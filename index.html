@@ -1,67 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carreritas</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<title>Motorsport Garage Tycoon</title>
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
-  <!-- MENU PRINCIPAL -->
-  <div id="menu" class="screen active">
-    <h1>🏎️ Carreritas</h1>
-    <div class="card">
-      <p>Motor: <strong id="engine">1</strong> &nbsp;|&nbsp; Aero: <strong id="aero">1</strong> &nbsp;|&nbsp; Dinero: $<strong id="money">100</strong></p>
-    </div>
-    <button onclick="goTo('garage')">🔧 Garage</button>
-    <button onclick="goTo('qualifying')">🏁 Clasificar</button>
-  </div>
+<header>
+    <h1>Motorsport Garage Tycoon</h1>
+</header>
 
-  <!-- GARAGE -->
-  <div id="garage" class="screen">
-    <h1>🔧 Garage</h1>
-    <div class="card">
-      <p>Dinero: $<strong id="engine">-</strong></p>
-      <p style="margin-top:10px">Motor — Nivel <strong id="aero">-</strong></p>
-      <button onclick="upgrade('engine')">Mejorar Motor ($50)</button>
-      <p style="margin-top:10px">Aerodinámica — Nivel <strong id="money">-</strong></p>
-      <button onclick="upgrade('aero')">Mejorar Aero ($50)</button>
-    </div>
-    <button onclick="goTo('menu')">← Volver</button>
-  </div>
+<nav>
+    <button onclick="showScreen('dashboard')">Inicio</button>
+    <button onclick="showScreen('workshop')">Taller</button>
+    <button onclick="showScreen('employees')">Staff</button>
+    <button onclick="showScreen('sponsors')">Sponsors</button>
+    <button onclick="showScreen('race')">Carrera</button>
+    <button onclick="showScreen('league')">Liga</button>
+</nav>
 
-  <!-- CLASIFICACIÓN -->
-  <div id="qualifying" class="screen">
-    <h1>🏁 Clasificación</h1>
-    <div class="card">
-      <button onclick="qualify()">Hacer vuelta clasificatoria</button>
-      <div id="grid"></div>
-    </div>
-    <div class="card">
-      <label for="strategy">Estrategia de carrera:</label><br/>
-      <select id="strategy" style="margin:10px;padding:5px;background:#0d1117;color:white;border:1px solid #30363d">
-        <option value="safe">Conservadora</option>
-        <option value="normal" selected>Normal</option>
-        <option value="aggressive">Agresiva</option>
-      </select><br/>
-      <button onclick="startRace()">🚦 Iniciar Carrera</button>
-    </div>
-    <button onclick="goTo('menu')">← Volver</button>
-  </div>
+<main>
 
-  <!-- PISTA DE CARRERA -->
-  <div id="raceTrack" class="screen">
-    <h1>🏎️ En Carrera</h1>
-    <div class="track-container">
-      <svg viewBox="0 0 500 300">
-        <ellipse cx="250" cy="150" rx="200" ry="100" stroke-width="20" stroke="#2ea043" fill="none"/>
-      </svg>
-      <div id="carsLayer"></div>
-    </div>
-    <div id="livePositions" class="card"></div>
-  </div>
+<section id="dashboard" class="screen active">
+    <div id="dashboardContent"></div>
+</section>
 
-  <script src="game.js"></script>
+<section id="workshop" class="screen">
+    <div id="workshopContent"></div>
+</section>
+
+<section id="employees" class="screen">
+    <div id="employeesContent"></div>
+</section>
+
+<section id="sponsors" class="screen">
+    <div id="sponsorsContent"></div>
+</section>
+
+<section id="race" class="screen">
+    <button onclick="runRace()">Correr carrera</button>
+</section>
+
+<section id="league" class="screen">
+    <div id="leagueContent"></div>
+</section>
+
+</main>
+
+<div id="notifications"></div>
+
+<script src="js/core/gameState.js"></script>
+<script src="js/core/saveSystem.js"></script>
+<script src="js/core/notifications.js"></script>
+
+<script src="js/systems/progression.js"></script>
+<script src="js/systems/offline.js"></script>
+<script src="js/systems/employees.js"></script>
+<script src="js/systems/sponsors.js"></script>
+<script src="js/systems/workshop.js"></script>
+<script src="js/systems/league.js"></script>
+<script src="js/systems/race.js"></script>
+
+<script src="js/app.js"></script>
 </body>
 </html>
