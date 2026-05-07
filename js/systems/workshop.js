@@ -1,3 +1,10 @@
+let workshopTab = "repair";
+
+function showWorkshopTab(tab) {
+    workshopTab = tab;
+    renderWorkshop();
+}
+
 function generateCar() {
     const rare = Math.random() < 0.2;
     return {
@@ -29,52 +36,82 @@ function assignCars() {
 }
 
 function renderWorkshop() {
-    const workshopContent = document.getElementById("workshopContent");
-    if (!workshopContent) return;
+    const el = document.getElementById("workshopContent");
+    if (!el) return;
 
-    let html = `
-        <div class="panel">
-            <h3>Taller (Nivel ${game.workshop.level})</h3>
-            <p>💰 $${game.money}</p>
-            <p>🏆 Reputación: ${game.reputation}</p>
-            <p>Bahías disponibles: ${game.workshop.capacity - game.workshop.active.length} / ${game.workshop.capacity}</p>
-            <button onclick="addCar()">Recibir Auto</button>
+    const tabBar = `
+        <div class="wtab-bar">
+            <button class="wtab ${workshopTab === "repair" ? "wtab-active" : ""}"
+                    onclick="showWorkshopTab('repair')">🔧 Reparaciones</button>
+            <button class="wtab ${workshopTab === "car" ? "wtab-active" : ""}"
+                    onclick="showWorkshopTab('car')">🏎 Auto</button>
         </div>
-        <h3>En reparación</h3>
     `;
 
+    if (workshopTab === "car") {
+        el.innerHTML = tabBar + `<div id="carContent"></div>`;
+        renderCarUpgrades();
+        return;
+    }
+
+    // ── Repair tab ──
+    let activeHtml = "";
     if (game.workshop.active.length === 0) {
-        html += `<div class="panel"><p>Ningún auto en reparación.</p></div>`;
-    }
-
-    game.workshop.active.forEach(car => {
-        const pct = Math.floor((car.progress / car.duration) * 100);
-        html += `
-            <div class="panel">
-                <p>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"}</p>
-                <p>Progreso: ${pct}%</p>
-                <div style="background:#334155;border-radius:4px;height:8px;margin-top:4px;">
-                    <div style="background:#22c55e;width:${pct}%;height:100%;border-radius:4px;"></div>
+        activeHtml = `<div class="empty-row">Sin autos en reparación</div>`;
+    } else {
+        game.workshop.active.forEach(car => {
+            const pct = Math.floor((car.progress / car.duration) * 100);
+            activeHtml += `
+                <div class="car-card">
+                    <div class="car-card-top">
+                        <span>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"}</span>
+                        <span class="car-pct">${pct}%</span>
+                    </div>
+                    <div class="car-progress-track">
+                        <div class="car-progress-fill ${car.rare ? "rare" : ""}"
+                             style="width:${pct}%"></div>
+                    </div>
                 </div>
-            </div>
-        `;
-    });
-
-    html += `<h3>En cola (${game.workshop.queue.length}/5)</h3>`;
-
-    if (game.workshop.queue.length === 0) {
-        html += `<div class="panel"><p>Cola vacía.</p></div>`;
+            `;
+        });
     }
 
-    game.workshop.queue.forEach(car => {
-        html += `
-            <div class="panel">
-                <p>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"} — esperando</p>
-            </div>
-        `;
-    });
+    let queueHtml = "";
+    if (game.workshop.queue.length === 0) {
+        queueHtml = `<div class="empty-row">Cola vacía</div>`;
+    } else {
+        game.workshop.queue.forEach(car => {
+            queueHtml += `
+                <div class="car-card queued">
+                    <span>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"}</span>
+                    <span class="car-queue-tag">en cola</span>
+                </div>
+            `;
+        });
+    }
 
-    workshopContent.innerHTML = html;
+    el.innerHTML = `
+        ${tabBar}
+        <div class="race-card">
+            <div class="ws-top-row">
+                <div>
+                    <div class="ws-money">💰 $${game.money.toLocaleString()}</div>
+                    <div class="ws-sub">Bahías: ${game.workshop.active.length}/${game.workshop.capacity}</div>
+                </div>
+                <button class="rbtn accent-btn ws-recv-btn" onclick="addCar()">+ Recibir Auto</button>
+            </div>
+        </div>
+
+        <div class="race-card">
+            <div class="race-divider">EN REPARACIÓN</div>
+            ${activeHtml}
+        </div>
+
+        <div class="race-card">
+            <div class="race-divider">EN COLA (${game.workshop.queue.length}/5)</div>
+            ${queueHtml}
+        </div>
+    `;
 }
 
 setInterval(() => {
@@ -83,7 +120,6 @@ setInterval(() => {
     assignCars();
 
     let speed = game.workshop.speed || 1;
-
     if (Array.isArray(game.employees)) {
         game.employees.forEach(emp => { speed += emp.speed || 0; });
     }
@@ -93,17 +129,15 @@ setInterval(() => {
         game.money = Math.max(0, game.money - 1);
 
         if (car.progress >= car.duration) {
-            const boost = game.sponsor ? game.sponsor.money : 1;
+            const boost  = game.sponsor ? game.sponsor.money : 1;
             const reward = Math.floor(car.reward * boost);
-
-            game.money += reward;
+            game.money   += reward;
             addXP(car.rare ? 100 : 50);
             game.reputation += car.rare ? 2 : 1;
             notify("Auto terminado +$" + reward);
-
             game.workshop.active = game.workshop.active.filter(c => c.id !== car.id);
         }
     });
 
-    renderWorkshop();
+    if (workshopTab === "repair") renderWorkshop();
 }, 1000);

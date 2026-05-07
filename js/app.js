@@ -51,7 +51,6 @@ function renderDashboard() {
             ${poleRow}
         </div>
 
-        <button class="danger-btn" onclick="resetGame()">Reiniciar juego</button>
     `;
 }
 

@@ -5,7 +5,13 @@ const game = {
     level: 1,
     lastTime: Date.now(),
 
-    car: { engine: 1, aero: 1, durability: 1 },
+    car: {
+        engine: 1,
+        transmission: 1,
+        aero: 1,
+        wheels: 1
+    },
+
     driver: { name: "Jugador", skill: 1, salary: 100 },
 
     sponsor: null,

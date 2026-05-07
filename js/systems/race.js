@@ -38,10 +38,14 @@ function formatLapTime(secs) {
 
 function getPlayerPace() {
     const base = 92;
-    const lvlBonus = (game.workshop.level - 1) * 4;
-    const repBonus = Math.min(game.reputation * 0.15, 10);
-    const sponsorBonus = game.sponsor ? 2 : 0;
-    return Math.max(58, base - lvlBonus - repBonus - sponsorBonus);
+    const lvlBonus      = (game.workshop.level       - 1) * 4;
+    const repBonus      = Math.min(game.reputation * 0.15, 10);
+    const sponsorBonus  = game.sponsor ? 2 : 0;
+    const engineBonus   = (game.car.engine       - 1) * 1.8;
+    const transBonus    = (game.car.transmission - 1) * 1.2;
+    const aeroBonus     = (game.car.aero         - 1) * 1.0;
+    const wheelsBonus   = (game.car.wheels       - 1) * 0.8;
+    return Math.max(55, base - lvlBonus - repBonus - sponsorBonus - engineBonus - transBonus - aeroBonus - wheelsBonus);
 }
 
 // ── Called when the user taps "← Menú" or a race series finishes ──
