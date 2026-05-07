@@ -20,8 +20,14 @@ const raceState = {
     prevStandings: [],
     lap: 0,
     totalLaps: 5,
-    raceInterval: null
+    raceInterval: null,
+    leagueMode: false,
+    renderTarget: "raceContent"
 };
+
+function getRaceEl() {
+    return document.getElementById(raceState.renderTarget);
+}
 
 function formatLapTime(secs) {
     const m = Math.floor(secs / 60);
@@ -38,13 +44,22 @@ function getPlayerPace() {
     return Math.max(58, base - lvlBonus - repBonus - sponsorBonus);
 }
 
+// ── Called when the user taps "← Menú" or a race series finishes ──
 function showRaceMenu() {
+    if (raceState.leagueMode) {
+        raceState.leagueMode = false;
+        raceState.renderTarget = "raceContent";
+        raceState.phase = "menu";
+        renderLeague();
+        return;
+    }
     raceState.phase = "menu";
     renderRaceScreen();
 }
 
+// ── Carrera screen: only Quick Race ──
 function renderRaceScreen() {
-    const el = document.getElementById("raceContent");
+    const el = getRaceEl();
     if (!el) return;
     if (raceState.phase !== "menu") return;
 
@@ -53,7 +68,7 @@ function renderRaceScreen() {
 
     el.innerHTML = `
         <div class="race-card">
-            <div class="race-hero-title">🏎 GARAJE DE CARRERAS</div>
+            <div class="race-hero-title">🏎 CARRERA RÁPIDA</div>
 
             <div class="race-stats-row">
                 <div class="race-stat-box">
@@ -70,14 +85,17 @@ function renderRaceScreen() {
                 </div>
             </div>
 
-            <div class="race-divider">ELIGE EL FORMATO</div>
-
-            <button class="rbtn" onclick="startQualy(1)">🏁 Carrera rápida</button>
-            <button class="rbtn" onclick="startQualy(3)">🏆 Serie de 3 carreras</button>
-            <button class="rbtn" onclick="startQualy(5)">🏆 Serie de 5 carreras</button>
-            <button class="rbtn gold-btn" onclick="startQualy(10)">👑 Campeonato — 10 carreras</button>
+            <div class="race-divider">CLASIFICACIÓN + CARRERA ÚNICA</div>
+            <button class="rbtn accent-btn" onclick="startQualy(1)">🚦 Iniciar clasificación</button>
         </div>
     `;
+}
+
+// ── Entry point from Liga screen ──
+function startLeagueChampionship(n) {
+    raceState.leagueMode = true;
+    raceState.renderTarget = "leagueContent";
+    startQualy(n);
 }
 
 function startQualy(mode) {
@@ -110,21 +128,23 @@ function runQualyAnimation(total, gotPole) {
     const s2 = total * (0.36 + Math.random() * 0.04);
     const s3 = total - s1 - s2;
 
-    const el = document.getElementById("raceContent");
+    const el = getRaceEl();
+    if (!el) return;
+
     el.innerHTML = `
         <div class="race-card">
             <div class="race-hero-title">⏱ VUELTA CLASIFICATORIA</div>
             <div class="qualy-car-anim">🏎</div>
             <div class="qualy-sectors">
-                <div class="sector-box" id="sec1">
+                <div class="sector-box">
                     <span class="sec-label">SECTOR 1</span>
                     <span class="sec-time" id="t1">· · ·</span>
                 </div>
-                <div class="sector-box" id="sec2">
+                <div class="sector-box">
                     <span class="sec-label">SECTOR 2</span>
                     <span class="sec-time" id="t2">· · ·</span>
                 </div>
-                <div class="sector-box" id="sec3">
+                <div class="sector-box">
                     <span class="sec-label">SECTOR 3</span>
                     <span class="sec-time" id="t3">· · ·</span>
                 </div>
@@ -150,10 +170,7 @@ function runQualyAnimation(total, gotPole) {
     }, 3700);
     setTimeout(() => {
         const t = document.getElementById("qualyTotal");
-        if (t) {
-            t.textContent = formatLapTime(total);
-            t.classList.add("done");
-        }
+        if (t) { t.textContent = formatLapTime(total); t.classList.add("done"); }
         if (gotPole) {
             const w = document.getElementById("qualyTotalWrap");
             if (w) w.insertAdjacentHTML("beforeend", `<div class="pole-banner">🟣 POLE POSITION</div>`);
@@ -165,7 +182,8 @@ function runQualyAnimation(total, gotPole) {
 
 function showGrid(gotPole) {
     raceState.phase = "grid";
-    const el = document.getElementById("raceContent");
+    const el = getRaceEl();
+    if (!el) return;
 
     const rows = raceState.grid.map((r, i) => `
         <div class="grid-row ${r.name === "Tú" ? "player-row" : ""}">
@@ -175,10 +193,15 @@ function showGrid(gotPole) {
         </div>
     `).join("");
 
+    const seriesLabel = raceState.seriesMode > 1
+        ? `<div class="race-divider">CARRERA ${raceState.seriesRace + 1} DE ${raceState.seriesMode}</div>`
+        : "";
+
     el.innerHTML = `
         <div class="race-card">
             <div class="race-hero-title">🚦 PARRILLA DE SALIDA</div>
             ${gotPole ? `<div class="pole-banner">🟣 POLE POSITION — MEJOR TIEMPO</div>` : ""}
+            ${seriesLabel}
             <div class="grid-table">${rows}</div>
             <button class="rbtn accent-btn" onclick="beginRace()">🚥 ¡ARRANCAR!</button>
         </div>
@@ -218,19 +241,21 @@ function doRaceLap() {
 }
 
 function renderRaceLap() {
-    const el = document.getElementById("raceContent");
+    const el = getRaceEl();
     if (!el) return;
 
     const pct = Math.round((raceState.lap / raceState.totalLaps) * 100);
+    const seriesInfo = raceState.seriesMode > 1
+        ? `Carrera ${raceState.seriesRace + 1}/${raceState.seriesMode}`
+        : "Carrera rápida";
 
     const rows = raceState.standings.map((r, i) => {
         const prevIdx = raceState.prevStandings.findIndex(s => s.name === r.name);
         const delta = prevIdx - i;
         const arrow = delta > 0
             ? `<span class="pos-up">▲</span>`
-            : delta < 0
-                ? `<span class="pos-dn">▼</span>`
-                : `<span class="pos-eq">—</span>`;
+            : delta < 0 ? `<span class="pos-dn">▼</span>`
+            : `<span class="pos-eq">—</span>`;
         return `
             <div class="race-live-row ${r.name === "Tú" ? "player-row" : ""}">
                 <span class="rlpos">${i + 1}</span>
@@ -243,7 +268,7 @@ function renderRaceLap() {
     el.innerHTML = `
         <div class="race-card">
             <div class="race-live-header">
-                <span class="race-live-title">🏎 CARRERA ${raceState.seriesRace + 1}/${raceState.seriesMode}</span>
+                <span class="race-live-title">🏎 ${seriesInfo}</span>
                 <span class="lap-badge">V${raceState.lap}/${raceState.totalLaps}</span>
             </div>
             <div class="lap-track">
@@ -285,7 +310,9 @@ function endRace() {
 }
 
 function showRaceResult(pos, cash, xp) {
-    const el = document.getElementById("raceContent");
+    const el = getRaceEl();
+    if (!el) return;
+
     const medal = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "🏁";
     const posLabel = pos === 1 ? "1er lugar" : pos === 2 ? "2do lugar" : pos === 3 ? "3er lugar" : `${pos}° lugar`;
     const sPts = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
@@ -307,7 +334,7 @@ function showRaceResult(pos, cash, xp) {
             <div class="result-standings">${rows}</div>
             ${hasMore
                 ? `<button class="rbtn accent-btn" onclick="startNextRace()">Siguiente carrera (${raceState.seriesRace + 1}/${raceState.seriesMode}) →</button>`
-                : `<button class="rbtn accent-btn" onclick="showSeriesResult()">🏆 Resultado final del campeonato</button>`}
+                : `<button class="rbtn accent-btn" onclick="showSeriesResult()">🏆 Resultado final</button>`}
             <button class="rbtn" onclick="showRaceMenu()">← Menú</button>
         </div>
     `;
@@ -330,12 +357,15 @@ function showSeriesResult() {
         </div>
     `).join("");
 
-    const el = document.getElementById("raceContent");
+    const backLabel = raceState.leagueMode ? "← Volver a Liga" : "← Menú";
+    const el = getRaceEl();
+    if (!el) return;
+
     el.innerHTML = `
         <div class="race-card">
             <div class="race-hero-title">${trophy} CAMPEONATO FINAL</div>
             <div class="result-standings">${rows}</div>
-            <button class="rbtn" onclick="showRaceMenu()">← Menú Principal</button>
+            <button class="rbtn" onclick="showRaceMenu()">${backLabel}</button>
         </div>
     `;
 }

@@ -7,43 +7,53 @@ const league = {
 function initLeague() {
     if (league.standings.length > 0) return;
 
-    for (let i = 0; i < 9; i++) {
-        league.standings.push({
-            name: "Equipo " + (i + 1),
-            points: 0
-        });
-    }
-
-    league.standings.push({
-        name: "Jugador",
-        points: 0
+    RIVALS.forEach(r => {
+        league.standings.push({ name: r.name, points: 0 });
     });
+
+    league.standings.push({ name: "Jugador", points: 0 });
 }
 
 function awardLeaguePoints(name, pos) {
     const pts = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-    let entry = league.standings.find(t => t.name === name);
+    const entry = league.standings.find(t => t.name === name);
     if (!entry) return;
     entry.points += pts[pos - 1] || 0;
 }
 
 function renderLeague() {
-    const leagueContent = document.getElementById("leagueContent");
-    if (!leagueContent) return;
+    const el = document.getElementById("leagueContent");
+    if (!el) return;
 
-    let html = `<div class="panel">
-        <p>Carrera ${league.currentRace}/${league.totalRaces}</p>
-    </div>`;
+    // If a race/series is mid-flow in league mode, don't overwrite the race content
+    if (raceState && raceState.leagueMode && raceState.phase !== "menu") return;
 
-    league.standings
-        .slice()
-        .sort((a, b) => b.points - a.points)
-        .forEach((t, i) => {
-            const highlight = t.name === "Jugador" ? "border-left:4px solid #22c55e;" : "";
-            html += `<div class="panel" style="${highlight}">
-                ${i + 1}. ${t.name} — ${t.points} pts
-            </div>`;
-        });
+    const sorted = league.standings.slice().sort((a, b) => b.points - a.points);
 
-    leagueContent.innerHTML = html;
+    const standingsRows = sorted.map((t, i) => {
+        const isPlayer = t.name === "Jugador";
+        const posIcon = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
+        return `
+            <div class="league-row ${isPlayer ? "player-row" : ""}">
+                <span class="lg-pos">${posIcon}</span>
+                <span class="lg-name">${isPlayer ? "Tú" : t.name}</span>
+                <span class="lg-pts">${t.points}pts</span>
+            </div>
+        `;
+    }).join("");
+
+    el.innerHTML = `
+        <div class="race-card">
+            <div class="race-hero-title">🏆 LIGA</div>
+            <div class="race-divider">INICIA UN CAMPEONATO</div>
+            <button class="rbtn" onclick="startLeagueChampionship(3)">🏆 Campeonato — 3 carreras</button>
+            <button class="rbtn" onclick="startLeagueChampionship(5)">🏆 Campeonato — 5 carreras</button>
+            <button class="rbtn gold-btn" onclick="startLeagueChampionship(10)">👑 Campeonato — 10 carreras</button>
+        </div>
+
+        <div class="race-card">
+            <div class="race-divider">CLASIFICACIÓN GENERAL</div>
+            <div class="league-standings">${standingsRows}</div>
+        </div>
+    `;
 }
