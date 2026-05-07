@@ -1,6 +1,9 @@
 const game = {
     money: 1000,
     reputation: 1,
+    xp: 0,
+    level: 1,
+    lastTime: Date.now(),
 
     car: {
         engine: 1,
@@ -15,6 +18,17 @@ const game = {
     },
 
     sponsor: null,
+    sponsorsUnlocked: [],
+
+    workshop: {
+        level: 1,
+        speed: 1,
+        capacity: 2,
+        queue: [],
+        active: []
+    },
+
+    employees: [],
 
     championship: {
         round: 1,
