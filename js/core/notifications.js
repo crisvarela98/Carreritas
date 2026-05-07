@@ -1,16 +1,16 @@
-function notify(text) {
+function notify(text, type) {
+    const container = document.getElementById("notifications");
+    if (!container) return;
 
-    const notifications =
-        document.getElementById("notifications");
-
-    let div = document.createElement("div");
-
-    div.className = "toast";
+    const div = document.createElement("div");
+    div.className = "toast" + (type ? " toast-" + type : "");
     div.innerText = text;
 
-    notifications.appendChild(div);
+    container.appendChild(div);
 
-    setTimeout(() => {
-        div.remove();
-    }, 3000);
+    setTimeout(() => div.remove(), 3200);
 }
+
+function notifySuccess(text) { notify(text, "success"); }
+function notifyWarn(text)    { notify(text, "warn"); }
+function notifyInfo(text)    { notify(text, "info"); }

@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Motorsport Garage Tycoon</title>
-<link rel="stylesheet" href="css/main.css?v=5">
+<link rel="stylesheet" href="css/main.css?v=6">
 </head>
 <body>
 
@@ -16,12 +16,12 @@
 </header>
 
 <nav>
-    <button onclick="showScreen('dashboard')">Inicio</button>
-    <button onclick="showScreen('workshop')">Taller</button>
-    <button onclick="showScreen('employees')">Staff</button>
-    <button onclick="showScreen('sponsors')">Sponsors</button>
-    <button onclick="showScreen('race')">Carrera</button>
-    <button onclick="showScreen('league')">Liga</button>
+    <button data-screen="dashboard"  onclick="showScreen('dashboard')">Inicio</button>
+    <button data-screen="workshop"   onclick="showScreen('workshop')">Taller</button>
+    <button data-screen="employees"  onclick="showScreen('employees')">Staff</button>
+    <button data-screen="sponsors"   onclick="showScreen('sponsors')">Sponsors</button>
+    <button data-screen="race"       onclick="showScreen('race')">Carrera</button>
+    <button data-screen="league"     onclick="showScreen('league')">Liga</button>
 </nav>
 
 <main>
@@ -50,23 +50,35 @@
     <div id="leagueContent"></div>
 </section>
 
+<section id="profile" class="screen">
+    <div id="profileContent"></div>
+</section>
+
 </main>
 
 <div id="notifications"></div>
 
-<script src="js/core/gameState.js?v=5"></script>
-<script src="js/core/saveSystem.js?v=5"></script>
-<script src="js/core/notifications.js?v=5"></script>
+<!-- Core -->
+<script src="js/core/gameState.js?v=6"></script>
+<script src="js/core/saveSystem.js?v=6"></script>
+<script src="js/core/notifications.js?v=6"></script>
 
-<script src="js/systems/progression.js?v=5"></script>
-<script src="js/systems/offline.js?v=5"></script>
-<script src="js/systems/employees.js?v=5"></script>
-<script src="js/systems/sponsors.js?v=5"></script>
-<script src="js/systems/car.js?v=5"></script>
-<script src="js/systems/workshop.js?v=5"></script>
-<script src="js/systems/league.js?v=5"></script>
-<script src="js/systems/race.js?v=5"></script>
+<!-- Features (load before systems so hooks are available) -->
+<script src="js/features/monetization.js?v=6"></script>
+<script src="js/features/ftue.js?v=6"></script>
 
-<script src="js/app.js?v=5"></script>
+<!-- Systems -->
+<script src="js/systems/progression.js?v=6"></script>
+<script src="js/systems/offline.js?v=6"></script>
+<script src="js/systems/sponsors.js?v=6"></script>
+<script src="js/systems/employees.js?v=6"></script>
+<script src="js/systems/car.js?v=6"></script>
+<script src="js/systems/workshop.js?v=6"></script>
+<script src="js/systems/league.js?v=6"></script>
+<script src="js/systems/race.js?v=6"></script>
+
+<!-- App controller -->
+<script src="js/app.js?v=6"></script>
+
 </body>
 </html>

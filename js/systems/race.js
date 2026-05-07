@@ -22,7 +22,8 @@ const raceState = {
     totalLaps: 5,
     raceInterval: null,
     leagueMode: false,
-    renderTarget: "raceContent"
+    renderTarget: "raceContent",
+    _pendingReward: null  // used for rewarded-ad double-reward hook
 };
 
 function getRaceEl() {
@@ -30,30 +31,32 @@ function getRaceEl() {
 }
 
 function formatLapTime(secs) {
-    const m = Math.floor(secs / 60);
+    const m   = Math.floor(secs / 60);
     const rem = secs % 60;
-    const s = rem < 10 ? "0" + rem.toFixed(3) : rem.toFixed(3);
+    const s   = rem < 10 ? "0" + rem.toFixed(3) : rem.toFixed(3);
     return `${m}:${s}`;
 }
 
+// ── Player pace based on upgrades ────────────────────────────────
 function getPlayerPace() {
-    const base = 92;
-    const lvlBonus      = (game.workshop.level       - 1) * 4;
-    const repBonus      = Math.min(game.reputation * 0.15, 10);
-    const sponsorBonus  = game.sponsor ? 2 : 0;
-    const engineBonus   = (game.car.engine       - 1) * 1.8;
-    const transBonus    = (game.car.transmission - 1) * 1.2;
-    const aeroBonus     = (game.car.aero         - 1) * 1.0;
-    const wheelsBonus   = (game.car.wheels       - 1) * 0.8;
-    return Math.max(55, base - lvlBonus - repBonus - sponsorBonus - engineBonus - transBonus - aeroBonus - wheelsBonus);
+    const base         = 92;
+    const lvlBonus     = (game.workshop.level       - 1) * 4;
+    const repBonus     = Math.min(game.reputation * 0.15, 10);
+    const sponsorBonus = game.sponsor ? 2 : 0;
+    const engineBonus  = (game.car.engine       - 1) * 1.8;
+    const transBonus   = (game.car.transmission - 1) * 1.2;
+    const aeroBonus    = (game.car.aero         - 1) * 1.0;
+    const wheelsBonus  = (game.car.wheels       - 1) * 0.8;
+    return Math.max(55, base - lvlBonus - repBonus - sponsorBonus
+                             - engineBonus - transBonus - aeroBonus - wheelsBonus);
 }
 
-// ── Called when the user taps "← Menú" or a race series finishes ──
+// ── Navigation ───────────────────────────────────────────────────
 function showRaceMenu() {
     if (raceState.leagueMode) {
-        raceState.leagueMode = false;
+        raceState.leagueMode  = false;
         raceState.renderTarget = "raceContent";
-        raceState.phase = "menu";
+        raceState.phase        = "menu";
         renderLeague();
         return;
     }
@@ -61,7 +64,7 @@ function showRaceMenu() {
     renderRaceScreen();
 }
 
-// ── Carrera screen: only Quick Race ──
+// ── Race screen entry ─────────────────────────────────────────────
 function renderRaceScreen() {
     const el = getRaceEl();
     if (!el) return;
@@ -92,39 +95,65 @@ function renderRaceScreen() {
             <div class="race-divider">CLASIFICACIÓN + CARRERA ÚNICA</div>
             <button class="rbtn accent-btn" onclick="startQualy(1)">🚦 Iniciar clasificación</button>
         </div>
+
+        ${game.raceResults.length > 0 ? renderRaceHistory() : ""}
     `;
 }
 
-// ── Entry point from Liga screen ──
+function renderRaceHistory() {
+    const last5 = game.raceResults.slice(-5).reverse();
+    const rows = last5.map(r => {
+        const d    = new Date(r.timestamp);
+        const time = d.toLocaleDateString("es", { month: "short", day: "numeric" });
+        const medal = r.position === 1 ? "🥇" : r.position === 2 ? "🥈" : r.position === 3 ? "🥉" : `${r.position}°`;
+        return `<div class="hist-row">
+            <span class="hist-medal">${medal}</span>
+            <span class="hist-reward">+$${r.moneyEarned.toLocaleString()}</span>
+            <span class="hist-pts">+${r.leaguePoints}pts</span>
+            <span class="hist-date">${time}</span>
+        </div>`;
+    }).join("");
+
+    return `<div class="race-card">
+        <div class="race-divider">ÚLTIMAS CARRERAS</div>
+        ${rows}
+    </div>`;
+}
+
+// ── League entry ──────────────────────────────────────────────────
 function startLeagueChampionship(n) {
-    raceState.leagueMode = true;
+    raceState.leagueMode   = true;
     raceState.renderTarget = "leagueContent";
     startQualy(n);
 }
 
+// ── Qualifying ────────────────────────────────────────────────────
 function startQualy(mode) {
-    raceState.seriesMode = mode;
-    raceState.seriesRace = 0;
+    raceState.seriesMode   = mode;
+    raceState.seriesRace   = 0;
     raceState.seriesPoints = {};
-    raceState.phase = "qualy";
+    raceState.phase        = "qualy";
 
-    const pace = getPlayerPace();
+    const pace     = getPlayerPace();
     const variance = (Math.random() - 0.5) * 5;
     const playerTime = Math.max(58, pace + variance);
 
     raceState.grid = RIVALS.map(r => ({
         name: r.name,
         qualyTime: r.basePace + (Math.random() - 0.5) * 8,
-        basePace: r.basePace + (Math.random() - 0.3) * 3
+        basePace:  r.basePace + (Math.random() - 0.3) * 3
     }));
     raceState.grid.push({ name: "Tú", qualyTime: playerTime, basePace: pace });
 
     const rivalBest = Math.min(...raceState.grid.filter(r => r.name !== "Tú").map(r => r.qualyTime));
-    const gotPole = playerTime < rivalBest;
+    const gotPole   = playerTime < rivalBest;
     if (gotPole) game.poleCount++;
     if (!game.bestLapTime || playerTime < game.bestLapTime) game.bestLapTime = playerTime;
 
     runQualyAnimation(playerTime, gotPole);
+
+    // FTUE step 5 progress
+    if (window.FTUEManager) FTUEManager.onRaceStarted();
 }
 
 function runQualyAnimation(total, gotPole) {
@@ -184,6 +213,7 @@ function runQualyAnimation(total, gotPole) {
     }, 5000);
 }
 
+// ── Grid ──────────────────────────────────────────────────────────
 function showGrid(gotPole) {
     raceState.phase = "grid";
     const el = getRaceEl();
@@ -212,10 +242,11 @@ function showGrid(gotPole) {
     `;
 }
 
+// ── Race loop ─────────────────────────────────────────────────────
 function beginRace() {
-    raceState.phase = "racing";
-    raceState.lap = 0;
-    raceState.standings = raceState.grid.map((r, i) => ({ ...r, pos: i + 1 }));
+    raceState.phase        = "racing";
+    raceState.lap          = 0;
+    raceState.standings    = raceState.grid.map((r, i) => ({ ...r, pos: i + 1 }));
     raceState.prevStandings = raceState.standings.map(s => ({ ...s }));
     renderRaceLap();
     raceState.raceInterval = setInterval(doRaceLap, 1300);
@@ -248,15 +279,15 @@ function renderRaceLap() {
     const el = getRaceEl();
     if (!el) return;
 
-    const pct = Math.round((raceState.lap / raceState.totalLaps) * 100);
+    const pct        = Math.round((raceState.lap / raceState.totalLaps) * 100);
     const seriesInfo = raceState.seriesMode > 1
         ? `Carrera ${raceState.seriesRace + 1}/${raceState.seriesMode}`
         : "Carrera rápida";
 
     const rows = raceState.standings.map((r, i) => {
         const prevIdx = raceState.prevStandings.findIndex(s => s.name === r.name);
-        const delta = prevIdx - i;
-        const arrow = delta > 0
+        const delta   = prevIdx - i;
+        const arrow   = delta > 0
             ? `<span class="pos-up">▲</span>`
             : delta < 0 ? `<span class="pos-dn">▼</span>`
             : `<span class="pos-eq">—</span>`;
@@ -283,15 +314,27 @@ function renderRaceLap() {
     `;
 }
 
+// ── End of race ───────────────────────────────────────────────────
 function endRace() {
-    const playerIdx = raceState.standings.findIndex(r => r.name === "Tú");
-    const pos = playerIdx + 1;
+    const playerIdx   = raceState.standings.findIndex(r => r.name === "Tú");
+    const pos         = playerIdx + 1;
 
-    const cashTable = [0, 2500, 1500, 1000, 700, 500, 300, 200, 100, 50, 25];
-    const xpTable   = [0, 300,  200,  150,  100,  80,  60,  40,  20,  10,  5];
-    const cash = cashTable[pos] || 0;
-    const xp   = xpTable[pos]   || 0;
+    const cashTable      = [0, 2500, 1500, 1000, 700, 500, 300, 200, 100, 50, 25];
+    const xpTable        = [0, 300,  200,  150,  100,  80,  60,  40,  20,  10,  5];
+    const leaguePtsTable = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 
+    const cash        = cashTable[pos]        || 0;
+    const xp          = xpTable[pos]          || 0;
+    const leaguePts   = leaguePtsTable[pos - 1] || 0;
+
+    // Store pending reward for possible rewarded-ad doubling
+    raceState._pendingReward = { cash, xp, leaguePts, pos };
+
+    run_race(pos, cash, xp, leaguePts);
+}
+
+// ── run_race(): apply results, save to history ────────────────────
+function run_race(pos, cash, xp, leaguePts) {
     game.money += cash;
     addXP(xp);
     if (pos <= 3) game.reputation += (4 - pos);
@@ -300,26 +343,48 @@ function endRace() {
     else if (pos === 2) game.medals.silver++;
     else if (pos === 3) game.medals.bronze++;
 
+    // ── League points ─────────────────────────────────────────────
     awardLeaguePoints("Jugador", pos);
-    league.currentRace++;
+    game.league.currentRace++;
 
+    // ── Rival league points ───────────────────────────────────────
     const sPts = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
     raceState.standings.forEach((r, i) => {
+        if (r.name !== "Tú") {
+            awardLeaguePoints(r.name, i + 1);
+        }
         raceState.seriesPoints[r.name] = (raceState.seriesPoints[r.name] || 0) + (sPts[i] || 0);
     });
 
+    // ── Persist race result ───────────────────────────────────────
+    game.raceResults.push({
+        position:    pos,
+        moneyEarned: cash,
+        xpEarned:    xp,
+        leaguePoints: leaguePts,
+        timestamp:   Date.now()
+    });
+
+    // Keep history to last 50 races
+    if (game.raceResults.length > 50) game.raceResults.shift();
+
     raceState.seriesRace++;
     raceState.phase = "result";
+
+    // FTUE progress
+    if (window.FTUEManager) FTUEManager.onRaceCompleted();
+
     showRaceResult(pos, cash, xp);
 }
 
+// ── Result screen ─────────────────────────────────────────────────
 function showRaceResult(pos, cash, xp) {
     const el = getRaceEl();
     if (!el) return;
 
-    const medal = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "🏁";
+    const medal    = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "🏁";
     const posLabel = pos === 1 ? "1er lugar" : pos === 2 ? "2do lugar" : pos === 3 ? "3er lugar" : `${pos}° lugar`;
-    const sPts = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+    const sPts     = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 
     const rows = raceState.standings.map((r, i) => `
         <div class="result-row ${r.name === "Tú" ? "player-row" : ""}">
@@ -331,11 +396,17 @@ function showRaceResult(pos, cash, xp) {
 
     const hasMore = raceState.seriesRace < raceState.seriesMode;
 
+    // Rewarded ad hook
+    const adBtn = AdsManager.canOffer("double_race_reward")
+        ? `<button class="rbtn ad-btn" onclick="AdsManager.offer_ad_double_race_reward()">📺 Ver anuncio — Doblar recompensa</button>`
+        : "";
+
     el.innerHTML = `
         <div class="race-card">
             <div class="race-hero-title">${medal} ${posLabel}</div>
-            ${cash > 0 ? `<div class="result-reward-badge">+$${cash} &nbsp;·&nbsp; +${xp} XP</div>` : ""}
+            ${cash > 0 ? `<div class="result-reward-badge">+$${cash.toLocaleString()} &nbsp;·&nbsp; +${xp} XP</div>` : ""}
             <div class="result-standings">${rows}</div>
+            ${adBtn}
             ${hasMore
                 ? `<button class="rbtn accent-btn" onclick="startNextRace()">Siguiente carrera (${raceState.seriesRace + 1}/${raceState.seriesMode}) →</button>`
                 : `<button class="rbtn accent-btn" onclick="showSeriesResult()">🏆 Resultado final</button>`}
@@ -344,14 +415,13 @@ function showRaceResult(pos, cash, xp) {
     `;
 }
 
-function startNextRace() {
-    beginRace();
-}
+function startNextRace() { beginRace(); }
 
+// ── Series result ─────────────────────────────────────────────────
 function showSeriesResult() {
-    const sorted = Object.entries(raceState.seriesPoints).sort((a, b) => b[1] - a[1]);
+    const sorted    = Object.entries(raceState.seriesPoints).sort((a, b) => b[1] - a[1]);
     const playerPos = sorted.findIndex(([n]) => n === "Tú") + 1;
-    const trophy = playerPos === 1 ? "🥇" : playerPos === 2 ? "🥈" : playerPos === 3 ? "🥉" : "🏁";
+    const trophy    = playerPos === 1 ? "🥇" : playerPos === 2 ? "🥈" : playerPos === 3 ? "🥉" : "🏁";
 
     const rows = sorted.map(([name, pts], i) => `
         <div class="result-row ${name === "Tú" ? "player-row" : ""}">

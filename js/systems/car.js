@@ -19,17 +19,23 @@ function getCarTorque() {
     return Math.round(getCarHP() * 1.36);
 }
 
-function upgradePart(key) {
+// ── tune_car(): upgrade a car part ───────────────────────────────
+function tune_car(key) {
     const part = CAR_PARTS.find(p => p.key === key);
-    const lvl = game.car[key];
+    const lvl  = game.car[key];
     if (lvl >= CAR_MAX_LEVEL) { notify("Nivel máximo alcanzado"); return; }
     const cost = part.baseCost * lvl;
-    if (game.money < cost) { notify("Dinero insuficiente"); return; }
+    if (game.money < cost) { notifyWarn("Dinero insuficiente"); return; }
     game.money -= cost;
     game.car[key]++;
-    notify(`${part.label} mejorado — Nivel ${game.car[key]}`);
+    notify(`${part.label} mejorado — Nivel ${game.car[key]}`, "success");
     renderCarUpgrades();
+
+    // FTUE progress
+    if (window.FTUEManager) FTUEManager.onCarUpgraded();
 }
+
+function upgradePart(key) { tune_car(key); }
 
 let dynoRunning = false;
 
@@ -37,21 +43,21 @@ function runDynoTest() {
     if (dynoRunning) return;
     dynoRunning = true;
 
-    const hp = getCarHP();
+    const hp     = getCarHP();
     const torque = getCarTorque();
 
-    const carEl  = document.getElementById("dynoCar");
-    const roll1  = document.getElementById("dynoRoll1");
-    const roll2  = document.getElementById("dynoRoll2");
-    const hpEl   = document.getElementById("dynoHP");
-    const tqEl   = document.getElementById("dynoTQ");
+    const carEl = document.getElementById("dynoCar");
+    const roll1 = document.getElementById("dynoRoll1");
+    const roll2 = document.getElementById("dynoRoll2");
+    const hpEl  = document.getElementById("dynoHP");
+    const tqEl  = document.getElementById("dynoTQ");
 
-    if (carEl)  carEl.classList.add("dyno-shaking");
-    if (roll1)  roll1.classList.add("spinning");
-    if (roll2)  roll2.classList.add("spinning");
+    if (carEl) carEl.classList.add("dyno-shaking");
+    if (roll1) roll1.classList.add("spinning");
+    if (roll2) roll2.classList.add("spinning");
 
-    let cur = 0;
-    const step = Math.max(1, Math.ceil(hp / 50));
+    let cur      = 0;
+    const step   = Math.max(1, Math.ceil(hp / 50));
     const interval = setInterval(() => {
         cur = Math.min(cur + step, hp);
         if (hpEl) hpEl.textContent = cur;
@@ -94,7 +100,7 @@ function renderCarUpgrades() {
                 <div class="part-segs">${segs}</div>
                 ${lvl < CAR_MAX_LEVEL
                     ? `<button class="rbtn ${game.money >= cost ? "accent-btn" : ""}"
-                               onclick="upgradePart('${part.key}')"
+                               onclick="tune_car('${part.key}')"
                                ${game.money < cost ? "disabled" : ""}>
                            Mejorar — $${cost.toLocaleString()}
                        </button>`
