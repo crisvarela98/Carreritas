@@ -5,17 +5,8 @@ const game = {
     level: 1,
     lastTime: Date.now(),
 
-    car: {
-        engine: 1,
-        aero: 1,
-        durability: 1
-    },
-
-    driver: {
-        name: "Jugador",
-        skill: 1,
-        salary: 100
-    },
+    car: { engine: 1, aero: 1, durability: 1 },
+    driver: { name: "Jugador", skill: 1, salary: 100 },
 
     sponsor: null,
     sponsorsUnlocked: [],
@@ -29,6 +20,10 @@ const game = {
     },
 
     employees: [],
+
+    medals: { gold: 0, silver: 0, bronze: 0 },
+    bestLapTime: null,
+    poleCount: 0,
 
     championship: {
         round: 1,

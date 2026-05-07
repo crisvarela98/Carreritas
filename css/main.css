@@ -1,109 +1,425 @@
-/* RESET */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ===== BASE ===== */
 body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0b0f1a;
     color: #e2e8f0;
-    padding: 10px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 20px;
+    overflow-x: hidden;
 }
 
-/* HEADER */
+/* ===== HEADER ===== */
 header {
+    background: linear-gradient(135deg, #1a1f35, #0f172a);
+    padding: 14px 16px 10px;
     text-align: center;
-    margin-bottom: 10px;
+    border-bottom: 2px solid #e11d48;
+}
+header h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #f8fafc;
 }
 
-h1 {
-    font-size: 20px;
-}
-
-/* NAV */
+/* ===== NAV ===== */
 nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
-    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
 }
-
-button {
-    flex: 1;
-    min-width: 90px;
-    padding: 10px;
+nav button {
+    padding: 12px 4px;
     border: none;
-    border-radius: 8px;
-    background: #1e293b;
-    color: white;
-    font-size: 14px;
+    border-right: 1px solid #1e293b;
+    background: #0f172a;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
 }
+nav button:last-child { border-right: none; }
+nav button:hover, nav button:active { background: #1e293b; color: #f1f5f9; }
 
-button:hover {
-    background: #334155;
-}
+/* ===== SCREENS ===== */
+.screen { display: none; padding: 12px; }
+.screen.active { display: block; }
 
-/* SCREENS */
-.screen { display: none; }
-.active { display: block; }
-
-/* PANEL */
+/* ===== SHARED PANEL ===== */
 .panel {
     background: #1e293b;
-    padding: 12px;
-    margin-top: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.panel h3 { font-size: 15px; margin-bottom: 8px; color: #f1f5f9; }
+.panel p { font-size: 14px; color: #94a3b8; margin-bottom: 4px; }
+
+button {
+    cursor: pointer;
+    border: none;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 16px;
+    transition: opacity 0.15s, transform 0.1s;
+}
+button:active { transform: scale(0.97); opacity: 0.85; }
+
+.danger-btn {
+    width: 100%;
+    margin-top: 14px;
+    background: #7f1d1d;
+    color: #fca5a5;
+    padding: 11px;
+    border-radius: 10px;
+    font-size: 13px;
 }
 
-/* LIST ITEMS */
-.panel + .panel {
-    margin-top: 8px;
+/* ===== DASHBOARD ===== */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
 }
-
-/* TITLES */
-h3 {
-    margin-top: 10px;
-    font-size: 16px;
+.dash-title { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+.dash-level {
+    background: #e11d48;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
 }
-
-/* GRID SIMPLE */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+.dash-money {
+    font-size: 32px;
+    font-weight: 800;
+    color: #22c55e;
+    margin: 6px 0 4px;
 }
+.dash-xp-bar-wrap {
+    background: #334155;
+    border-radius: 4px;
+    height: 6px;
+    margin-bottom: 3px;
+    overflow: hidden;
+}
+.dash-xp-bar {
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+.dash-xp-label { font-size: 11px; color: #64748b; margin-bottom: 10px; }
 
-/* TOAST */
+.dash-medals-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.medal {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+}
+.gold-m  { background: #422006; color: #fbbf24; }
+.silv-m  { background: #1e293b; color: #94a3b8; }
+.bron-m  { background: #3b1a0b; color: #c2855a; }
+
+.dash-stats-panel {
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+.dash-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #0f172a;
+    font-size: 14px;
+}
+.dash-stat-row:last-child { border-bottom: none; }
+.dash-stat-row span { color: #94a3b8; flex: 1; }
+.dash-stat-row strong { color: #f1f5f9; }
+
+/* ===== WORKSHOP ===== */
+.workshop-bar-wrap {
+    background: #334155;
+    border-radius: 3px;
+    height: 6px;
+    margin: 5px 0 2px;
+    overflow: hidden;
+}
+.workshop-bar { background: #22c55e; height: 100%; border-radius: 3px; }
+
+/* ===== NOTIFICATIONS ===== */
 #notifications {
     position: fixed;
     top: 10px;
     right: 10px;
     z-index: 999;
+    pointer-events: none;
+    max-width: 220px;
+}
+.toast {
+    background: #166534;
+    border: 1px solid #22c55e;
+    color: #dcfce7;
+    padding: 9px 13px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ===== RACE SCREEN ===== */
+.race-card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
 }
 
-.toast {
-    background: #22c55e;
-    color: black;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 6px;
+.race-hero-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #f1f5f9;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+
+/* race stats row */
+.race-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.race-stat-box {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+}
+.rsb-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.rsb-value { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+.rsb-value.small { font-size: 13px; }
+
+.race-divider {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin: 4px 0 10px;
+}
+
+/* race buttons */
+.rbtn {
+    display: block;
+    width: 100%;
+    background: #1e3a5f;
+    color: #93c5fd;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+.rbtn:hover, .rbtn:active { background: #1d4ed8; color: white; }
+.accent-btn {
+    background: #e11d48;
+    color: white;
+}
+.accent-btn:hover, .accent-btn:active { background: #be123c; }
+.gold-btn {
+    background: linear-gradient(135deg, #78350f, #92400e);
+    color: #fde68a;
+    border: 1px solid #b45309;
+}
+.gold-btn:hover { background: linear-gradient(135deg, #92400e, #b45309); }
+
+/* ===== QUALIFYING ===== */
+.qualy-car-anim {
+    font-size: 42px;
+    text-align: center;
+    margin: 8px 0 16px;
+    animation: driveAnim 2s linear infinite;
+}
+@keyframes driveAnim {
+    0%   { transform: translateX(-10px); }
+    50%  { transform: translateX(10px); }
+    100% { transform: translateX(-10px); }
+}
+
+.qualy-sectors {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.sector-box {
+    flex: 1;
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    border: 2px solid #1e293b;
+    transition: border-color 0.3s;
+}
+.sector-box:has(.done) { border-color: #22c55e; }
+.sec-label { display: block; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.sec-time { display: block; font-size: 14px; font-weight: 700; color: #94a3b8; transition: color 0.3s; }
+.sec-time.done { color: #22c55e; }
+
+.qualy-total-wrap {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.qualy-label { display: block; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.qualy-total-time { font-size: 28px; font-weight: 800; color: #94a3b8; font-variant-numeric: tabular-nums; }
+.qualy-total-time.done { color: #22c55e; }
+
+.pole-banner {
+    background: #4c1d95;
+    color: #c4b5fd;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+/* ===== GRID ===== */
+.grid-table { margin-bottom: 14px; }
+.grid-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    background: #0f172a;
     font-size: 13px;
 }
+.grid-row.player-row { background: #1e3a5f; border: 1px solid #3b82f6; }
+.grid-pos { font-weight: 800; color: #64748b; width: 24px; flex-shrink: 0; }
+.grid-row.player-row .grid-pos { color: #93c5fd; }
+.grid-name { flex: 1; font-weight: 600; color: #e2e8f0; }
+.grid-row.player-row .grid-name { color: #bfdbfe; }
+.grid-qtime { font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }
 
-/* MOBILE */
-@media (max-width: 480px) {
-    h1 { font-size: 18px; }
+/* ===== LIVE RACE ===== */
+.race-live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.race-live-title { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+.lap-badge {
+    background: #e11d48;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
 
-    button {
-        font-size: 13px;
-        padding: 8px;
-    }
+.lap-track {
+    background: #334155;
+    border-radius: 4px;
+    height: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.lap-track-fill {
+    background: linear-gradient(90deg, #e11d48, #f97316);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
 
-    .panel {
-        font-size: 14px;
-    }
+.live-standings { display: flex; flex-direction: column; gap: 3px; }
+.race-live-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #0f172a;
+    font-size: 13px;
+}
+.race-live-row.player-row { background: #1e3a5f; border: 1px solid #3b82f6; }
+.rlpos { font-weight: 800; color: #64748b; width: 20px; }
+.race-live-row.player-row .rlpos { color: #93c5fd; }
+.rlname { flex: 1; font-weight: 600; color: #e2e8f0; }
+.race-live-row.player-row .rlname { color: #bfdbfe; }
+.pos-up { color: #22c55e; font-size: 11px; font-weight: 700; width: 14px; }
+.pos-dn { color: #ef4444; font-size: 11px; font-weight: 700; width: 14px; }
+.pos-eq { color: #475569; font-size: 11px; width: 14px; }
+
+/* ===== RACE RESULT ===== */
+.result-reward-badge {
+    background: #14532d;
+    border: 1px solid #22c55e;
+    color: #86efac;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+.result-standings { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.result-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    background: #0f172a;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.result-row.player-row { background: #1e3a5f; border: 1px solid #3b82f6; }
+.res-medal { width: 28px; font-size: 16px; }
+.res-name { flex: 1; font-weight: 600; color: #e2e8f0; }
+.result-row.player-row .res-name { color: #bfdbfe; }
+.res-pts { font-size: 12px; color: #64748b; font-weight: 700; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 380px) {
+    .race-hero-title { font-size: 15px; }
+    .rbtn { font-size: 13px; padding: 12px; }
+    .rsb-value { font-size: 14px; }
+    nav button { font-size: 11px; padding: 10px 2px; }
 }
