@@ -8,7 +8,6 @@ function showScreen(id) {
     if (btn) btn.classList.add("nav-active");
 
     if (id === "race")      renderRaceScreen();
-    if (id === "league")    renderLeague();
     if (id === "sponsors")  renderSponsors();
     if (id === "employees") renderEmployees();
     if (id === "workshop")  renderWorkshop();
@@ -181,7 +180,6 @@ function init() {
     renderWorkshop();
     renderEmployees();
     renderSponsors();
-    renderLeague();
     renderRaceScreen();
 
     if (window.FTUEManager) FTUEManager.init();
