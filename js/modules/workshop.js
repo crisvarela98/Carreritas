@@ -106,28 +106,29 @@ function renderWorkshop() {
     const el = document.getElementById("workshopContent");
     if (!el) return;
 
-    const tabBar = `
-    <div class="wtab-bar">
-        <button class="wtab ${workshopTab === "repair"  ? "wtab-active" : ""}" onclick="showWorkshopTab('repair')">🔧 Reparar</button>
-        <button class="wtab ${workshopTab === "vehicles"? "wtab-active" : ""}" onclick="showWorkshopTab('vehicles')">🚗 Vehículos</button>
-        <button class="wtab ${workshopTab === "garage"  ? "wtab-active" : ""}" onclick="showWorkshopTab('garage')">🏗 Garage</button>
-    </div>`;
-
     if (workshopTab === "vehicles") {
-        el.innerHTML = tabBar + `<div id="vehiclesTabContent"></div>`;
+        el.innerHTML = _makeTabBar() + `<div id="vehiclesTabContent"></div>`;
         renderVehiclesTab();
         return;
     }
     if (workshopTab === "garage") {
-        _renderGarageTab(el, tabBar);
+        _renderGarageTab(el);
         return;
     }
-    _renderRepairTab(el, tabBar);
+    _renderRepairTab(el);
 }
 
-function _renderRepairTab(el, tabBar) {
+function _makeTabBar() {
+    return `
+    <div class="wtab-bar">
+        <button class="wtab ${workshopTab === "repair"   ? "wtab-active" : ""}" onclick="showWorkshopTab('repair')">🔧 Reparar</button>
+        <button class="wtab ${workshopTab === "vehicles" ? "wtab-active" : ""}" onclick="showWorkshopTab('vehicles')">🚗 Vehículos</button>
+        <button class="wtab ${workshopTab === "garage"   ? "wtab-active" : ""}" onclick="showWorkshopTab('garage')">🏗 Garage</button>
+    </div>`;
+}
+
+function _renderRepairTab(el) {
     if (!el) return;
-    if (tabBar === undefined) tabBar = "";
 
     let activeHtml = game.workshop.active.length === 0
         ? `<div class="empty-row">Sin autos en reparación</div>`
@@ -160,7 +161,7 @@ function _renderRepairTab(el, tabBar) {
     const totalSpeed = (game.workshop.speed || 1) + getTotalMechanicSpeed();
 
     el.innerHTML = `
-    ${tabBar}
+    ${_makeTabBar()}
     <div class="race-card">
         <div class="ws-top-row">
             <div>
@@ -178,7 +179,7 @@ function _renderRepairTab(el, tabBar) {
     </div>`;
 }
 
-function _renderGarageTab(el, tabBar) {
+function _renderGarageTab(el) {
     const upgradesHtml = GARAGE_UPGRADES_DEF.map(def => {
         const lvl   = game.garageUpgrades[def.key] || 0;
         const maxed = lvl >= def.max;
@@ -206,7 +207,7 @@ function _renderGarageTab(el, tabBar) {
     }).join("");
 
     el.innerHTML = `
-    ${tabBar}
+    ${_makeTabBar()}
     <div class="race-card">
         <div class="race-hero-title">🏗 MEJORAS DEL GARAGE</div>
         ${upgradesHtml}
