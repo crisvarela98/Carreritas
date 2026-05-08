@@ -1,84 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>Motorsport Garage Tycoon</title>
-<link rel="stylesheet" href="css/main.css?v=6">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Motorsport Garage Tycoon</title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
-<header>
-    <h1>Motorsport Garage Tycoon</h1>
-</header>
-
-<nav>
-    <button data-screen="dashboard"  onclick="showScreen('dashboard')">Inicio</button>
-    <button data-screen="workshop"   onclick="showScreen('workshop')">Taller</button>
-    <button data-screen="employees"  onclick="showScreen('employees')">Staff</button>
-    <button data-screen="sponsors"   onclick="showScreen('sponsors')">Sponsors</button>
-    <button data-screen="race"       onclick="showScreen('race')">Carrera</button>
-    <button data-screen="league"     onclick="showScreen('league')">Liga</button>
-</nav>
-
-<main>
-
-<section id="dashboard" class="screen active">
-    <div id="dashboardContent"></div>
-</section>
-
-<section id="workshop" class="screen">
-    <div id="workshopContent"></div>
-</section>
-
-<section id="employees" class="screen">
-    <div id="employeesContent"></div>
-</section>
-
-<section id="sponsors" class="screen">
-    <div id="sponsorsContent"></div>
-</section>
-
-<section id="race" class="screen">
-    <div id="raceContent"></div>
-</section>
-
-<section id="league" class="screen">
-    <div id="leagueContent"></div>
-</section>
-
-<section id="profile" class="screen">
-    <div id="profileContent"></div>
-</section>
-
-</main>
-
 <div id="notifications"></div>
 
+<div id="app">
+
+    <!-- Header -->
+    <header id="appHeader">
+        <div class="header-left">
+            <span class="header-logo">🏎</span>
+            <span class="header-title">Motorsport Garage Tycoon</span>
+        </div>
+        <div class="header-right">
+            <span class="hdr-coins"  id="hdrCoins">$0</span>
+            <span class="hdr-diamonds" id="hdrDiamonds">💎 0</span>
+        </div>
+    </header>
+
+    <!-- Screens -->
+    <main id="mainContent">
+
+        <div class="screen active" id="dashboard">
+            <div class="screen-inner" id="dashboardContent"></div>
+        </div>
+
+        <div class="screen" id="workshop">
+            <div class="screen-inner" id="workshopContent"></div>
+        </div>
+
+        <div class="screen" id="race">
+            <div class="screen-inner" id="raceContent"></div>
+        </div>
+
+        <div class="screen" id="league">
+            <div class="screen-inner" id="leagueContent"></div>
+        </div>
+
+        <div class="screen" id="employees">
+            <div class="screen-inner" id="employeesContent"></div>
+        </div>
+
+        <div class="screen" id="sponsors">
+            <div class="screen-inner" id="sponsorsContent"></div>
+        </div>
+
+        <div class="screen" id="profile">
+            <div class="screen-inner" id="profileContent"></div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav id="mainNav">
+        <button data-screen="dashboard" onclick="showScreen('dashboard')" class="nav-active">
+            <span class="nav-icon">🏠</span><span class="nav-label">Inicio</span>
+        </button>
+        <button data-screen="workshop" onclick="showScreen('workshop')">
+            <span class="nav-icon">🔧</span><span class="nav-label">Taller</span>
+        </button>
+        <button data-screen="race" onclick="showScreen('race')">
+            <span class="nav-icon">🏁</span><span class="nav-label">Carreras</span>
+        </button>
+        <button data-screen="league" onclick="showScreen('league')">
+            <span class="nav-icon">🏆</span><span class="nav-label">Liga</span>
+        </button>
+        <button data-screen="employees" onclick="showScreen('employees')">
+            <span class="nav-icon">👷</span><span class="nav-label">Staff</span>
+        </button>
+        <button data-screen="profile" onclick="showScreen('profile')">
+            <span class="nav-icon">👤</span><span class="nav-label">Perfil</span>
+        </button>
+    </nav>
+
+</div>
+
 <!-- Core -->
-<script src="js/core/gameState.js?v=6"></script>
-<script src="js/core/saveSystem.js?v=6"></script>
-<script src="js/core/notifications.js?v=6"></script>
+<script src="js/core/gameState.js"></script>
+<script src="js/core/saveSystem.js"></script>
+<script src="js/core/notifications.js"></script>
 
-<!-- Features (load before systems so hooks are available) -->
-<script src="js/features/monetization.js?v=6"></script>
-<script src="js/features/ftue.js?v=6"></script>
+<!-- Modules (order matters: economy → vehicles → leagues → upgrades → workshop → races → employees → sponsors → offline) -->
+<script src="js/modules/economy.js"></script>
+<script src="js/modules/vehicles.js"></script>
+<script src="js/modules/leagues.js"></script>
+<script src="js/modules/upgrades.js"></script>
+<script src="js/modules/workshop.js"></script>
+<script src="js/modules/races.js"></script>
+<script src="js/modules/employees.js"></script>
+<script src="js/modules/sponsors.js"></script>
+<script src="js/modules/offline.js"></script>
 
-<!-- Systems -->
-<script src="js/systems/progression.js?v=6"></script>
-<script src="js/systems/offline.js?v=6"></script>
-<script src="js/systems/sponsors.js?v=6"></script>
-<script src="js/systems/employees.js?v=6"></script>
-<script src="js/systems/car.js?v=6"></script>
-<script src="js/systems/workshop.js?v=6"></script>
-<script src="js/systems/league.js?v=6"></script>
-<script src="js/systems/race.js?v=6"></script>
+<!-- Features -->
+<script src="js/features/monetization.js"></script>
+<script src="js/features/ftue.js"></script>
 
-<!-- App controller -->
-<script src="js/app.js?v=6"></script>
+<!-- App -->
+<script src="js/app.js"></script>
+
+<!-- Header live update -->
+<script>
+setInterval(() => {
+    const c = document.getElementById("hdrCoins");
+    const d = document.getElementById("hdrDiamonds");
+    if (c) c.textContent = "$" + (game.money || 0).toLocaleString();
+    if (d) d.textContent = "💎 " + (game.diamonds || 0);
+}, 500);
+</script>
 
 </body>
 </html>

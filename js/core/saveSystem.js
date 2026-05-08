@@ -1,4 +1,4 @@
-const SAVE_KEY = "mgt_save_v3";
+const SAVE_KEY = "mgt_save_v4";
 
 function deepMerge(target, source) {
     for (const key of Object.keys(source)) {
@@ -20,83 +20,95 @@ function deepMerge(target, source) {
 // ── Save ──────────────────────────────────────────────────────────
 function save_user_progress() {
     try {
-        const data = {
-            version: 3,
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            version: 4,
             timestamp: Date.now(),
-            game: game
-        };
-        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+            game
+        }));
     } catch (e) {
-        console.error("Error al guardar:", e);
+        console.error("Save error:", e);
     }
 }
-
-// Alias
 const saveGame = save_user_progress;
 
-// ── Load ──────────────────────────────────────────────────────────
+// ── Load with migration ───────────────────────────────────────────
 function load_user_progress() {
     try {
-        // Try current save key first
+        // Try current key, then migrate old saves
         let raw = localStorage.getItem(SAVE_KEY);
-
-        // Migrate from old save keys
         if (!raw) {
-            const oldKeys = ["mgt_save_v1", "mgt_save_v2", "mgt_save_v1"];
-            for (const k of oldKeys) {
+            for (const k of ["mgt_save_v3", "mgt_save_v2", "mgt_save_v1"]) {
                 raw = localStorage.getItem(k);
-                if (raw) {
-                    localStorage.removeItem(k);
-                    break;
-                }
+                if (raw) { localStorage.removeItem(k); break; }
             }
         }
-
         if (!raw) return;
 
         const data = JSON.parse(raw);
+        if (data.game) deepMerge(game, data.game);
 
-        if (data.version >= 1 && data.game) {
-            deepMerge(game, data.game);
-        }
-
-        // ── Ensure all required structures exist ──
+        // ── Ensure all required structures ─────────────────────────
 
         if (!game.workshop || !Array.isArray(game.workshop.active)) {
             game.workshop = { level: 1, speed: 1, capacity: 2, queue: [], active: [] };
         }
-        if (!Array.isArray(game.employees))        game.employees = [];
-        if (!Array.isArray(game.sponsorsUnlocked)) game.sponsorsUnlocked = [];
-        if (!Array.isArray(game.mechanics))         game.mechanics = [];
-        if (!Array.isArray(game.raceResults))       game.raceResults = [];
-
         if (!game.garageUpgrades) {
             game.garageUpgrades = { extraBay: 0, speedBoost: 0, partsStock: 0 };
         }
+        if (!Array.isArray(game.mechanics))         game.mechanics = [];
+        if (!Array.isArray(game.employees))          game.employees = [];
+        if (!Array.isArray(game.sponsorsUnlocked))   game.sponsorsUnlocked = [];
+        if (!Array.isArray(game.raceResults))         game.raceResults = [];
+        if (!game.medals)       game.medals = { gold: 0, silver: 0, bronze: 0 };
+        if (!game.bestLapTimes) game.bestLapTimes = {};
+        if (typeof game.diamonds !== "number") game.diamonds = 0;
 
-        // ── League migration: old saves stored league separately ──
-        if (!game.league || !Array.isArray(game.league.standings)) {
-            game.league = { currentRace: 1, totalRaces: 10, standings: [] };
+        // ── Vehicle migration (v3 → v4) ────────────────────────────
+        if (!game.vehicles) {
+            game.vehicles = {
+                car:     { owned: true,  upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+                moto:    { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+                rally:   { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+                formula: { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } }
+            };
+        }
+        for (const id of ["car", "moto", "rally", "formula"]) {
+            if (!game.vehicles[id]) {
+                game.vehicles[id] = { owned: id === "car", upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } };
+            }
         }
 
-        if (!game.ftue) {
-            game.ftue = { completed: false, step: 0 };
+        // ── League migration (v3 had flat game.league, now per-vehicle) ─
+        if (!game.leagues || !game.leagues.car) {
+            // Migrate old flat league if present
+            const oldPts = game.league && Array.isArray(game.league.standings)
+                ? (game.league.standings.find(s => s.name === "Jugador") || {}).points || 0
+                : 0;
+            game.leagues = {
+                car:     { standings: [], currentRace: 1 },
+                moto:    { standings: [], currentRace: 1 },
+                rally:   { standings: [], currentRace: 1 },
+                formula: { standings: [], currentRace: 1 }
+            };
+            // Inject old car points if any
+            if (oldPts > 0) {
+                game.leagues.car.standings = [{ name: "Jugador", points: oldPts }];
+            }
         }
 
-        if (!game.medals) {
-            game.medals = { gold: 0, silver: 0, bronze: 0 };
-        }
+        if (!game.ftue) game.ftue = { completed: false, step: 0 };
+        if (!game.iap)  game.iap  = {};
+        if (!game.activeVehicle) game.activeVehicle = "car";
 
     } catch (e) {
-        console.error("Error al cargar:", e);
+        console.error("Load error:", e);
         localStorage.removeItem(SAVE_KEY);
     }
 }
-
-// Alias
 const loadGame = load_user_progress;
 
 function resetGame() {
+    if (!confirm("¿Reiniciar todo el progreso? Esta acción no se puede deshacer.")) return;
     localStorage.removeItem(SAVE_KEY);
     location.reload();
 }

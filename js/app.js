@@ -2,12 +2,10 @@
 function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     document.querySelectorAll("nav button").forEach(b => b.classList.remove("nav-active"));
-
     const screen = document.getElementById(id);
     if (screen) screen.classList.add("active");
-
-    const navBtn = document.querySelector(`nav button[data-screen="${id}"]`);
-    if (navBtn) navBtn.classList.add("nav-active");
+    const btn = document.querySelector(`nav button[data-screen="${id}"]`);
+    if (btn) btn.classList.add("nav-active");
 
     if (id === "race")      renderRaceScreen();
     if (id === "league")    renderLeague();
@@ -22,14 +20,6 @@ function renderDashboard() {
     const el = document.getElementById("dashboardContent");
     if (!el) return;
 
-    const best = game.bestLapTime
-        ? `<div class="dash-stat-row">⚡ <span>Mejor vuelta</span><strong>${formatLapTime(game.bestLapTime)}</strong></div>`
-        : "";
-
-    const poleRow = game.poleCount > 0
-        ? `<div class="dash-stat-row">🟣 <span>Poles</span><strong>${game.poleCount}</strong></div>`
-        : "";
-
     const medalRow = (game.medals.gold + game.medals.silver + game.medals.bronze) > 0
         ? `<div class="dash-medals-row">
                ${game.medals.gold   > 0 ? `<span class="medal gold-m">🥇 ${game.medals.gold}</span>`   : ""}
@@ -38,41 +28,56 @@ function renderDashboard() {
            </div>`
         : "";
 
-    const leagueEntry = game.league.standings.find(t => t.name === "Jugador");
-    const leaguePoints = leagueEntry ? leagueEntry.points : 0;
-    const leagueRank   = calculate_league_points().findIndex(t => t.name === "Jugador") + 1;
+    const ownedVehicles = Object.entries(VEHICLE_CATALOG).filter(([id]) => game.vehicles[id]?.owned);
+    const leagueRows = ownedVehicles.map(([id, def]) => {
+        const rank = LeagueManager.getPlayerRank(id);
+        const pts  = LeagueManager.getPlayerPoints(id);
+        return `<div class="dash-stat-row">${def.icon} <span>Liga ${def.name}</span><strong>${pts}pts (${rank}°)</strong></div>`;
+    }).join("");
 
-    const playerTag = game.playerName
-        ? `<div class="dash-player-tag">👤 ${game.playerName}  ·  🏠 ${game.garageName || "Mi Garage"}</div>`
+    const nextUnlock = Object.entries(VEHICLE_CATALOG).find(([id]) => !game.vehicles[id]?.owned);
+    const nextHint   = nextUnlock
+        ? `<div class="unlock-hint">🔓 ${nextUnlock[1].icon} ${nextUnlock[1].name} en Nivel ${nextUnlock[1].unlockLevel}</div>`
         : "";
 
     el.innerHTML = `
-        <div class="dash-header">
-            <div class="dash-title">Motorsport Garage Tycoon</div>
-            <div class="dash-level">Nivel ${game.level}</div>
+    <div class="dash-header">
+        <div>
+            <div class="dash-title">${game.garageName || "Motorsport Garage Tycoon"}</div>
+            ${game.playerName ? `<div class="dash-player-tag">👤 ${game.playerName}</div>` : ""}
         </div>
+        <div class="dash-level">Nivel ${game.level}</div>
+    </div>
 
-        ${playerTag}
-
-        <div class="dash-money">$${game.money.toLocaleString()}</div>
-        <div class="dash-xp-bar-wrap">
-            <div class="dash-xp-bar" style="width:${Math.min(100,(game.xp/(game.level*1000))*100)}%"></div>
+    <div class="dash-currency-row">
+        <div class="dash-currency-box">
+            <div class="dcb-label">Monedas</div>
+            <div class="dcb-val green">$${game.money.toLocaleString()}</div>
         </div>
-        <div class="dash-xp-label">${game.xp} / ${game.level * 1000} XP</div>
-
-        ${medalRow}
-
-        <div class="dash-stats-panel">
-            <div class="dash-stat-row">🏆 <span>Reputación</span><strong>${game.reputation}</strong></div>
-            <div class="dash-stat-row">🔧 <span>Nivel taller</span><strong>${game.workshop.level}</strong></div>
-            <div class="dash-stat-row">👷 <span>Mecánicos</span><strong>${game.mechanics.length}</strong></div>
-            <div class="dash-stat-row">🏁 <span>Puntos de liga</span><strong>${leaguePoints} pts (${leagueRank}°)</strong></div>
-            ${game.sponsor ? `<div class="dash-stat-row">🤝 <span>Sponsor</span><strong>${game.sponsor.name}</strong></div>` : ""}
-            ${best}
-            ${poleRow}
+        <div class="dash-currency-box">
+            <div class="dcb-label">Diamantes</div>
+            <div class="dcb-val diamond">💎 ${game.diamonds}</div>
         </div>
+    </div>
 
-        <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
+    <div class="dash-xp-bar-wrap">
+        <div class="dash-xp-bar" style="width:${Math.min(100,(game.xp/(game.level*1000))*100)}%"></div>
+    </div>
+    <div class="dash-xp-label">${game.xp} / ${game.level * 1000} XP · Siguiente nivel: +1000💰 +2💎</div>
+
+    ${medalRow}
+    ${nextHint}
+
+    <div class="dash-stats-panel">
+        <div class="dash-stat-row">🏆 <span>Reputación</span><strong>${game.reputation}</strong></div>
+        <div class="dash-stat-row">🔧 <span>Nivel taller</span><strong>${game.workshop.level}</strong></div>
+        <div class="dash-stat-row">👷 <span>Mecánicos</span><strong>${game.mechanics.length}</strong></div>
+        ${game.sponsor ? `<div class="dash-stat-row">🤝 <span>Sponsor</span><strong>${game.sponsor.name} ×${game.sponsor.money}</strong></div>` : ""}
+        ${leagueRows}
+    </div>
+
+    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()" style="margin-top:8px">📺 Ver anuncio — +3 💎</button>
+    <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
     `;
 }
 
@@ -81,110 +86,96 @@ function renderProfile() {
     const el = document.getElementById("profileContent");
     if (!el) return;
 
+    const diamondPacks = Object.entries(IAPManager.PRODUCTS)
+        .filter(([, p]) => p.diamonds > 0)
+        .map(([id, p]) => `
+        <button class="rbtn iap-pack-btn" onclick="IAPManager.purchaseDiamondsPack('${id}')">
+            <span>💎 +${p.diamonds}</span>
+            <span class="iap-price">${p.price}</span>
+        </button>`).join("");
+
     el.innerHTML = `
-        <div class="race-card">
-            <div class="race-hero-title">👤 MI PERFIL</div>
-            <div class="profile-form">
-                <label class="profile-label">Nombre del jugador</label>
-                <input class="profile-input" id="inputPlayerName"
-                       value="${game.playerName || ""}" placeholder="Tu nombre" maxlength="24">
-
-                <label class="profile-label">Nombre del garage</label>
-                <input class="profile-input" id="inputGarageName"
-                       value="${game.garageName || ""}" placeholder="Nombre de tu taller" maxlength="32">
-
-                <button class="rbtn accent-btn" onclick="saveProfile()">💾 Guardar perfil</button>
-            </div>
+    <div class="race-card">
+        <div class="race-hero-title">👤 MI PERFIL</div>
+        <div class="profile-form">
+            <label class="profile-label">Nombre del jugador</label>
+            <input class="profile-input" id="inputPlayerName" value="${game.playerName || ""}" placeholder="Tu nombre" maxlength="24">
+            <label class="profile-label">Nombre del garage</label>
+            <input class="profile-input" id="inputGarageName" value="${game.garageName || ""}" placeholder="Nombre de tu taller" maxlength="32">
+            <button class="rbtn accent-btn" onclick="saveProfile()">💾 Guardar perfil</button>
         </div>
+    </div>
 
-        <div class="race-card">
-            <div class="race-divider">ESTADÍSTICAS</div>
-            <div class="dash-stats-panel" style="border-radius:10px">
-                <div class="dash-stat-row">💰 <span>Dinero total</span><strong>$${game.money.toLocaleString()}</strong></div>
-                <div class="dash-stat-row">⭐ <span>Nivel</span><strong>${game.level}</strong></div>
-                <div class="dash-stat-row">🏆 <span>Reputación</span><strong>${game.reputation}</strong></div>
-                <div class="dash-stat-row">🏁 <span>Carreras disputadas</span><strong>${game.raceResults.length}</strong></div>
-                <div class="dash-stat-row">🥇 <span>Victorias</span><strong>${game.medals.gold}</strong></div>
-                <div class="dash-stat-row">🟣 <span>Poles</span><strong>${game.poleCount}</strong></div>
-            </div>
+    <div class="race-card">
+        <div class="race-divider">ESTADÍSTICAS</div>
+        <div class="dash-stats-panel" style="border-radius:10px">
+            <div class="dash-stat-row">💰 <span>Monedas</span><strong>$${game.money.toLocaleString()}</strong></div>
+            <div class="dash-stat-row">💎 <span>Diamantes</span><strong>${game.diamonds}</strong></div>
+            <div class="dash-stat-row">⭐ <span>Nivel</span><strong>${game.level}</strong></div>
+            <div class="dash-stat-row">🏁 <span>Carreras</span><strong>${game.raceResults.length}</strong></div>
+            <div class="dash-stat-row">🥇 <span>Victorias</span><strong>${game.medals.gold}</strong></div>
+            <div class="dash-stat-row">🟣 <span>Poles</span><strong>${game.poleCount}</strong></div>
         </div>
-    `;
+    </div>
+
+    <div class="race-card">
+        <div class="race-divider">💎 COMPRAR DIAMANTES</div>
+        ${diamondPacks}
+        <button class="rbtn iap-pack-btn" onclick="IAPManager.purchaseVehicleUpgradePack()">
+            <span>Pack Upgrades +$20K</span><span class="iap-price">$4.99</span>
+        </button>
+    </div>`;
 }
 
 function saveProfile() {
     const nameEl   = document.getElementById("inputPlayerName");
     const garageEl = document.getElementById("inputGarageName");
-
-    const name   = (nameEl   ? nameEl.value.trim()   : "") || "Jugador";
-    const garage = (garageEl ? garageEl.value.trim()  : "") || "Mi Garage";
-
-    game.playerName  = name;
-    game.garageName  = garage;
-
+    game.playerName = (nameEl   && nameEl.value.trim())  || "Jugador";
+    game.garageName = (garageEl && garageEl.value.trim()) || "Mi Garage";
     save_user_progress();
-    notify("Perfil guardado ✅", "success");
-
-    // Update league entry name display
-    renderLeague();
+    notifySuccess("Perfil guardado ✅");
     renderDashboard();
-
-    // FTUE
     if (window.FTUEManager) FTUEManager.onProfileSaved();
 }
 
-// ── Profile setup modal (first-run FTUE step 0) ───────────────────
+// ── First-run profile modal ───────────────────────────────────────
 function showProfileModal() {
-    if (game.playerName) return; // already set
-
+    if (game.playerName) return;
     const overlay = document.createElement("div");
     overlay.id        = "profileModal";
     overlay.className = "profile-modal-overlay";
     overlay.innerHTML = `
-        <div class="profile-modal">
-            <div class="pm-title">🏎 Motorsport Garage Tycoon</div>
-            <div class="pm-subtitle">¡Bienvenido! Configura tu taller para comenzar.</div>
-
-            <label class="profile-label">Tu nombre</label>
-            <input class="profile-input" id="pmPlayerName" placeholder="Ej: Carlos" maxlength="24" autofocus>
-
-            <label class="profile-label">Nombre de tu garage</label>
-            <input class="profile-input" id="pmGarageName" placeholder="Ej: Scuderia Veloz" maxlength="32">
-
-            <button class="rbtn accent-btn pm-start-btn" onclick="submitProfileModal()">🚦 ¡Comenzar!</button>
-        </div>
-    `;
+    <div class="profile-modal">
+        <div class="pm-title">🏎 Motorsport Garage Tycoon</div>
+        <div class="pm-subtitle">¡Bienvenido! Configura tu taller para comenzar.</div>
+        <label class="profile-label">Tu nombre</label>
+        <input class="profile-input" id="pmPlayerName" placeholder="Ej: Carlos" maxlength="24">
+        <label class="profile-label">Nombre de tu garage</label>
+        <input class="profile-input" id="pmGarageName" placeholder="Ej: Scuderia Veloz" maxlength="32">
+        <button class="rbtn accent-btn pm-start-btn" onclick="submitProfileModal()">🚦 ¡Comenzar!</button>
+    </div>`;
     document.body.appendChild(overlay);
-
-    // Focus first input
-    setTimeout(() => {
-        const inp = document.getElementById("pmPlayerName");
-        if (inp) inp.focus();
-    }, 100);
+    setTimeout(() => { const i = document.getElementById("pmPlayerName"); if (i) i.focus(); }, 100);
 }
 
 function submitProfileModal() {
-    const nameEl   = document.getElementById("pmPlayerName");
-    const garageEl = document.getElementById("pmGarageName");
-
-    game.playerName = (nameEl   && nameEl.value.trim())   || "Jugador";
-    game.garageName = (garageEl && garageEl.value.trim())  || "Mi Garage";
-
+    const n = document.getElementById("pmPlayerName");
+    const g = document.getElementById("pmGarageName");
+    game.playerName = (n && n.value.trim()) || "Jugador";
+    game.garageName = (g && g.value.trim()) || "Mi Garage";
     const overlay = document.getElementById("profileModal");
     if (overlay) overlay.remove();
-
     save_user_progress();
     renderDashboard();
-
-    if (window.FTUEManager) {
-        FTUEManager.onProfileSaved();
-    }
+    if (window.FTUEManager) FTUEManager.onProfileSaved();
 }
 
 // ── Init ──────────────────────────────────────────────────────────
 function init() {
     load_user_progress();
     applyOffline();
-    initLeague();
+    initAllLeagues();
+    checkVehicleUnlocks();
 
     renderDashboard();
     renderWorkshop();
@@ -193,17 +184,13 @@ function init() {
     renderLeague();
     renderRaceScreen();
 
-    // FTUE
     if (window.FTUEManager) FTUEManager.init();
-
-    // Show profile modal on first run
-    if (!game.playerName) {
-        showProfileModal();
-    }
+    if (!game.playerName) showProfileModal();
 
     setInterval(() => {
         renderDashboard();
         checkSponsors();
+        checkVehicleUnlocks();
     }, 1000);
 
     startAutoSave();

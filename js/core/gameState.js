@@ -1,75 +1,76 @@
+// ── Global game state — single source of truth ───────────────────
 const game = {
 
     // ── USER PROFILE ──────────────────────────────────────────────
     playerName: "",
     garageName: "",
 
-    // ── CORE ECONOMY ──────────────────────────────────────────────
-    money: 1000,
+    // ── ECONOMY ───────────────────────────────────────────────────
+    money:      1000,   // regular coins
+    diamonds:   0,      // premium currency
     reputation: 1,
-    xp: 0,
-    level: 1,
-    lastTime: Date.now(),
+    xp:         0,
+    level:      1,
+    lastTime:   Date.now(),
 
-    // ── RACE CAR ──────────────────────────────────────────────────
-    car: {
-        engine: 1,
-        transmission: 1,
-        aero: 1,
-        wheels: 1
+    // ── VEHICLES ─────────────────────────────────────────────────
+    // Tracks ownership and per-vehicle upgrade levels
+    vehicles: {
+        car:     { owned: true,  upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+        moto:    { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+        rally:   { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
+        formula: { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } }
     },
 
-    driver: { name: "Jugador", skill: 1, salary: 100 },
+    activeVehicle: "car",   // currently selected vehicle for racing
 
-    // ── SPONSORS ──────────────────────────────────────────────────
-    sponsor: null,
+    // ── WORKSHOP ─────────────────────────────────────────────────
+    workshop: {
+        level:    1,
+        speed:    1,
+        capacity: 2,
+        queue:    [],
+        active:   []
+    },
+
+    garageUpgrades: {
+        extraBay:   0,  // +1 capacity, max 3
+        speedBoost: 0,  // +0.5 speed, max 4
+        partsStock: 0   // -10% repair time, max 3
+    },
+
+    // ── STAFF ────────────────────────────────────────────────────
+    mechanics:  [],
+    employees:  [],  // legacy compat
+
+    // ── SPONSORS ─────────────────────────────────────────────────
+    sponsor:          null,
     sponsorsUnlocked: [],
 
-    // ── WORKSHOP / GARAGE ─────────────────────────────────────────
-    workshop: {
-        level: 1,
-        speed: 1,
-        capacity: 2,
-        queue: [],
-        active: []
+    // ── RACE STATS ───────────────────────────────────────────────
+    medals:       { gold: 0, silver: 0, bronze: 0 },
+    bestLapTimes: {},   // keyed by vehicleId
+    poleCount:    0,
+
+    // ── PER-VEHICLE LEAGUES ───────────────────────────────────────
+    // THE OLD BUG: league was outside game object → never saved.
+    // Now all leagues live here.
+    leagues: {
+        car:     { standings: [], currentRace: 1 },
+        moto:    { standings: [], currentRace: 1 },
+        rally:   { standings: [], currentRace: 1 },
+        formula: { standings: [], currentRace: 1 }
     },
 
-    // Purchasable garage upgrades
-    garageUpgrades: {
-        extraBay: 0,      // +1 capacity per level, max 3
-        speedBoost: 0,    // +0.5 speed per level, max 4
-        partsStock: 0     // -10% repair duration per level, max 3
-    },
+    // ── RACE HISTORY ─────────────────────────────────────────────
+    raceResults: [],    // last 50 races
 
-    // ── MECHANICS (NPC STAFF) ─────────────────────────────────────
-    mechanics: [],
-    // each entry: { id, name, speed, hireCost, salaryPerMin }
-
-    // Legacy employees array (kept for save compatibility)
-    employees: [],
-
-    // ── RACE STATS ────────────────────────────────────────────────
-    medals: { gold: 0, silver: 0, bronze: 0 },
-    bestLapTime: null,
-    poleCount: 0,
-
-    // ── LEAGUE (persisted inside game — this was the bug) ─────────
-    league: {
-        currentRace: 1,
-        totalRaces: 10,
-        standings: []
-        // each entry: { name, points }
-    },
-
-    // ── RACE HISTORY ──────────────────────────────────────────────
-    raceResults: [],
-    // each entry: { position, moneyEarned, xpEarned, leaguePoints, timestamp }
-
-    // ── FTUE PROGRESS ─────────────────────────────────────────────
+    // ── FTUE ─────────────────────────────────────────────────────
     ftue: {
         completed: false,
-        step: 0
-        // steps: 0=profile, 1=repair_first, 2=finish_repair,
-        //        3=upgrade_car, 4=hire_mechanic, 5=run_race, 6=done
-    }
+        step: 0     // 0=profile, 1=repair, 2=race, 3=upgrade, 4=done
+    },
+
+    // ── IAP OWNERSHIP ────────────────────────────────────────────
+    iap: {}
 };

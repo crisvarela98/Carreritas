@@ -1,63 +1,51 @@
-// ── Monetization Module ───────────────────────────────────────────
-// Placeholder hooks for Rewarded Ads (AdMob / UnityAds) and IAP.
-// Replace the body of each function with real SDK calls when ready.
+// ── Monetization Hooks ────────────────────────────────────────────
+// Replace _showAdPlaceholder / _runIAP bodies with real SDK calls.
 
-// ─────────────────────────────────────────────────────────────────
-// REWARDED ADS
-// ─────────────────────────────────────────────────────────────────
 const AdsManager = (() => {
-
-    // Track when an ad was last shown per slot (prevent spam)
-    const _lastShown = {};
-    const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes per slot
+    const _lastShown   = {};
+    const COOLDOWN_MS  = 4 * 60 * 1000;
 
     function canOffer(slot) {
-        const last = _lastShown[slot] || 0;
-        return Date.now() - last > COOLDOWN_MS;
+        return Date.now() - (_lastShown[slot] || 0) > COOLDOWN_MS;
     }
+    function _markShown(slot) { _lastShown[slot] = Date.now(); }
 
-    function _markShown(slot) {
-        _lastShown[slot] = Date.now();
-    }
-
-    // ── Hook 1: Speed up a repair by 50% ─────────────────────────
+    // ── Hook 1: Speed repair by 50% ───────────────────────────────
     function offer_ad_to_speed_repair(carId) {
-        _showAdPlaceholder("Repair Speed Boost", () => {
+        _showAdPlaceholder("Acelerar reparación", () => {
             const car = game.workshop.active.find(c => String(c.id) === String(carId));
-            if (!car) return;
-            car.progress += car.duration * 0.5;
-            notify("📺 ¡Reparación acelerada al 50%!", "success");
+            if (car) car.progress += car.duration * 0.5;
+            notifySuccess("📺 ¡Reparación acelerada!");
             _markShown("speed_repair");
         });
     }
 
-    // ── Hook 2: Instantly source a missing part ───────────────────
-    function offer_ad_for_missing_part(partKey, callback) {
-        _showAdPlaceholder("Missing Part Unlock", () => {
-            notify("📺 ¡Pieza obtenida gratis!", "success");
-            _markShown("missing_part");
-            if (typeof callback === "function") callback();
+    // ── Hook 2: Earn diamonds from ad ────────────────────────────
+    function offerRewardedAdToGetDiamonds() {
+        _showAdPlaceholder("Ganar Diamantes", () => {
+            earn_diamonds(3);
+            _markShown("earn_diamonds");
         });
     }
 
     // ── Hook 3: Double race reward ────────────────────────────────
     function offer_ad_double_race_reward() {
-        if (!raceState._pendingReward) return;
-        const { cash, xp } = raceState._pendingReward;
-        _showAdPlaceholder("Double Race Reward", () => {
-            game.money += cash;
-            addXP(xp);
-            raceState._pendingReward = null;
-            notify(`📺 ¡Recompensa doblada! +$${cash.toLocaleString()} extra`, "success");
+        const pending = RaceManager.state._pendingReward;
+        if (!pending) return;
+        _showAdPlaceholder("Doblar recompensa de carrera", () => {
+            earn_coins(pending.cash);
+            addXP(pending.xp);
+            RaceManager.state._pendingReward = null;
+            notifySuccess(`📺 +$${pending.cash.toLocaleString()} extra!`);
             _markShown("double_race_reward");
         });
     }
 
-    // ── Hook 4: Unlock a free extra garage slot (30 min) ─────────
+    // ── Hook 4: Free garage slot (30 min) ────────────────────────
     function offer_ad_free_garage_slot() {
-        _showAdPlaceholder("Free Garage Slot", () => {
+        _showAdPlaceholder("Bahía extra (30 min)", () => {
             game.workshop.capacity++;
-            notify("📺 ¡Bahía extra desbloqueada por 30 min!", "success");
+            notifySuccess("📺 ¡Bahía extra por 30 min!");
             _markShown("free_garage_slot");
             setTimeout(() => {
                 game.workshop.capacity = Math.max(
@@ -68,130 +56,88 @@ const AdsManager = (() => {
         });
     }
 
-    // ── Internal: shows a simulated ad placeholder ────────────────
-    // Replace this entire function body with your real SDK call.
     function _showAdPlaceholder(slotName, onReward) {
         const overlay = document.createElement("div");
         overlay.className = "ad-overlay";
         overlay.innerHTML = `
-            <div class="ad-modal">
-                <div class="ad-label">📺 ANUNCIO</div>
-                <div class="ad-slot-name">${slotName}</div>
-                <div class="ad-progress-wrap">
-                    <div class="ad-progress-bar" id="adProgressBar"></div>
-                </div>
-                <div class="ad-countdown" id="adCountdown">5</div>
-                <div class="ad-note">SDK Placeholder — integra AdMob / UnityAds aquí</div>
-            </div>
-        `;
+        <div class="ad-modal">
+            <div class="ad-label">📺 ANUNCIO</div>
+            <div class="ad-slot-name">${slotName}</div>
+            <div class="ad-progress-wrap"><div class="ad-progress-bar" id="adBar"></div></div>
+            <div class="ad-countdown" id="adCnt">5</div>
+            <div class="ad-note">SDK Placeholder — integra AdMob / UnityAds aquí</div>
+        </div>`;
         document.body.appendChild(overlay);
 
         let secs = 5;
-        const bar = overlay.querySelector("#adProgressBar");
-        const cnt = overlay.querySelector("#adCountdown");
-
+        const bar = overlay.querySelector("#adBar");
+        const cnt = overlay.querySelector("#adCnt");
         const tick = setInterval(() => {
             secs--;
             if (cnt) cnt.textContent = secs;
             if (bar) bar.style.width = ((5 - secs) / 5 * 100) + "%";
-            if (secs <= 0) {
-                clearInterval(tick);
-                overlay.remove();
-                onReward();
-            }
+            if (secs <= 0) { clearInterval(tick); overlay.remove(); onReward(); }
         }, 1000);
     }
 
-    return {
-        canOffer,
-        offer_ad_to_speed_repair,
-        offer_ad_for_missing_part,
-        offer_ad_double_race_reward,
-        offer_ad_free_garage_slot
-    };
+    return { canOffer, offer_ad_to_speed_repair, offerRewardedAdToGetDiamonds, offer_ad_double_race_reward, offer_ad_free_garage_slot };
 })();
 
-
-// ─────────────────────────────────────────────────────────────────
-// IN-APP PURCHASES
-// ─────────────────────────────────────────────────────────────────
+// ── IAP Manager ───────────────────────────────────────────────────
 const IAPManager = (() => {
-
     const PRODUCTS = {
-        mechanic_premium_pack: {
-            id:    "mechanic_premium_pack",
-            label: "Pack Mecánico Premium",
-            price: "$4.99",
-            desc:  "Desbloquea al Ingeniero F1 permanentemente"
-        },
-        extra_lift_pack: {
-            id:    "extra_lift_pack",
-            label: "Pack Elevadores Extra",
-            price: "$1.99",
-            desc:  "+2 bahías de trabajo permanentes"
-        },
-        rare_parts_pack: {
-            id:    "rare_parts_pack",
-            label: "Pack Repuestos Raros",
-            price: "$2.99",
-            desc:  "50% más probabilidad de autos raros por 7 días"
-        },
-        garage_pro_upgrade: {
-            id:    "garage_pro_upgrade",
-            label: "Garage Pro",
-            price: "$9.99",
-            desc:  "Desbloquea todas las mejoras del garage al máximo"
-        }
+        diamonds_small:          { label: "Pack Pequeño",    price: "$0.99", diamonds: 50 },
+        diamonds_medium:         { label: "Pack Mediano",    price: "$2.99", diamonds: 200 },
+        diamonds_large:          { label: "Pack Grande",     price: "$9.99", diamonds: 1000 },
+        mechanic_premium_pack:   { label: "Ingeniero Pro",   price: "10 💎", diamonds: 0 },
+        vehicle_upgrade_pack:    { label: "Pack Upgrades",   price: "$4.99", diamonds: 0, coins: 20000 },
+        garage_pro_upgrade:      { label: "Garage Pro",      price: "$9.99", diamonds: 0, unlockAll: true }
     };
 
-    // Local ownership state (persisted in game.iap)
-    function _getOwned() {
-        if (!game.iap) game.iap = {};
-        return game.iap;
-    }
+    function isOwned(productId) { return !!(game.iap && game.iap[productId]); }
 
-    function isOwned(productId) {
-        return !!_getOwned()[productId];
-    }
-
-    // ── purchase(): replace body with real store SDK call ─────────
-    function purchase(productId, onSuccess) {
-        const product = PRODUCTS[productId];
-        if (!product) return;
-
-        // --- Placeholder flow ---
-        const overlay = document.createElement("div");
-        overlay.className = "ad-overlay";
-        overlay.innerHTML = `
-            <div class="ad-modal">
-                <div class="ad-label">💎 COMPRA IN-APP</div>
-                <div class="ad-slot-name">${product.label}</div>
-                <div class="ad-note">${product.desc}</div>
-                <div class="ad-price">${product.price}</div>
-                <div class="iap-btn-row">
-                    <button class="rbtn accent-btn" id="iapConfirm">Comprar (simulado)</button>
-                    <button class="rbtn" id="iapCancel">Cancelar</button>
-                </div>
-                <div class="ad-note" style="margin-top:8px">SDK Placeholder — integra tu tienda aquí</div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-
-        overlay.querySelector("#iapCancel").addEventListener("click", () => overlay.remove());
-        overlay.querySelector("#iapConfirm").addEventListener("click", () => {
-            overlay.remove();
-            _fulfil(productId, onSuccess);
+    // ── purchaseDiamondsPack() ────────────────────────────────────
+    function purchaseDiamondsPack(productId) {
+        const p = PRODUCTS[productId];
+        if (!p) return;
+        _runIAP(p, () => {
+            if (p.diamonds) earn_diamonds(p.diamonds);
+            if (p.coins)    earn_coins(p.coins);
+            if (p.unlockAll) {
+                Object.keys(game.garageUpgrades).forEach(k => {
+                    const def = GARAGE_UPGRADES_DEF.find(d => d.key === k);
+                    if (def) game.garageUpgrades[k] = def.max;
+                });
+                game.workshop.capacity = 5;
+                game.workshop.speed    = 3;
+                notifySuccess("💎 Garage Pro desbloqueado!");
+            }
+            game.iap[productId] = true;
+            save_user_progress();
         });
     }
 
-    function _fulfil(productId, onSuccess) {
-        _getOwned()[productId] = true;
-        save_user_progress();
-        notify("💎 Compra completada: " + PRODUCTS[productId].label, "success");
-        if (typeof onSuccess === "function") onSuccess();
+    // ── purchaseVehicleUpgradePack() ──────────────────────────────
+    function purchaseVehicleUpgradePack() { purchaseDiamondsPack("vehicle_upgrade_pack"); }
+
+    function _runIAP(product, onSuccess) {
+        const overlay = document.createElement("div");
+        overlay.className = "ad-overlay";
+        overlay.innerHTML = `
+        <div class="ad-modal">
+            <div class="ad-label">💎 COMPRA</div>
+            <div class="ad-slot-name">${product.label}</div>
+            <div class="ad-price">${product.price}</div>
+            <div class="iap-btn-row">
+                <button class="rbtn accent-btn" id="iapOk">Comprar (simulado)</button>
+                <button class="rbtn" id="iapNo">Cancelar</button>
+            </div>
+            <div class="ad-note">SDK Placeholder — integra tu tienda aquí</div>
+        </div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector("#iapNo").addEventListener("click", () => overlay.remove());
+        overlay.querySelector("#iapOk").addEventListener("click", () => { overlay.remove(); onSuccess(); });
     }
 
-    function getProducts() { return PRODUCTS; }
-
-    return { purchase, isOwned, getProducts };
+    return { isOwned, purchaseDiamondsPack, purchaseVehicleUpgradePack, PRODUCTS };
 })();
