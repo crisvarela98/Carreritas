@@ -44,48 +44,40 @@ function updateGarageHud() {
 }
 
 function updateCarSpots() {
-    const spotMap = { "gspot-car": "car", "gspot-moto": "moto", "gspot-rally": "rally", "gspot-f1": "f1" };
-    for (const [spotId, vehicleId] of Object.entries(spotMap)) {
-        const el = document.getElementById(spotId);
-        if (!el) continue;
-        const owned = game.vehicles && game.vehicles[vehicleId] && game.vehicles[vehicleId].owned;
-        el.classList.toggle("spot-locked", !owned);
-    }
+    /* car spots removed from dashboard — nothing to update */
 }
 
 function updateFloorSlots() {
+    const btn = document.getElementById("recieveCarBtn");
+    const bar = document.getElementById("rcvBar");
+    if (!btn) return;
+
     const active = (game.workshop && game.workshop.active) || [];
     const queue  = (game.workshop && game.workshop.queue)  || [];
     const allCars = [...active, ...queue];
+    const iconEl  = btn.querySelector(".rcv-icon");
+    const labelEl = btn.querySelector(".rcv-label");
 
-    for (let i = 1; i <= 5; i++) {
-        const slot = document.getElementById("gslot-" + i);
-        const bar  = document.getElementById("sbar-" + i);
-        if (!slot) continue;
+    btn.classList.remove("rcv-busy", "rcv-done");
 
-        const car = allCars[i - 1];
-        slot.classList.remove("slot-busy", "slot-done");
-
-        const iconEl = slot.querySelector(".slot-icon");
-        const numEl  = slot.querySelector(".slot-num");
-
-        if (car) {
-            const pct = Math.floor(car.progress || 0);
-            if (pct >= 100) {
-                slot.classList.add("slot-done");
-                if (iconEl) iconEl.textContent = "✓";
-                if (bar)    bar.style.width = "100%";
-            } else {
-                slot.classList.add("slot-busy");
-                if (iconEl) iconEl.textContent = "🔧";
-                if (bar)    bar.style.width = pct + "%";
-            }
-            if (numEl) numEl.textContent = pct + "%";
+    if (allCars.length > 0) {
+        const first = allCars[0];
+        const pct   = Math.floor(first.progress || 0);
+        if (pct >= 100) {
+            btn.classList.add("rcv-done");
+            if (iconEl)  iconEl.textContent  = "✅";
+            if (labelEl) labelEl.textContent = "¡Listo!";
+            if (bar)     bar.style.width     = "100%";
         } else {
-            if (iconEl) iconEl.textContent = "＋";
-            if (numEl)  numEl.textContent  = i;
-            if (bar)    bar.style.width    = "0%";
+            btn.classList.add("rcv-busy");
+            if (iconEl)  iconEl.textContent  = "🔧";
+            if (labelEl) labelEl.textContent = pct + "% — " + allCars.length + " auto" + (allCars.length > 1 ? "s" : "");
+            if (bar)     bar.style.width     = pct + "%";
         }
+    } else {
+        if (iconEl)  iconEl.textContent  = "🚗";
+        if (labelEl) labelEl.textContent = "Recibir Auto";
+        if (bar)     bar.style.width     = "0%";
     }
 }
 

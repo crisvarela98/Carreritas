@@ -47,7 +47,7 @@
                 <span class="hud-sponsor-wheel">⚙</span>
             </button>
 
-            <!-- Currency column (right) — money top, diamonds bottom -->
+            <!-- Currency column (right) — money top, diamonds bottom, store btn below -->
             <div id="hudCurrency">
                 <div class="hud-money-box">
                     <span class="hud-money-icon">💵</span>
@@ -57,39 +57,22 @@
                     <span class="hud-gem">💎</span>
                     <span id="hudDiamonds">0</span>
                 </div>
+                <button class="hud-store-btn" onclick="AdsManager.offer_ad_double_race_reward()">
+                    <span class="hud-store-icon">📺</span>
+                    <span class="hud-store-label">+💎</span>
+                </button>
             </div>
 
         </div><!-- /garageHud -->
 
-        <!-- ── ROOFTOP CAR SPOTS ── -->
-        <div class="garage-car-spot" id="gspot-car"   onclick="showScreen('race')">🚗</div>
-        <div class="garage-car-spot" id="gspot-moto"  onclick="showScreen('race')">🏍</div>
-        <div class="garage-car-spot" id="gspot-rally" onclick="showScreen('race')">🚙</div>
-        <div class="garage-car-spot" id="gspot-f1"    onclick="showScreen('race')">🏎</div>
+        <!-- ── SINGLE RECEIVE BUTTON (center floor) ── -->
+        <button id="recieveCarBtn" onclick="repair_car()">
+            <span class="rcv-icon">🚗</span>
+            <span class="rcv-label">Recibir Auto</span>
+            <div class="rcv-bar-wrap"><div class="rcv-bar" id="rcvBar"></div></div>
+        </button>
 
-        <!-- ── FLOOR WORKSHOP SLOTS (tap = Recibir) ── -->
-        <div class="garage-floor-slot" id="gslot-1" onclick="repair_car()">
-            <div class="slot-inner"><div class="slot-num">1</div><div class="slot-icon">＋</div></div>
-            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-1"></div></div>
-        </div>
-        <div class="garage-floor-slot" id="gslot-2" onclick="repair_car()">
-            <div class="slot-inner"><div class="slot-num">2</div><div class="slot-icon">＋</div></div>
-            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-2"></div></div>
-        </div>
-        <div class="garage-floor-slot" id="gslot-3" onclick="repair_car()">
-            <div class="slot-inner"><div class="slot-num">3</div><div class="slot-icon">＋</div></div>
-            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-3"></div></div>
-        </div>
-        <div class="garage-floor-slot" id="gslot-4" onclick="repair_car()">
-            <div class="slot-inner"><div class="slot-num">4</div><div class="slot-icon">＋</div></div>
-            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-4"></div></div>
-        </div>
-        <div class="garage-floor-slot" id="gslot-5" onclick="repair_car()">
-            <div class="slot-inner"><div class="slot-num">5</div><div class="slot-icon">＋</div></div>
-            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-5"></div></div>
-        </div>
-
-        <!-- ── LEFT FLOATING BUTTONS (Staff + Taller) ── -->
+        <!-- ── LEFT FLOATING BUTTONS (Staff + Taller + Carrera) ── -->
         <div id="leftFabs">
             <button class="lfab-btn" onclick="showScreen('employees')">
                 <div class="lfab-faces"><span>👩</span><span>👨</span><span>🧔</span></div>
@@ -99,14 +82,14 @@
                 <span class="lfab-icon">🔧</span>
                 <span class="lfab-label">Taller</span>
             </button>
-        </div>
-
-        <!-- ── RIGHT SIDE: Carrera pill + FABs ── -->
-        <div id="rightFabs">
-            <button class="lfab-btn rfab-carrera" onclick="showScreen('race')">
+            <button class="lfab-btn lfab-carrera" onclick="showScreen('race')">
                 <span class="lfab-icon">🏁</span>
                 <span class="lfab-label">Carrera</span>
             </button>
+        </div>
+
+        <!-- ── RIGHT FABs (Tasks + Mini-game) ── -->
+        <div id="rightFabs">
             <button class="rfab-btn" onclick="MiniGame.open()">🚛</button>
             <button class="rfab-btn" id="tasksFab" onclick="openTasksOverlay()">
                 🎯<span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
