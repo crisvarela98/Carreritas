@@ -18,79 +18,101 @@
         <!-- Background -->
         <img id="garageBg" src="assets/garage-bg.png" alt="">
 
-        <!-- ── Top HUD ── -->
+        <!-- ── TOP HUD ── -->
         <div id="garageHud">
-            <div id="hudLeft">
-                <div class="hud-player-card">
-                    <span class="hud-player-icon">👤</span>
-                    <div class="hud-player-info">
-                        <span id="hudPlayerName">Jugador</span>
-                        <div class="hud-xp-bar"><div id="hudXpFill" class="hud-xp-fill"></div></div>
-                    </div>
-                    <span id="hudLevel" class="hud-level-badge">Nv.1</span>
+
+            <!-- Player card (tap = profile sheet) -->
+            <div id="hudPlayerCard" onclick="openProfileSheet()">
+                <div class="hpc-avatar">👤</div>
+                <div class="hpc-info">
+                    <div class="hpc-name" id="hudPlayerName">Jugador</div>
+                    <div class="hpc-xp"><div id="hudXpFill" class="hpc-xp-fill"></div></div>
                 </div>
+                <div id="hudLevel" class="hpc-level">Nv.1</div>
+                <div class="hpc-chevron">›</div>
             </div>
-            <div id="hudCenter">
-                <button class="hud-sponsor-btn" onclick="showScreen('sponsors')">
-                    💰 <span id="hudSponsorName">Sponsors</span>
-                </button>
-            </div>
-            <div id="hudRight">
-                <div class="hud-stat-pill diamond-pill">
-                    <span>💎</span><span id="hudDiamonds">0</span>
+
+            <!-- Sponsors button (center) -->
+            <button class="hud-sponsor-btn" onclick="showScreen('sponsors')">
+                <span class="hud-sponsor-icon">💰</span>
+                <span id="hudSponsorName">Sponsors</span>
+                <span class="hud-sponsor-wheel">⚙</span>
+            </button>
+
+            <!-- Currency column (right) -->
+            <div id="hudCurrency">
+                <div class="hud-diamonds-pill">
+                    <span class="hud-gem">💎</span>
+                    <span id="hudDiamonds">0</span>
                 </div>
                 <div class="hud-money-box">
                     <span class="hud-money-icon">💵</span>
                     <span id="hudMoney">$0</span>
                 </div>
             </div>
+
+        </div><!-- /garageHud -->
+
+        <!-- ── ROOFTOP CAR SPOTS ── -->
+        <div class="garage-car-spot" id="gspot-car"   onclick="showScreen('race')">🚗</div>
+        <div class="garage-car-spot" id="gspot-moto"  onclick="showScreen('race')">🏍</div>
+        <div class="garage-car-spot" id="gspot-rally" onclick="showScreen('race')">🚙</div>
+        <div class="garage-car-spot" id="gspot-f1"    onclick="showScreen('race')">🏎</div>
+
+        <!-- ── FLOOR WORKSHOP SLOTS (tap = Recibir) ── -->
+        <div class="garage-floor-slot" id="gslot-1" onclick="repair_car()">
+            <div class="slot-inner"><div class="slot-num">1</div><div class="slot-icon">＋</div></div>
+            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-1"></div></div>
+        </div>
+        <div class="garage-floor-slot" id="gslot-2" onclick="repair_car()">
+            <div class="slot-inner"><div class="slot-num">2</div><div class="slot-icon">＋</div></div>
+            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-2"></div></div>
+        </div>
+        <div class="garage-floor-slot" id="gslot-3" onclick="repair_car()">
+            <div class="slot-inner"><div class="slot-num">3</div><div class="slot-icon">＋</div></div>
+            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-3"></div></div>
+        </div>
+        <div class="garage-floor-slot" id="gslot-4" onclick="repair_car()">
+            <div class="slot-inner"><div class="slot-num">4</div><div class="slot-icon">＋</div></div>
+            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-4"></div></div>
+        </div>
+        <div class="garage-floor-slot" id="gslot-5" onclick="repair_car()">
+            <div class="slot-inner"><div class="slot-num">5</div><div class="slot-icon">＋</div></div>
+            <div class="slot-bar-wrap"><div class="slot-bar" id="sbar-5"></div></div>
         </div>
 
-        <!-- ── Rooftop car spots ── -->
-        <div class="garage-car-spot" id="gspot-car"   onclick="showScreen('race')" title="Auto de Taller">🚗</div>
-        <div class="garage-car-spot" id="gspot-moto"  onclick="showScreen('race')" title="Moto">🏍</div>
-        <div class="garage-car-spot" id="gspot-rally" onclick="showScreen('race')" title="Rally">🚙</div>
-        <div class="garage-car-spot" id="gspot-f1"    onclick="showScreen('race')" title="F1">🏎</div>
+        <!-- ── LEFT FLOATING BUTTONS (Staff + Taller) ── -->
+        <div id="leftFabs">
+            <button class="lfab-btn" onclick="showScreen('employees')">
+                <div class="lfab-faces"><span>👩</span><span>👨</span><span>🧔</span></div>
+                <span class="lfab-label">Staff</span>
+            </button>
+            <button class="lfab-btn" onclick="showScreen('workshop')">
+                <span class="lfab-icon">🔧</span>
+                <span class="lfab-label">Taller</span>
+            </button>
+        </div>
 
-        <!-- ── Floor workshop slots ── -->
-        <div class="garage-floor-slot" id="gslot-1" onclick="repair_car()"><span>1</span></div>
-        <div class="garage-floor-slot" id="gslot-2" onclick="repair_car()"><span>2</span></div>
-        <div class="garage-floor-slot" id="gslot-3" onclick="repair_car()"><span>3</span></div>
-        <div class="garage-floor-slot" id="gslot-4" onclick="repair_car()"><span>4</span></div>
-        <div class="garage-floor-slot" id="gslot-5" onclick="repair_car()"><span>5</span></div>
-
-        <!-- ── Recibir button ── -->
-        <button id="garageRecibirBtn" onclick="repair_car()">＋ Recibir</button>
-
-        <!-- ── FABs ── -->
-        <div id="garageFabs">
-            <button class="gfab" onclick="MiniGame.open()" title="Minijuego">🚛</button>
-            <button class="gfab" id="tasksFab" onclick="openTasksOverlay()" title="Tareas">
+        <!-- ── RIGHT FABs (Tasks + Minigame) ── -->
+        <div id="rightFabs">
+            <button class="rfab-btn" onclick="MiniGame.open()">🚛</button>
+            <button class="rfab-btn" id="tasksFab" onclick="openTasksOverlay()">
                 🎯<span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
             </button>
         </div>
 
-        <!-- ── Bottom Nav ── -->
-        <nav id="garageNav">
-            <button class="gnav-btn" onclick="showScreen('employees')">
-                <div class="gnav-portraits">
-                    <span>👩</span><span>👨</span><span>🧔</span>
-                </div>
-                <span class="gnav-label">Staff</span>
+        <!-- ── CARRERA BOTTOM BAR ── -->
+        <div id="garageCarreraBar">
+            <button id="carreraBtn" onclick="showScreen('race')">
+                <span class="carrera-flag">🏁</span>
+                <span class="carrera-label">Carrera</span>
+                <span class="carrera-trophy">🏆</span>
             </button>
-            <button class="gnav-btn gnav-center" onclick="showScreen('workshop')">
-                <span class="gnav-icon">🔧</span>
-                <span class="gnav-label">Taller</span>
-            </button>
-            <button class="gnav-btn" onclick="showScreen('race')">
-                <span class="gnav-icon">🏁</span>
-                <span class="gnav-label">Carrera</span>
-            </button>
-        </nav>
+        </div>
 
     </div><!-- /dashboard -->
 
-    <!-- ══════════════ OTHER SCREENS (overlay panels) ══════════════ -->
+    <!-- ══════════════ OVERLAY SCREENS ══════════════ -->
 
     <div class="screen overlay-screen" id="workshop">
         <div class="overlay-header">
@@ -148,6 +170,18 @@
 
 </div><!-- /app -->
 
+<!-- ══ PROFILE BOTTOM SHEET ══ -->
+<div id="profileSheet" class="psheet-overlay" onclick="closeProfileSheet()">
+    <div class="psheet-panel" onclick="event.stopPropagation()">
+        <div class="psheet-handle"></div>
+        <div class="psheet-header">
+            <span class="psheet-title">👤 Mi Perfil</span>
+            <button class="psheet-close" onclick="closeProfileSheet()">✕</button>
+        </div>
+        <div class="psheet-body" id="profileSheetBody"></div>
+    </div>
+</div>
+
 <!-- Tasks overlay -->
 <div id="tasksOverlay" class="tasks-overlay">
     <div class="tasks-overlay-panel">
@@ -174,8 +208,6 @@
         <div id="mgGameArea" class="mg-game-area"></div>
     </div>
 </div>
-
-<!-- First-run profile modal (rendered by JS) -->
 
 <!-- Core -->
 <script src="js/core/gameState.js"></script>

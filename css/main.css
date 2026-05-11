@@ -25,7 +25,7 @@
     pointer-events: none;
 }
 
-/* ── Top HUD ── */
+/* ── TOP HUD ── */
 #garageHud {
     position: absolute;
     top: 0;
@@ -38,121 +38,133 @@
     padding: 10px 10px 0;
 }
 
-#hudLeft {
-    flex: 1;
-    min-width: 0;
-}
-
-.hud-player-card {
+/* Player card */
+#hudPlayerCard {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(10,15,30,0.82);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-    padding: 6px 10px 7px;
-    backdrop-filter: blur(6px);
+    gap: 7px;
+    background: rgba(8,12,26,0.88);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 12px;
+    padding: 7px 10px 8px;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+    transition: background 0.15s;
 }
-.hud-player-icon { font-size: 18px; flex-shrink: 0; }
-.hud-player-info { flex: 1; min-width: 0; }
-.hud-player-info > span {
-    display: block;
+#hudPlayerCard:hover  { background: rgba(20,35,80,0.9); }
+#hudPlayerCard:active { background: rgba(30,55,120,0.9); }
+
+.hpc-avatar { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.hpc-info   { flex: 1; min-width: 0; }
+.hpc-name {
     font-size: 13px;
     font-weight: 800;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
 }
-.hud-xp-bar {
+.hpc-xp {
     height: 4px;
     background: rgba(255,255,255,0.15);
     border-radius: 2px;
     overflow: hidden;
-    margin-top: 4px;
+    margin-top: 5px;
 }
-.hud-xp-fill {
+.hpc-xp-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #a78bfa);
+    background: linear-gradient(90deg, #22c55e, #3b82f6);
     border-radius: 2px;
     transition: width 0.6s ease;
 }
-.hud-level-badge {
+.hpc-level {
     font-size: 11px;
     font-weight: 900;
     color: #fff;
     background: #3b82f6;
     border-radius: 6px;
-    padding: 2px 6px;
+    padding: 3px 7px;
     flex-shrink: 0;
     white-space: nowrap;
 }
+.hpc-chevron {
+    font-size: 18px;
+    color: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+    line-height: 1;
+}
 
-#hudCenter {
+/* Sponsors button */
+.hud-sponsor-btn {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding-top: 2px;
-}
-.hud-sponsor-btn {
-    background: rgba(10,15,30,0.82);
+    gap: 5px;
+    background: rgba(8,12,26,0.88);
     border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 10px;
+    border-radius: 12px;
     color: #fff;
     font-size: 12px;
     font-weight: 800;
-    padding: 6px 10px;
+    padding: 7px 10px;
     cursor: pointer;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     white-space: nowrap;
     transition: background 0.15s;
 }
-.hud-sponsor-btn:hover { background: rgba(30,60,120,0.85); }
+.hud-sponsor-btn:hover  { background: rgba(30,60,120,0.9); }
+.hud-sponsor-icon { font-size: 14px; }
+.hud-sponsor-wheel { font-size: 13px; opacity: 0.7; }
 
-#hudRight {
+/* Currency column */
+#hudCurrency {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 5px;
-    padding-top: 2px;
 }
-.hud-stat-pill {
+.hud-diamonds-pill {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 9px;
+    gap: 5px;
+    background: rgba(8,12,26,0.88);
+    border: 1px solid rgba(167,139,250,0.4);
     border-radius: 8px;
-    font-size: 12px;
-    font-weight: 800;
-    backdrop-filter: blur(6px);
+    padding: 4px 10px;
+    backdrop-filter: blur(8px);
 }
-.diamond-pill {
-    background: rgba(10,15,30,0.82);
-    border: 1px solid rgba(167,139,250,0.35);
+.hud-gem { font-size: 14px; }
+#hudDiamonds {
+    font-size: 13px;
+    font-weight: 900;
     color: #c4b5fd;
+    letter-spacing: 0.3px;
 }
 .hud-money-box {
     display: flex;
     align-items: center;
-    gap: 5px;
-    background: rgba(10,15,30,0.88);
-    border: 1px solid rgba(34,197,94,0.35);
+    gap: 6px;
+    background: rgba(8,30,18,0.92);
+    border: 1px solid rgba(34,197,94,0.5);
     border-radius: 10px;
-    padding: 5px 10px;
-    backdrop-filter: blur(6px);
+    padding: 5px 11px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 12px rgba(34,197,94,0.18);
 }
-.hud-money-icon { font-size: 14px; }
+.hud-money-icon { font-size: 15px; }
 #hudMoney {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 900;
     color: #22c55e;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
 }
 
-/* ── Rooftop car spots ── */
+/* ── ROOFTOP CAR SPOTS ── */
 .garage-car-spot {
     position: absolute;
     width: 70px;
@@ -167,185 +179,288 @@
     transition: transform 0.15s, filter 0.15s;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
 }
-.garage-car-spot:hover {
-    transform: scale(1.12) translateY(-3px);
-    filter: drop-shadow(0 4px 12px rgba(59,130,246,0.5));
-}
+.garage-car-spot:hover  { transform: scale(1.12) translateY(-3px); filter: drop-shadow(0 4px 14px rgba(59,130,246,0.55)); }
 .garage-car-spot:active { transform: scale(0.96); }
 
-/* Positions tuned to the garage background image */
 #gspot-car   { left: 6%;  top: 21%; }
 #gspot-moto  { left: 30%; top: 18%; }
 #gspot-rally { left: 53%; top: 20%; }
 #gspot-f1    { left: 76%; top: 23%; }
 
-/* Hide locked spots */
-.garage-car-spot.spot-locked {
-    opacity: 0.35;
-    filter: grayscale(1);
-    cursor: default;
-}
+.garage-car-spot.spot-locked { opacity: 0.35; filter: grayscale(1); cursor: default; }
 .garage-car-spot.spot-locked:hover { transform: none; filter: grayscale(1); }
 
-/* ── Floor workshop slots ── */
+/* ── FLOOR WORKSHOP SLOTS ── */
 .garage-floor-slot {
     position: absolute;
-    width: 52px;
-    height: 52px;
+    width: 68px;
+    height: 72px;
     z-index: 10;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px dashed rgba(255,255,255,0.4);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(2px);
+    border: 2px dashed rgba(255,255,255,0.35);
+    border-radius: 12px;
+    background: rgba(8,12,26,0.55);
+    backdrop-filter: blur(4px);
     transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    overflow: hidden;
+    gap: 4px;
+    padding: 6px 4px 4px;
 }
 .garage-floor-slot:hover {
-    background: rgba(59,130,246,0.25);
-    border-color: rgba(59,130,246,0.7);
-    transform: scale(1.08);
+    background: rgba(45,140,255,0.28);
+    border-color: rgba(45,140,255,0.8);
+    transform: scale(1.07);
 }
-.garage-floor-slot:active { transform: scale(0.95); }
-.garage-floor-slot span {
-    font-size: 20px;
+.garage-floor-slot:active { transform: scale(0.94); }
+
+.slot-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+}
+.slot-num {
+    font-size: 10px;
     font-weight: 900;
-    color: rgba(255,255,255,0.75);
-    pointer-events: none;
-}
-
-/* Slot positions — tuned to background image parking area */
-#gslot-1 { left: 8%;  top: 55%; }
-#gslot-2 { left: 22%; top: 59%; }
-#gslot-3 { left: 36%; top: 63%; }
-#gslot-4 { left: 50%; top: 67%; }
-#gslot-5 { left: 64%; top: 71%; }
-
-/* Active/busy slots */
-.garage-floor-slot.slot-busy {
-    border-color: rgba(249,115,22,0.7);
-    background: rgba(249,115,22,0.15);
-    animation: slot-pulse 1.4s ease-in-out infinite;
-}
-@keyframes slot-pulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.3); }
-    50%      { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
-}
-.garage-floor-slot.slot-done {
-    border-color: rgba(34,197,94,0.8);
-    background: rgba(34,197,94,0.2);
-}
-
-/* ── + Recibir button ── */
-#garageRecibirBtn {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 100px;
-    z-index: 10;
-    padding: 14px 48px;
-    background: #2d8cff;
-    border: none;
-    border-radius: 14px;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 900;
-    cursor: pointer;
+    color: rgba(255,255,255,0.5);
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 20px rgba(45,140,255,0.55);
-    transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
-    white-space: nowrap;
+    line-height: 1;
 }
-#garageRecibirBtn:hover {
-    background: #1a78f0;
-    box-shadow: 0 6px 28px rgba(45,140,255,0.7);
-    transform: translateX(-50%) translateY(-2px);
+.slot-icon {
+    font-size: 22px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.8);
+    line-height: 1;
 }
-#garageRecibirBtn:active {
-    transform: translateX(-50%) scale(0.96);
-    box-shadow: 0 2px 10px rgba(45,140,255,0.4);
+.slot-bar-wrap {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.slot-bar {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
+    border-radius: 2px;
+    transition: width 0.8s linear;
 }
 
-/* ── FABs (in garage scene) ── */
-#garageFabs {
+/* Slot positions */
+#gslot-1 { left: 7%;  top: 53%; }
+#gslot-2 { left: 21%; top: 58%; }
+#gslot-3 { left: 35%; top: 62%; }
+#gslot-4 { left: 49%; top: 66%; }
+#gslot-5 { left: 63%; top: 70%; }
+
+.garage-floor-slot.slot-busy {
+    border-color: rgba(249,115,22,0.75);
+    background: rgba(30,12,4,0.7);
+}
+.garage-floor-slot.slot-busy .slot-bar { background: #f97316; }
+.garage-floor-slot.slot-busy .slot-icon { color: #f97316; }
+
+.garage-floor-slot.slot-done {
+    border-color: rgba(34,197,94,0.85);
+    background: rgba(4,24,10,0.7);
+    animation: slot-done-pulse 1.2s ease-in-out infinite;
+}
+.garage-floor-slot.slot-done .slot-bar { background: #22c55e; width: 100% !important; }
+.garage-floor-slot.slot-done .slot-icon { color: #22c55e; }
+
+@keyframes slot-done-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.35); }
+    50%      { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+}
+
+/* ── LEFT FLOATING BUTTONS (Staff + Taller) ── */
+#leftFabs {
     position: absolute;
-    right: 12px;
-    bottom: 108px;
+    left: 10px;
+    bottom: 90px;
     z-index: 15;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-.gfab {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.18);
-    background: rgba(10,15,30,0.82);
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-    position: relative;
-    transition: transform 0.15s;
-}
-.gfab:hover  { transform: scale(1.1); }
-.gfab:active { transform: scale(0.93); }
-
-/* ── Garage Bottom Nav ── */
-#garageNav {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    height: 90px;
-    background: rgba(15,18,30,0.93);
-    border-top: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-}
-.gnav-btn {
+.lfab-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
+    width: 66px;
+    padding: 10px 6px;
+    background: rgba(8,12,26,0.88);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    transition: transform 0.12s, background 0.15s;
+}
+.lfab-btn:hover  { background: rgba(30,55,120,0.9); transform: scale(1.06); }
+.lfab-btn:active { transform: scale(0.94); }
+.lfab-faces { display: flex; margin: 0 -2px; }
+.lfab-faces span { font-size: 18px; margin: 0 -2px; }
+.lfab-icon  { font-size: 22px; line-height: 1; }
+.lfab-label { font-size: 10px; font-weight: 900; letter-spacing: 0.3px; color: rgba(255,255,255,0.9); }
+
+/* ── RIGHT FABs ── */
+#rightFabs {
+    position: absolute;
+    right: 10px;
+    bottom: 90px;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.rfab-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(8,12,26,0.88);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    position: relative;
+    transition: transform 0.12s, background 0.15s;
+}
+.rfab-btn:hover  { background: rgba(30,55,120,0.9); transform: scale(1.1); }
+.rfab-btn:active { transform: scale(0.92); }
+
+/* ── CARRERA BOTTOM BAR ── */
+#garageCarreraBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 80px;
+    background: rgba(8,12,26,0.93);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#carreraBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border: none;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 900;
+    padding: 14px 40px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 24px rgba(99,60,220,0.55);
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+#carreraBtn:hover  { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,60,220,0.7); }
+#carreraBtn:active { transform: scale(0.96); }
+.carrera-flag   { font-size: 24px; }
+.carrera-label  { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
+.carrera-trophy { font-size: 22px; }
+
+/* ── PROFILE BOTTOM SHEET ── */
+.psheet-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+}
+.psheet-overlay.psheet-open { display: flex; }
+
+.psheet-panel {
+    width: 100%;
+    max-width: 540px;
+    max-height: 82vh;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--border-hi);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slide-up 0.22s ease;
+}
+.psheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-hi);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+}
+.psheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.psheet-title { font-size: 16px; font-weight: 900; color: var(--text); }
+.psheet-close {
     background: none;
     border: none;
+    color: var(--text-muted);
+    font-size: 20px;
     cursor: pointer;
-    padding: 8px 4px;
-    color: #e8edf5;
-    transition: background 0.15s;
+    padding: 2px 6px;
+    transition: color 0.15s;
 }
-.gnav-btn:hover   { background: rgba(255,255,255,0.06); }
-.gnav-btn:active  { background: rgba(255,255,255,0.12); }
-.gnav-center {
-    border-left:  1px solid rgba(255,255,255,0.08);
-    border-right: 1px solid rgba(255,255,255,0.08);
-}
-.gnav-portraits {
+.psheet-close:hover { color: var(--text); }
+.psheet-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 14px 28px;
     display: flex;
-    gap: -4px;
+    flex-direction: column;
+    gap: 10px;
 }
-.gnav-portraits span {
-    font-size: 22px;
-    margin: 0 -3px;
+
+/* Profile sheet stats grid */
+.ps-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
-.gnav-icon  { font-size: 26px; line-height: 1; }
-.gnav-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #e8edf5;
-    letter-spacing: 0.3px;
+.ps-stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 10px;
+    text-align: center;
 }
+.ps-stat-val   { font-size: 22px; font-weight: 900; }
+.ps-stat-val.green { color: var(--green); }
+.ps-stat-val.blue  { color: var(--accent); }
+.ps-stat-val.gold  { color: var(--gold); }
+.ps-stat-val.diam  { color: var(--diamond); }
+.ps-stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 3px; }
 
 /* ══════════════════════════════════════════════════════════════════
    OVERLAY SCREENS (Workshop, Race, Employees, Sponsors, Profile)
