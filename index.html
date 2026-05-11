@@ -93,20 +93,15 @@
             </button>
         </div>
 
-        <!-- ── RIGHT FABs (Tasks + Minigame) ── -->
+        <!-- ── RIGHT SIDE: Carrera pill + FABs ── -->
         <div id="rightFabs">
+            <button class="lfab-btn rfab-carrera" onclick="showScreen('race')">
+                <span class="lfab-icon">🏁</span>
+                <span class="lfab-label">Carrera</span>
+            </button>
             <button class="rfab-btn" onclick="MiniGame.open()">🚛</button>
             <button class="rfab-btn" id="tasksFab" onclick="openTasksOverlay()">
                 🎯<span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
-            </button>
-        </div>
-
-        <!-- ── CARRERA BOTTOM BAR ── -->
-        <div id="garageCarreraBar">
-            <button id="carreraBtn" onclick="showScreen('race')">
-                <span class="carrera-flag">🏁</span>
-                <span class="carrera-label">Carrera</span>
-                <span class="carrera-trophy">🏆</span>
             </button>
         </div>
 
