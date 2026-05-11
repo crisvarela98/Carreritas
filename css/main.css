@@ -33,135 +33,199 @@
     right: 0;
     z-index: 10;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;       /* all three boxes same height */
     gap: 6px;
     padding: 10px 10px 0;
 }
 
-/* Player card */
+/* ── PLAYER CARD ── */
 #hudPlayerCard {
     display: flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(8,12,26,0.88);
-    border: 1px solid rgba(255,255,255,0.13);
+    flex-direction: column;
+    gap: 0;
+    background: rgba(8,12,26,0.90);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-top: 2px solid #3b82f6;          /* accent top stripe */
     border-radius: 12px;
-    padding: 7px 10px 8px;
-    backdrop-filter: blur(8px);
+    padding: 0;
+    backdrop-filter: blur(10px);
     cursor: pointer;
     flex: 1;
     min-width: 0;
+    overflow: hidden;
     transition: background 0.15s;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
 }
-#hudPlayerCard:hover  { background: rgba(20,35,80,0.9); }
-#hudPlayerCard:active { background: rgba(30,55,120,0.9); }
+#hudPlayerCard:hover  { background: rgba(20,38,90,0.92); }
+#hudPlayerCard:active { background: rgba(30,55,120,0.94); }
 
-.hpc-avatar { font-size: 20px; flex-shrink: 0; line-height: 1; }
-.hpc-info   { flex: 1; min-width: 0; }
+/* Top row: avatar + name + chevron */
+.hpc-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 9px 4px;
+}
+.hpc-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.35);
+}
+.hpc-mid {
+    flex: 1;
+    min-width: 0;
+}
 .hpc-name {
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 12px;
+    font-weight: 900;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+    letter-spacing: 0.2px;
+}
+.hpc-level {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(90deg, #3b82f6, #7c3aed);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+}
+.hpc-chevron {
+    font-size: 16px;
+    color: rgba(255,255,255,0.3);
+    flex-shrink: 0;
+}
+
+/* XP row at the bottom of the card */
+.hpc-xp-row {
+    padding: 0 9px 7px;
+}
+.hpc-xp-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 3px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
 .hpc-xp {
-    height: 4px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 2px;
+    height: 5px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 3px;
     overflow: hidden;
-    margin-top: 5px;
 }
 .hpc-xp-fill {
     height: 100%;
-    background: linear-gradient(90deg, #22c55e, #3b82f6);
-    border-radius: 2px;
+    background: linear-gradient(90deg, #22c55e, #3b82f6, #7c3aed);
+    border-radius: 3px;
     transition: width 0.6s ease;
-}
-.hpc-level {
-    font-size: 11px;
-    font-weight: 900;
-    color: #fff;
-    background: #3b82f6;
-    border-radius: 6px;
-    padding: 3px 7px;
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-.hpc-chevron {
-    font-size: 18px;
-    color: rgba(255,255,255,0.4);
-    flex-shrink: 0;
-    line-height: 1;
+    box-shadow: 0 0 6px rgba(59,130,246,0.6);
 }
 
-/* Sponsors button */
+/* ── SPONSORS BUTTON ── */
 .hud-sponsor-btn {
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
-    background: rgba(8,12,26,0.88);
-    border: 1px solid rgba(255,255,255,0.18);
+    justify-content: center;
+    gap: 4px;
+    background: rgba(8,12,26,0.90);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-top: 2px solid rgba(249,115,22,0.7);
     border-radius: 12px;
     color: #fff;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     padding: 7px 10px;
     cursor: pointer;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
     white-space: nowrap;
     transition: background 0.15s;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
 }
-.hud-sponsor-btn:hover  { background: rgba(30,60,120,0.9); }
-.hud-sponsor-icon { font-size: 14px; }
-.hud-sponsor-wheel { font-size: 13px; opacity: 0.7; }
+.hud-sponsor-btn:hover  { background: rgba(40,25,8,0.93); }
+.hud-sponsor-icon  { font-size: 18px; line-height: 1; }
+.hud-sponsor-wheel { font-size: 11px; opacity: 0.55; }
 
-/* Currency column */
+/* ── CURRENCY COLUMN ── */
 #hudCurrency {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 5px;
 }
-.hud-diamonds-pill {
+
+/* Money box — fixed width so it never shifts */
+.hud-money-box {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
-    background: rgba(8,12,26,0.88);
-    border: 1px solid rgba(167,139,250,0.4);
-    border-radius: 8px;
-    padding: 4px 10px;
-    backdrop-filter: blur(8px);
+    background: rgba(4,22,12,0.92);
+    border: 1px solid rgba(34,197,94,0.45);
+    border-top: 2px solid #22c55e;
+    border-radius: 10px;
+    padding: 0 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 14px rgba(34,197,94,0.15);
+    min-width: 108px;
+    overflow: hidden;
 }
-.hud-gem { font-size: 14px; }
+.hud-money-icon { font-size: 13px; flex-shrink: 0; }
+#hudMoney {
+    font-size: 13px;           /* smaller — fits big numbers */
+    font-weight: 900;
+    color: #22c55e;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 82px;           /* clamp width, never shift box */
+}
+
+/* Diamonds pill */
+.hud-diamonds-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: rgba(8,4,26,0.90);
+    border: 1px solid rgba(167,139,250,0.38);
+    border-top: 2px solid #7c3aed;
+    border-radius: 10px;
+    padding: 0 10px;
+    backdrop-filter: blur(10px);
+    min-width: 108px;
+    overflow: hidden;
+}
+.hud-gem { font-size: 13px; flex-shrink: 0; }
 #hudDiamonds {
     font-size: 13px;
     font-weight: 900;
     color: #c4b5fd;
-    letter-spacing: 0.3px;
-}
-.hud-money-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(8,30,18,0.92);
-    border: 1px solid rgba(34,197,94,0.5);
-    border-radius: 10px;
-    padding: 5px 11px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 2px 12px rgba(34,197,94,0.18);
-}
-.hud-money-icon { font-size: 15px; }
-#hudMoney {
-    font-size: 17px;
-    font-weight: 900;
-    color: #22c55e;
     letter-spacing: 0.2px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70px;
 }
 
 /* ── ROOFTOP CAR SPOTS ── */

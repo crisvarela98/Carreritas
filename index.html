@@ -23,13 +23,21 @@
 
             <!-- Player card (tap = profile sheet) -->
             <div id="hudPlayerCard" onclick="openProfileSheet()">
-                <div class="hpc-avatar">👤</div>
-                <div class="hpc-info">
-                    <div class="hpc-name" id="hudPlayerName">Jugador</div>
+                <div class="hpc-top">
+                    <div class="hpc-avatar">👤</div>
+                    <div class="hpc-mid">
+                        <div class="hpc-name" id="hudPlayerName">Jugador</div>
+                        <div id="hudLevel" class="hpc-level">Nv.1</div>
+                    </div>
+                    <div class="hpc-chevron">›</div>
+                </div>
+                <div class="hpc-xp-row">
+                    <div class="hpc-xp-labels">
+                        <span>XP</span>
+                        <span id="hudXpLabel">0 / 1000</span>
+                    </div>
                     <div class="hpc-xp"><div id="hudXpFill" class="hpc-xp-fill"></div></div>
                 </div>
-                <div id="hudLevel" class="hpc-level">Nv.1</div>
-                <div class="hpc-chevron">›</div>
             </div>
 
             <!-- Sponsors button (center) -->
@@ -39,15 +47,15 @@
                 <span class="hud-sponsor-wheel">⚙</span>
             </button>
 
-            <!-- Currency column (right) -->
+            <!-- Currency column (right) — money top, diamonds bottom -->
             <div id="hudCurrency">
-                <div class="hud-diamonds-pill">
-                    <span class="hud-gem">💎</span>
-                    <span id="hudDiamonds">0</span>
-                </div>
                 <div class="hud-money-box">
                     <span class="hud-money-icon">💵</span>
                     <span id="hudMoney">$0</span>
+                </div>
+                <div class="hud-diamonds-pill">
+                    <span class="hud-gem">💎</span>
+                    <span id="hudDiamonds">0</span>
                 </div>
             </div>
 

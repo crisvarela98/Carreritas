@@ -23,10 +23,12 @@ function updateGarageHud() {
     if (lvEl) lvEl.textContent = "Nv." + (game.level || 1);
 
     const xpFill = $("hudXpFill");
-    if (xpFill) {
-        const pct = Math.min(100, ((game.xp || 0) / ((game.level || 1) * 1000)) * 100);
-        xpFill.style.width = pct + "%";
-    }
+    const xpLabel = $("hudXpLabel");
+    const xpMax = (game.level || 1) * 1000;
+    const xpCur = game.xp || 0;
+    const pct = Math.min(100, (xpCur / xpMax) * 100);
+    if (xpFill)  xpFill.style.width = pct + "%";
+    if (xpLabel) xpLabel.textContent = xpCur.toLocaleString() + " / " + xpMax.toLocaleString();
 
     const diaEl = $("hudDiamonds");
     if (diaEl) diaEl.textContent = (game.diamonds || 0).toLocaleString();
