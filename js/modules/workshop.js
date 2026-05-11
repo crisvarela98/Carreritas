@@ -2,7 +2,7 @@
 // Handles customer car repairs (idle money-making loop)
 // and garage upgrades.
 
-let workshopTab = "repair";
+let workshopTab = "garage";
 
 function showWorkshopTab(tab) {
     workshopTab = tab;
@@ -52,9 +52,8 @@ function assignCars() {
 
 // ── Garage upgrades ───────────────────────────────────────────────
 const GARAGE_UPGRADES_DEF = [
-    { key: "extraBay",   label: "Bahía adicional",   icon: "🏗", desc: "+1 auto simultáneo",           max: 3, cost: lvl => [2500, 7000, 18000][lvl] || 0 },
-    { key: "speedBoost", label: "Herramientas Pro",  icon: "⚡", desc: "+0.5 velocidad de reparación", max: 4, cost: lvl => [1800, 4500, 9000, 20000][lvl] || 0 },
-    { key: "partsStock", label: "Stock de repuestos",icon: "📦", desc: "-10% duración por nivel",       max: 3, cost: lvl => [1500, 4000, 10000][lvl] || 0 }
+    { key: "speedBoost", label: "Herramientas Pro",  icon: "⚡", desc: "+0.5 velocidad de reparación por nivel", max: 6, cost: lvl => [1800, 4500, 9000, 16000, 26000, 40000][lvl] || 0 },
+    { key: "partsStock", label: "Stock de repuestos",icon: "📦", desc: "-10% duración de reparación por nivel",  max: 5, cost: lvl => [1500, 4000, 8000, 15000, 28000][lvl] || 0 }
 ];
 
 function buyGarageUpgrade(key) {
@@ -66,8 +65,7 @@ function buyGarageUpgrade(key) {
     if (!spend_coins(cost)) { notifyWarn("Monedas insuficientes"); return; }
 
     game.garageUpgrades[key]++;
-    if (key === "extraBay")   game.workshop.capacity = 2 + game.garageUpgrades.extraBay;
-    if (key === "speedBoost") game.workshop.speed    = 1 + game.garageUpgrades.speedBoost * 0.5;
+    if (key === "speedBoost") game.workshop.speed = 1 + game.garageUpgrades.speedBoost * 0.5;
 
     notifySuccess(`${def.label} mejorado — Nv.${game.garageUpgrades[key]}`);
     renderWorkshop();
@@ -105,7 +103,6 @@ setInterval(() => {
         }
     });
 
-    if (workshopTab === "repair") _renderRepairTab(document.getElementById("workshopContent"));
 }, 1000);
 
 // ── renderWorkshop() ─────────────────────────────────────────────
@@ -118,17 +115,12 @@ function renderWorkshop() {
         renderVehiclesTab();
         return;
     }
-    if (workshopTab === "garage") {
-        _renderGarageTab(el);
-        return;
-    }
-    _renderRepairTab(el);
+    _renderGarageTab(el);
 }
 
 function _makeTabBar() {
     return `
     <div class="wtab-bar">
-        <button class="wtab ${workshopTab === "repair"   ? "wtab-active" : ""}" onclick="showWorkshopTab('repair')">🔧 Reparar</button>
         <button class="wtab ${workshopTab === "vehicles" ? "wtab-active" : ""}" onclick="showWorkshopTab('vehicles')">🚗 Vehículos</button>
         <button class="wtab ${workshopTab === "garage"   ? "wtab-active" : ""}" onclick="showWorkshopTab('garage')">🏗 Garage</button>
     </div>`;

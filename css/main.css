@@ -1416,18 +1416,18 @@ html, body {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px;
-    margin: 10px 10px 0;
+    padding: 12px;
+    margin: 8px 8px 0;
 }
-.pdk-card:last-child { margin-bottom: 10px; }
+.pdk-card:last-child { margin-bottom: 8px; }
 
 .pdk-section-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.2px;
     color: var(--text-muted);
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 /* ── Season card ─────────────────────────────────────────────── */
@@ -1436,22 +1436,22 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 .pdk-eyebrow {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
-.pdk-season-title { font-size: 19px; font-weight: 900; line-height: 1.1; }
+.pdk-season-title { font-size: 16px; font-weight: 900; line-height: 1.1; }
 .pdk-season-badge {
-    width: 40px; height: 40px;
+    width: 34px; height: 34px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 900;
+    font-size: 12px; font-weight: 900;
     color: #fff;
     flex-shrink: 0;
     box-shadow: 0 4px 14px rgba(0,0,0,0.4);
@@ -1461,7 +1461,7 @@ html, body {
 .sdots-row {
     display: flex;
     gap: 0;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     align-items: center;
     justify-content: space-between;
     position: relative;
@@ -1475,14 +1475,14 @@ html, body {
     z-index: 0;
 }
 .sdot {
-    width: 26px; height: 26px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     border: 2px solid var(--border);
     background: var(--surface);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 900;
     color: #fff;
     position: relative;
@@ -1499,7 +1499,7 @@ html, body {
     animation: sdot-pulse 1.4s ease-in-out infinite;
     box-shadow: 0 0 0 0 rgba(59,130,246,0.5);
 }
-.sdot-final { font-size: 14px; }
+.sdot-final { font-size: 11px; }
 @keyframes sdot-pulse {
     0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
     50%  { transform: scale(1.12); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
@@ -1514,41 +1514,42 @@ html, body {
     background: var(--border);
     border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-top: 14px;
+    margin-top: 10px;
 }
 .pdk-sstat {
     background: var(--surface3);
     text-align: center;
-    padding: 10px 6px;
+    padding: 8px 4px;
 }
-.pdk-sstat-val { font-size: 20px; font-weight: 900; line-height: 1; }
-.pdk-sstat-lbl { font-size: 8px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+.pdk-sstat-val { font-size: 16px; font-weight: 900; line-height: 1; }
+.pdk-sstat-lbl { font-size: 7px; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
 
 /* ── Next race card ──────────────────────────────────────────── */
 .pdk-next-card { }
 .pdk-nr-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
+.pdk-nr-header { margin-bottom: 8px; }
 .pdk-nr-circuit {
-    font-size: 20px;
+    font-size: 15px;
     font-weight: 900;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     line-height: 1.2;
 }
 .pdk-nr-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
-.pdk-diff-stars { font-size: 13px; letter-spacing: -0.5px; }
-.pdk-diff-label { font-size: 11px; color: var(--text-sub); }
-.pdk-weather    { font-size: 20px; margin-left: auto; }
+.pdk-diff-stars { font-size: 11px; letter-spacing: -0.5px; }
+.pdk-diff-label { font-size: 10px; color: var(--text-sub); }
+.pdk-weather    { font-size: 16px; margin-left: auto; }
 
 /* ── Pace comparison ─────────────────────────────────────────── */
 .pdk-pace-row {
@@ -1558,26 +1559,26 @@ html, body {
     background: var(--border);
     border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 .pdk-pace-box {
     flex: 1;
     text-align: center;
     background: var(--surface3);
-    padding: 12px 8px;
+    padding: 10px 6px;
 }
-.pdk-pace-val  { font-size: 22px; font-weight: 900; line-height: 1; }
-.pdk-pace-lbl  { font-size: 9px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-.pdk-vs        { display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 9px; font-weight: 900; color: var(--text-muted); flex-shrink: 0; letter-spacing: 0.5px; background: var(--border); }
+.pdk-pace-val  { font-size: 18px; font-weight: 900; line-height: 1; }
+.pdk-pace-lbl  { font-size: 8px; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.pdk-vs        { display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 8px; font-weight: 900; color: var(--text-muted); flex-shrink: 0; letter-spacing: 0.5px; background: var(--border); }
 .rival-clr     { color: var(--red); }
 
-.pdk-gap-box { text-align: center; padding: 12px 12px; flex-shrink: 0; background: var(--surface3); }
+.pdk-gap-box { text-align: center; padding: 10px 10px; flex-shrink: 0; background: var(--surface3); }
 .gap-ok  { background: rgba(34,197,94,0.15); }
 .gap-warn { background: rgba(239,68,68,0.15); }
-.pdk-gap-val { font-size: 18px; font-weight: 900; line-height: 1; }
+.pdk-gap-val { font-size: 15px; font-weight: 900; line-height: 1; }
 .gap-ok  .pdk-gap-val  { color: var(--green); }
 .gap-warn .pdk-gap-val { color: var(--red); }
-.pdk-gap-lbl { font-size: 9px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.pdk-gap-lbl { font-size: 8px; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
 
 .pdk-warn-bar {
     font-size: 11px;
@@ -1644,16 +1645,16 @@ html, body {
 .pdk-tt-btn   { flex-shrink: 0; padding: 10px 20px; font-size: 13px; white-space: nowrap; width: auto; }
 
 /* ── Standings ───────────────────────────────────────────────── */
-.pdk-standings { display: flex; flex-direction: column; gap: 5px; }
+.pdk-standings { display: flex; flex-direction: column; gap: 4px; }
 .pdkst-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 11px;
+    gap: 8px;
+    padding: 7px 10px;
     border-radius: var(--radius-sm);
     background: var(--surface3);
     border: 1px solid var(--border);
-    font-size: 13px;
+    font-size: 12px;
     transition: border-color 0.15s;
 }
 .pdkst-player {
@@ -1661,21 +1662,21 @@ html, body {
     border-color: var(--accent);
     font-weight: 700;
 }
-.pdkst-pos   { width: 28px; text-align: center; font-size: 15px; }
+.pdkst-pos   { width: 24px; text-align: center; font-size: 13px; }
 .pdkst-name  { flex: 1; }
-.pdkst-pts   { font-size: 13px; font-weight: 800; color: var(--text-muted); }
-.pdk-more-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; font-weight: 600; }
+.pdkst-pts   { font-size: 12px; font-weight: 800; color: var(--text-muted); }
+.pdk-more-hint { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 6px; font-weight: 600; }
 
 /* ── All-leagues 2×2 grid ────────────────────────────────────── */
 .pdk-leagues-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
 }
 .pdklg-card {
     background: var(--surface3);
     border-radius: var(--radius-sm);
-    padding: 14px 12px 11px;
+    padding: 10px 10px 8px;
     border: 2px solid var(--border);
     cursor: pointer;
     transition: border-color 0.15s, transform 0.12s;
@@ -1687,16 +1688,16 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
-.pdklg-vehicle-icon { font-size: 28px; line-height: 1; }
-.pdklg-rank         { font-size: 22px; font-weight: 900; line-height: 1; }
-.pdklg-vname        { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
-.pdklg-pts          { font-size: 14px; font-weight: 800; margin-bottom: 10px; }
-.pdklg-lock         { font-size: 11px; color: var(--text-muted); margin-top: 8px; font-weight: 600; }
-.pdklg-mini-bar     { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.pdklg-vehicle-icon { font-size: 22px; line-height: 1; }
+.pdklg-rank         { font-size: 18px; font-weight: 900; line-height: 1; }
+.pdklg-vname        { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+.pdklg-pts          { font-size: 12px; font-weight: 800; margin-bottom: 7px; }
+.pdklg-lock         { font-size: 10px; color: var(--text-muted); margin-top: 6px; font-weight: 600; }
+.pdklg-mini-bar     { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
 .pdklg-mini-fill    { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.pdklg-progress     { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+.pdklg-progress     { font-size: 9px; color: var(--text-muted); font-weight: 700; }
 
 /* ══════════════════════════════════════════════════════════════════
    PRE-RACE CONFIG
@@ -1704,28 +1705,28 @@ html, body {
 .cfg-vehicle-header {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 16px 0 12px;
+    gap: 12px;
+    padding: 10px 0 10px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
-.cfg-v-icon   { font-size: 42px; line-height: 1; }
-.cfg-v-name   { font-size: 17px; font-weight: 900; letter-spacing: 0.3px; }
-.cfg-v-format { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-top: 3px; }
+.cfg-v-icon   { font-size: 34px; line-height: 1; }
+.cfg-v-name   { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; }
+.cfg-v-format { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-top: 2px; }
 
 .cfg-circuit-box {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     background: var(--surface2);
     border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    margin-bottom: 16px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
     border: 1px solid var(--border);
 }
-.cfg-circuit-flag  { font-size: 28px; }
-.cfg-circuit-name  { font-size: 14px; font-weight: 800; }
-.cfg-circuit-meta  { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
+.cfg-circuit-flag  { font-size: 22px; }
+.cfg-circuit-name  { font-size: 13px; font-weight: 800; }
+.cfg-circuit-meta  { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
 
 .cfg-section-label {
     font-size: 10px;
@@ -1740,15 +1741,15 @@ html, body {
 /* Tire selector */
 .cfg-tire-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 .cfg-tire-btn {
     flex: 1;
     background: var(--surface2);
     border: 2px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 6px;
+    padding: 8px 4px;
     cursor: pointer;
     text-align: center;
     transition: border-color 0.15s, background 0.15s;
@@ -1756,36 +1757,36 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
 }
 .cfg-tire-btn:hover  { border-color: var(--border-hi); }
 .cfg-tire-active     { background: rgba(59,130,246,0.08) !important; }
-.cfg-tire-icon  { font-size: 20px; line-height: 1; }
-.cfg-tire-name  { font-size: 12px; font-weight: 800; }
-.cfg-tire-stat  { font-size: 10px; color: var(--accent-glow); font-weight: 700; }
-.cfg-tire-deg   { font-size: 9px;  color: var(--text-muted); }
+.cfg-tire-icon  { font-size: 17px; line-height: 1; }
+.cfg-tire-name  { font-size: 11px; font-weight: 800; }
+.cfg-tire-stat  { font-size: 9px; color: var(--accent-glow); font-weight: 700; }
+.cfg-tire-deg   { font-size: 8px;  color: var(--text-muted); }
 
 /* Pit strategy */
 .cfg-pit-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 .cfg-pit-btn {
     flex: 1;
     background: var(--surface2);
     border: 2px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 6px;
+    padding: 8px 4px;
     cursor: pointer;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text);
     line-height: 1.5;
     transition: border-color 0.15s, background 0.15s;
 }
-.cfg-pit-btn small { color: var(--text-muted); font-size: 10px; font-weight: 600; }
+.cfg-pit-btn small { color: var(--text-muted); font-size: 9px; font-weight: 600; }
 .cfg-pit-btn:hover { border-color: var(--border-hi); }
 .cfg-pit-active    { border-color: var(--accent) !important; background: rgba(59,130,246,0.08) !important; }
 

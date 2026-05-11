@@ -109,12 +109,18 @@ const TaskManager = {
     trackDaily(type, amount) {
         amount = amount || 1;
         this.checkDailyReset();
+        let changed = false;
         this.getDailyTasks().forEach(task => {
             if (task.type === type && !game.tasks.dailyClaimed[task.id]) {
                 game.tasks.dailyProgress[task.id] = (game.tasks.dailyProgress[task.id] || 0) + amount;
+                changed = true;
             }
         });
         this._updateBadge();
+        if (changed) {
+            const ov = document.getElementById('tasksOverlay');
+            if (ov && ov.classList.contains('tasks-overlay-active')) _renderTasksContent();
+        }
     },
 
     claimDaily(taskId) {
