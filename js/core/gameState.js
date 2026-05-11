@@ -6,11 +6,11 @@ const game = {
     garageName: "",
 
     // ── ECONOMY ───────────────────────────────────────────────────
-    money:      1000,   // regular coins
-    diamonds:   0,      // premium currency
-    reputation: 1,
-    xp:         0,
-    level:      1,
+    money:      999999,   // regular coins
+    diamonds:   9999,      // premium currency
+    reputation: 999999,
+    xp:         9999,
+    level:      100,
     lastTime:   Date.now(),
 
     // ── VEHICLES ─────────────────────────────────────────────────
