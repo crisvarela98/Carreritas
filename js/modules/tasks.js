@@ -286,3 +286,5 @@ function _renderSuperTasks(el) {
 
     el.innerHTML = `<div class="tov-tasks-list">${sections}</div>`;
 }
+
+window.TaskManager = TaskManager;

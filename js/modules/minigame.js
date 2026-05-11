@@ -197,3 +197,5 @@ const MiniGame = {
         if (ov) ov.classList.remove('mg-active');
     }
 };
+
+window.MiniGame = MiniGame;

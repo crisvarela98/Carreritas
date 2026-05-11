@@ -141,3 +141,6 @@ const IAPManager = (() => {
 
     return { isOwned, purchaseDiamondsPack, purchaseVehicleUpgradePack, PRODUCTS };
 })();
+
+window.AdsManager  = AdsManager;
+window.IAPManager  = IAPManager;

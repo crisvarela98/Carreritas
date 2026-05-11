@@ -71,3 +71,5 @@ const FTUEManager = (() => {
         onGarageUpgradePurchased(){ if (step() === 4) advance(5); }
     };
 })();
+
+window.FTUEManager = FTUEManager;
