@@ -1178,3 +1178,468 @@ html, body {
 .pdklg-mini-bar     { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
 .pdklg-mini-fill    { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
 .pdklg-progress     { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+
+/* ══════════════════════════════════════════════════════════════════
+   PRE-RACE CONFIG
+   ══════════════════════════════════════════════════════════════════ */
+.cfg-vehicle-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+.cfg-v-icon   { font-size: 42px; line-height: 1; }
+.cfg-v-name   { font-size: 17px; font-weight: 900; letter-spacing: 0.3px; }
+.cfg-v-format { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-top: 3px; }
+
+.cfg-circuit-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+.cfg-circuit-flag  { font-size: 28px; }
+.cfg-circuit-name  { font-size: 14px; font-weight: 800; }
+.cfg-circuit-meta  { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
+
+.cfg-section-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--text-muted);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 4px;
+}
+
+/* Tire selector */
+.cfg-tire-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.cfg-tire-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+.cfg-tire-btn:hover  { border-color: var(--border-hi); }
+.cfg-tire-active     { background: rgba(59,130,246,0.08) !important; }
+.cfg-tire-icon  { font-size: 20px; line-height: 1; }
+.cfg-tire-name  { font-size: 12px; font-weight: 800; }
+.cfg-tire-stat  { font-size: 10px; color: var(--accent-glow); font-weight: 700; }
+.cfg-tire-deg   { font-size: 9px;  color: var(--text-muted); }
+
+/* Pit strategy */
+.cfg-pit-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.cfg-pit-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 6px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.5;
+    transition: border-color 0.15s, background 0.15s;
+}
+.cfg-pit-btn small { color: var(--text-muted); font-size: 10px; font-weight: 600; }
+.cfg-pit-btn:hover { border-color: var(--border-hi); }
+.cfg-pit-active    { border-color: var(--accent) !important; background: rgba(59,130,246,0.08) !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   LIVE RACE — TIRE BAR / PIT / RALLY
+   ══════════════════════════════════════════════════════════════════ */
+.live-tire-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 4px;
+    margin-bottom: 6px;
+}
+.lt-icon    { font-size: 16px; flex-shrink: 0; }
+.lt-bar-wrap { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.lt-bar      { height: 100%; border-radius: 3px; transition: width 0.8s ease, background 0.4s; }
+.lt-pct      { font-size: 11px; font-weight: 800; min-width: 34px; text-align: right; }
+
+.pit-stop-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--orange) !important;
+    color: #fff !important;
+    font-weight: 900;
+    font-size: 13px;
+    animation: pit-pulse 0.9s ease-in-out infinite;
+}
+@keyframes pit-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.5); }
+    50%      { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+}
+.pit-reminder  { font-size: 11px; color: var(--text-muted); text-align: center; padding: 6px 0 0; font-weight: 600; }
+.pit-done-tag  { font-size: 11px; color: var(--green);       text-align: center; padding: 6px 0 0; font-weight: 700; }
+
+.rally-event-badge {
+    background: var(--surface3);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius-xs);
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FLOATING ACTION BUTTONS
+   ══════════════════════════════════════════════════════════════════ */
+.fab-group {
+    position: fixed;
+    right: 14px;
+    bottom: calc(var(--nav-h) + 14px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 200;
+}
+.fab-tasks, .fab-minigame {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab-tasks    { background: var(--accent); }
+.fab-minigame { background: var(--surface3); border: 2px solid var(--border-hi); }
+.fab-tasks:hover, .fab-minigame:hover { transform: scale(1.08); }
+.fab-tasks:active, .fab-minigame:active { transform: scale(0.95); }
+.fab-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid var(--bg);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TASKS OVERLAY
+   ══════════════════════════════════════════════════════════════════ */
+.tasks-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(3px);
+}
+.tasks-overlay-active { display: flex; }
+
+.tasks-overlay-panel {
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-top: 1px solid var(--border-hi);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slide-up 0.22s ease;
+}
+@keyframes slide-up {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.tov-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.tov-title  { font-size: 16px; font-weight: 900; }
+.tov-close  { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 2px 6px; }
+.tov-close:hover { color: var(--text); }
+
+.tov-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.tov-tab {
+    flex: 1;
+    padding: 10px 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+}
+.tov-tab:hover      { color: var(--text); }
+.tov-tab-active     { color: var(--accent-glow); border-bottom-color: var(--accent); }
+
+.tov-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px 20px;
+}
+.tov-reset-row {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0 0 10px;
+    font-weight: 600;
+}
+.tov-reset-row strong { color: var(--text); }
+.tov-group-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 14px 0 7px;
+}
+.tov-tasks-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* Task cards */
+.tk-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 12px 10px;
+    transition: border-color 0.15s;
+}
+.tk-ready  { border-color: var(--accent); background: rgba(59,130,246,0.05); }
+.tk-done   { opacity: 0.55; }
+.tk-claimed { opacity: 0.55; }
+
+.tk-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.tk-icon   { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.tk-info   { flex: 1; }
+.tk-desc   { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.tk-reward { font-size: 11px; color: var(--coin); font-weight: 800; margin-top: 3px; }
+
+.tk-bar-wrap  { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.tk-bar       { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+.tk-prog-label{ font-size: 10px; color: var(--text-muted); font-weight: 700; margin-top: 3px; }
+
+.tk-claim-btn {
+    padding: 7px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-xs);
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+.tk-claim-btn:active { opacity: 0.8; }
+.tk-pending  { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+.tk-done-tag { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 4px; }
+.tk-claimed  { font-size: 11px; color: var(--green); font-weight: 800; }
+
+/* ══════════════════════════════════════════════════════════════════
+   MINIGAME OVERLAY
+   ══════════════════════════════════════════════════════════════════ */
+.minigame-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    background: #0a0f18;
+    display: none;
+    flex-direction: column;
+}
+.minigame-overlay.mg-active { display: flex; }
+
+.mg-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.mg-panel-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.mg-panel-title { font-size: 14px; font-weight: 900; letter-spacing: 1px; }
+.mg-close-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.mg-close-btn:hover { color: var(--text); }
+
+.mg-game-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Start / end screens */
+.mg-start-screen, .mg-end-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+}
+.mg-big-icon   { font-size: 64px; line-height: 1; }
+.mg-start-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+.mg-start-desc  { font-size: 13px; color: var(--text-sub); max-width: 280px; line-height: 1.5; }
+.mg-start-btn   { font-size: 16px; font-weight: 900; padding: 14px 40px; margin-top: 8px; }
+.mg-tap-hint    { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.mg-end-icon    { font-size: 56px; line-height: 1; }
+.mg-end-title   { font-size: 20px; font-weight: 900; }
+.mg-end-sub     { font-size: 13px; color: var(--text-sub); }
+.mg-end-reward  { font-size: 28px; font-weight: 900; color: var(--coin); }
+
+/* Road */
+.mg-road {
+    flex: 1;
+    position: relative;
+    background: #1a1a2e;
+    overflow: hidden;
+}
+.mg-road-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 40px,
+            rgba(255,255,255,0.06) 40px,
+            rgba(255,255,255,0.06) 41px
+        );
+    animation: road-scroll 0.5s linear infinite;
+}
+@keyframes road-scroll {
+    from { background-position-y: 0; }
+    to   { background-position-y: 41px; }
+}
+.mg-lane-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.12);
+}
+.mg-lm1 { left: 33.3%; }
+.mg-lm2 { left: 66.6%; }
+
+/* Player truck */
+.mg-player {
+    position: absolute;
+    bottom: 60px;
+    font-size: 36px;
+    line-height: 1;
+    transition: left 0.12s ease;
+    z-index: 10;
+    filter: drop-shadow(0 0 8px rgba(59,130,246,0.6));
+}
+.mg-player-move { filter: drop-shadow(0 0 14px rgba(59,130,246,0.9)); }
+
+/* Obstacles */
+.mg-obstacle {
+    position: absolute;
+    font-size: 30px;
+    line-height: 1;
+    z-index: 9;
+    transition: none;
+}
+
+/* Tap zones (invisible) */
+.mg-tap-z {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 33.3%;
+    z-index: 20;
+    cursor: pointer;
+}
+.mg-tap-left  { left: 0; }
+.mg-tap-right { right: 0; }
+
+/* HUD */
+.mg-hud {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+.mg-hud-score  { font-size: 18px; font-weight: 900; color: var(--coin); min-width: 80px; }
+.mg-timer-wrap { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+.mg-timer-bar  { height: 100%; border-radius: 4px; transition: width 1s linear, background 0.4s; }
+.mg-hud-hint   { font-size: 10px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }

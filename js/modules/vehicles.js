@@ -11,7 +11,7 @@ const VEHICLE_CATALOG = {
         basePace:     92,       // seconds per lap (lower = faster)
         baseStats:    { hp: 350, torque: 476, cv: 355 },
         lapLabel:     "Vuelta",
-        totalLaps:    5,
+        totalLaps:    20,
         desc:         "El punto de partida. Versátil y fácil de mejorar."
     },
     moto: {
@@ -24,7 +24,7 @@ const VEHICLE_CATALOG = {
         basePace:     65,
         baseStats:    { hp: 200, torque: 120, cv: 203 },
         lapLabel:     "Vuelta",
-        totalLaps:    5,
+        totalLaps:    20,
         desc:         "Rápida y ágil. Requiere precisión en cada curva."
     },
     rally: {
@@ -37,7 +37,7 @@ const VEHICLE_CATALOG = {
         basePace:     105,
         baseStats:    { hp: 450, torque: 610, cv: 456 },
         lapLabel:     "Etapa",
-        totalLaps:    5,
+        totalLaps:    10,
         desc:         "Potencia bruta en terreno agreste. La bestia del off-road."
     },
     formula: {
@@ -50,7 +50,7 @@ const VEHICLE_CATALOG = {
         basePace:     80,
         baseStats:    { hp: 1000, torque: 400, cv: 1014 },
         lapLabel:     "Vuelta",
-        totalLaps:    7,
+        totalLaps:    50,
         desc:         "La cúspide del automovilismo. La liga más competitiva."
     }
 };

@@ -183,6 +183,7 @@ function init() {
     renderRaceScreen();
 
     if (window.FTUEManager) FTUEManager.init();
+    if (window.TaskManager) TaskManager.init();
     if (!game.playerName) showProfileModal();
 
     setInterval(() => {

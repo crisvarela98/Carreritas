@@ -95,6 +95,13 @@ setInterval(() => {
             notify(`🚗 Auto terminado +$${reward}`, "success");
             game.workshop.active = game.workshop.active.filter(c => c.id !== car.id);
             if (window.FTUEManager) FTUEManager.onCarCompleted();
+            // Stats & task tracking
+            if (!game.stats) game.stats = {};
+            game.stats.totalRepairs = (game.stats.totalRepairs || 0) + 1;
+            if (window.TaskManager) {
+                TaskManager.trackDaily('repair');
+                TaskManager._updateBadge();
+            }
         }
     });
 

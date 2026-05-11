@@ -72,5 +72,24 @@ const game = {
     },
 
     // ── IAP OWNERSHIP ────────────────────────────────────────────
-    iap: {}
+    iap: {},
+
+    // ── LIFETIME STATS (for tasks & achievements) ─────────────────
+    stats: {
+        totalRepairs:    0,
+        totalRacesRun:   0,
+        totalWins:       0,
+        totalPoles:      0,
+        totalMinigames:  0,
+        totalRaceCoins:  0
+    },
+
+    // ── TASKS ─────────────────────────────────────────────────────
+    tasks: {
+        dailyReset:    0,   // midnight timestamp of last reset
+        dailyIds:      [],  // 3 active daily task IDs
+        dailyProgress: {},  // taskId → number
+        dailyClaimed:  {},  // taskId → bool
+        superClaimed:  {}   // supertaskId → bool
+    }
 };

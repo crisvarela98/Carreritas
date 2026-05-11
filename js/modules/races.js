@@ -52,24 +52,61 @@ const RACE_CIRCUITS = {
 
 const DIFF_LABELS = ["", "Muy fácil", "Fácil", "Media", "Difícil", "Extrema"];
 
+// ── Tire compounds ────────────────────────────────────────────────
+const TIRE_COMPOUNDS = {
+    soft:   { id: 'soft',   label: 'Blando', icon: '🔴', paceBonus: -3.5, degradation: 0.072 },
+    medium: { id: 'medium', label: 'Medio',  icon: '🟡', paceBonus:  0,   degradation: 0.042 },
+    hard:   { id: 'hard',   label: 'Duro',   icon: '⚪', paceBonus:  4.0, degradation: 0.016 },
+};
+
+// ── Race format per vehicle ───────────────────────────────────────
+const RACE_FORMAT = {
+    car:     { laps: 20, interval: 1050, hasTires: true,  hasPit: false, isRally: false, pitWindow: null },
+    moto:    { laps: 20, interval: 1050, hasTires: true,  hasPit: false, isRally: false, pitWindow: null },
+    rally:   { laps: 10, interval: 1700, hasTires: false, hasPit: false, isRally: true,  pitWindow: null },
+    formula: { laps: 50, interval: 780,  hasTires: true,  hasPit: true,  isRally: false, pitWindow: [15, 35] },
+};
+
+// ── Rally stage events ────────────────────────────────────────────
+const RALLY_EVENTS = [
+    { label: '❄️ Tramo nevado',      effect: +7 },
+    { label: '🌧 Lluvia intensa',     effect: +5 },
+    { label: '🏔 Subida empinada',    effect: +4 },
+    { label: '🌵 Grava suelta',       effect: +4 },
+    { label: '💨 Viento cruzado',     effect: +3 },
+    { label: '🌲 Bosque estrecho',    effect: +5 },
+    { label: '☀️ Buen asfalto',       effect: -3 },
+    { label: '🛣 Tramo rápido',       effect: -5 },
+    { label: '⚡ Ataque completo',    effect: -4 },
+    { label: '🔥 Máximo ritmo',       effect: -6 },
+];
+
 // ── Race Manager ──────────────────────────────────────────────────
 const RaceManager = {
 
     state: {
-        phase:         "menu",
-        vehicleId:     "car",
-        seriesMode:    1,
-        seriesRace:    0,
-        seriesPoints:  {},
-        grid:          [],
-        standings:     [],
-        prevStandings: [],
-        lap:           0,
-        totalLaps:     5,
-        raceInterval:  null,
-        leagueMode:    false,
-        renderTarget:  "raceContent",
-        _pendingReward: null
+        phase:          "menu",
+        vehicleId:      "car",
+        seriesMode:     1,
+        seriesRace:     0,
+        seriesPoints:   {},
+        grid:           [],
+        standings:      [],
+        prevStandings:  [],
+        lap:            0,
+        totalLaps:      20,
+        raceInterval:   null,
+        leagueMode:     false,
+        renderTarget:   "raceContent",
+        _pendingReward: null,
+        tireCompound:   "medium",
+        tireCondition:  1.0,
+        pitDone:        false,
+        pitStrategy:    "normal",
+        _pitWindow:     null,
+        _pitOpen:       false,
+        stageEvent:     null,
+        skipQualy:      false,
     },
 
     el() {
@@ -78,21 +115,152 @@ const RaceManager = {
 
     // ── Entry points ─────────────────────────────────────────────
 
-    // Called when user taps "Quick Race" for a vehicle
-    start(vehicleId, mode) {
-        this.state.vehicleId   = vehicleId || game.activeVehicle;
-        this.state.leagueMode  = false;
-        this.state.renderTarget = "raceContent";
-        this._startQualy(mode || 1);
+    start(vehicleId) {
+        const s = this.state;
+        s.vehicleId    = vehicleId || game.activeVehicle;
+        s.leagueMode   = false;
+        s.seriesMode   = 1;
+        s.renderTarget = "raceContent";
+        this.showRaceConfig();
     },
 
-    // Called from the unified race screen (counts for league points)
     startLeague(vehicleId, n) {
-        this.state.vehicleId    = vehicleId;
-        this.state.leagueMode   = true;
-        this.state.renderTarget = "raceContent";
-        game.activeVehicle      = vehicleId;
-        this._startQualy(n || 1);
+        const s = this.state;
+        s.vehicleId    = vehicleId;
+        s.leagueMode   = true;
+        s.seriesMode   = n || 1;
+        s.renderTarget = "raceContent";
+        game.activeVehicle = vehicleId;
+        this.showRaceConfig();
+    },
+
+    // ── Pre-race config ───────────────────────────────────────────
+
+    showRaceConfig() {
+        const s      = this.state;
+        const el     = this.el();
+        if (!el) return;
+        const def    = VEHICLE_CATALOG[s.vehicleId];
+        const format = RACE_FORMAT[s.vehicleId];
+        const circs  = RACE_CIRCUITS[s.vehicleId] || [];
+        const lg     = game.leagues[s.vehicleId] || { currentRace: 1 };
+        const done   = Math.max(0, (lg.currentRace || 1) - 1);
+        const circ   = circs[done % circs.length] || circs[0] || {};
+        s.phase      = "config";
+
+        const tiresHtml = format.hasTires ? (() => {
+            const btns = Object.values(TIRE_COMPOUNDS).map(t => {
+                const active    = s.tireCompound === t.id;
+                const degLabel  = t.degradation >= 0.065 ? 'Alta deg.' : t.degradation >= 0.035 ? 'Media deg.' : 'Baja deg.';
+                const paceLabel = t.paceBonus < 0 ? `+${Math.abs(t.paceBonus)}s` : t.paceBonus > 0 ? `-${t.paceBonus}s` : 'Base';
+                return `<button class="cfg-tire-btn${active ? ' cfg-tire-active' : ''}"
+                    style="${active ? `border-color:${def.color}` : ''}"
+                    onclick="RaceManager.selectTire('${t.id}')">
+                    <span class="cfg-tire-icon">${t.icon}</span>
+                    <span class="cfg-tire-name">${t.label}</span>
+                    <span class="cfg-tire-stat">${paceLabel}</span>
+                    <span class="cfg-tire-deg">${degLabel}</span>
+                </button>`;
+            }).join('');
+            return `<div class="cfg-section-label">NEUMÁTICOS</div><div class="cfg-tire-row">${btns}</div>`;
+        })() : '';
+
+        const pitHtml = format.hasPit ? (() => {
+            const strats = [
+                { id:'early',  icon:'🔴', label:'Temprano', range:'Vuelta 10–18' },
+                { id:'normal', icon:'🟡', label:'Normal',   range:'Vuelta 20–30' },
+                { id:'late',   icon:'🟢', label:'Tardío',   range:'Vuelta 32–42' },
+            ];
+            const btns = strats.map(st => `
+            <button class="cfg-pit-btn${s.pitStrategy===st.id ? ' cfg-pit-active' : ''}"
+                    onclick="RaceManager.selectPit('${st.id}')">
+                ${st.icon} ${st.label}<br><small>${st.range}</small>
+            </button>`).join('');
+            return `<div class="cfg-section-label">ESTRATEGIA PIT STOP</div><div class="cfg-pit-row">${btns}</div>`;
+        })() : '';
+
+        const diff     = circ.diff || 1;
+        const diffStr  = '●'.repeat(diff) + '○'.repeat(5 - diff);
+        const lapWord  = format.isRally ? 'etapas' : 'vueltas';
+        const extraTag = format.hasPit ? ' · PIT STOP OBLIGATORIO' : format.isRally ? ' · ETAPAS ESPECIALES' : '';
+
+        el.innerHTML = `
+        <div class="race-card">
+            <div class="cfg-vehicle-header">
+                <span class="cfg-v-icon">${def.icon}</span>
+                <div>
+                    <div class="cfg-v-name" style="color:${def.color}">${def.name}</div>
+                    <div class="cfg-v-format">${format.laps} ${lapWord}${extraTag}</div>
+                </div>
+            </div>
+            <div class="cfg-circuit-box">
+                <span class="cfg-circuit-flag">${circ.flag || '🏁'}</span>
+                <div>
+                    <div class="cfg-circuit-name">${circ.name || 'Circuito'}</div>
+                    <div class="cfg-circuit-meta">${diffStr} · ${circ.weather || '☀️'} · ${DIFF_LABELS[diff] || ''}</div>
+                </div>
+            </div>
+            ${tiresHtml}
+            ${pitHtml}
+            <button class="rbtn pdk-race-btn" style="background:${def.color}"
+                    onclick="RaceManager._startFromConfig(false)">🚦 CLASIFICAR Y CORRER</button>
+            <button class="rbtn" onclick="RaceManager._startFromConfig(true)">⚡ Correr directo (sin clasificatoria)</button>
+            <button class="rbtn" style="opacity:0.55;font-size:12px" onclick="RaceManager.backToMenu()">← Cancelar</button>
+        </div>`;
+    },
+
+    selectTire(id) {
+        this.state.tireCompound = id;
+        this.showRaceConfig();
+    },
+
+    selectPit(strategy) {
+        this.state.pitStrategy = strategy;
+        this.showRaceConfig();
+    },
+
+    _startFromConfig(skipQualy) {
+        const s      = this.state;
+        s.skipQualy  = skipQualy;
+        s.seriesRace = 0;
+        s.seriesPoints = {};
+        const vid    = s.vehicleId;
+        const format = RACE_FORMAT[vid];
+        const rivals = VEHICLE_RIVALS[vid] || [];
+        const pace   = getVehiclePace(vid);
+        s.totalLaps  = format.laps;
+
+        s.grid = rivals.map(r => ({
+            name:      r.name,
+            qualyTime: r.basePace + (Math.random() - 0.5) * 8,
+            basePace:  r.basePace + (Math.random() - 0.3) * 3
+        }));
+        s.grid.push({ name: "Tú", qualyTime: pace + (Math.random() - 0.5) * 5, basePace: pace });
+
+        if (skipQualy) {
+            s.grid.sort(() => Math.random() - 0.5);
+            s.phase = "grid";
+            if (window.FTUEManager) FTUEManager.onRaceStarted();
+            this._showGrid(false);
+        } else {
+            this._startQualy(s.seriesMode || 1);
+        }
+    },
+
+    doPitStop() {
+        const s = this.state;
+        if (s.pitDone || !s._pitOpen) return;
+        s.pitDone  = true;
+        s._pitOpen = false;
+        s.tireCondition = 1.0;
+        const pidx = s.standings.findIndex(r => r.name === "Tú");
+        if (pidx >= 0 && pidx < s.standings.length - 2) {
+            const [player] = s.standings.splice(pidx, 1);
+            s.standings.splice(Math.min(pidx + 2, s.standings.length), 0, player);
+            s.standings = s.standings.map((r, i) => ({ ...r, pos: i + 1 }));
+        }
+        notifySuccess('🔧 Pit stop: neumáticos nuevos');
+        this._renderLap();
     },
 
     // ── Qualifying ───────────────────────────────────────────────
@@ -111,7 +279,7 @@ const RaceManager = {
 
         const playerTime = Math.max(def.basePace * 0.4, pace + (Math.random() - 0.5) * 5);
 
-        s.totalLaps = def.totalLaps || 5;
+        s.totalLaps = RACE_FORMAT[vehicleId].laps;
         s.grid = rivals.map(r => ({
             name:      r.name,
             qualyTime: r.basePace + (Math.random() - 0.5) * 8,
@@ -121,7 +289,12 @@ const RaceManager = {
 
         const rivalBest = Math.min(...s.grid.filter(r => r.name !== "Tú").map(r => r.qualyTime));
         const gotPole   = playerTime < rivalBest;
-        if (gotPole) game.poleCount++;
+        if (gotPole) {
+            game.poleCount++;
+            if (!game.stats) game.stats = {};
+            game.stats.totalPoles = (game.stats.totalPoles || 0) + 1;
+            if (window.TaskManager) { TaskManager.trackDaily('pole'); TaskManager._updateBadge(); }
+        }
 
         if (!game.bestLapTimes[vehicleId] || playerTime < game.bestLapTimes[vehicleId]) {
             game.bestLapTimes[vehicleId] = playerTime;
@@ -202,49 +375,102 @@ const RaceManager = {
     // ── Race loop ────────────────────────────────────────────────
 
     _beginRace() {
-        const s = this.state;
-        s.phase         = "racing";
-        s.lap           = 0;
+        const s      = this.state;
+        s.phase      = "racing";
+        s.lap        = 0;
         s.standings     = s.grid.map((r, i) => ({ ...r, pos: i + 1 }));
         s.prevStandings = s.standings.map(x => ({ ...x }));
+        s.tireCondition = 1.0;
+        s.pitDone       = false;
+        s._pitOpen      = false;
+        s.stageEvent    = null;
+        const format = RACE_FORMAT[s.vehicleId];
+        if (format.hasPit) {
+            const windows = { early:[10,18], normal:[20,30], late:[32,42] };
+            s._pitWindow = windows[s.pitStrategy] || windows.normal;
+        } else {
+            s._pitWindow = null;
+        }
         this._renderLap();
-        s.raceInterval = setInterval(() => this._doLap(), 1300);
+        s.raceInterval = setInterval(() => this._doLap(), format.interval);
     },
 
     _doLap() {
-        const s = this.state;
+        const s      = this.state;
+        const format = RACE_FORMAT[s.vehicleId];
+        const tire   = TIRE_COMPOUNDS[s.tireCompound] || TIRE_COMPOUNDS.medium;
         s.lap++;
+
         if (s.lap > s.totalLaps) {
             clearInterval(s.raceInterval);
             this._endRace();
             return;
         }
 
-        const pace     = getVehiclePace(s.vehicleId);
+        // Tire degradation
+        if (format.hasTires) {
+            s.tireCondition = Math.max(0.15, s.tireCondition - tire.degradation);
+        }
+
+        // Formula pit window management
+        if (format.hasPit && s._pitWindow) {
+            if (s.lap >= s._pitWindow[0] && !s.pitDone) s._pitOpen = true;
+            if (s.lap > s._pitWindow[1] && !s.pitDone) {
+                s.pitDone      = true;
+                s._pitOpen     = false;
+                s.tireCondition = 1.0;
+                notifyWarn('⚠️ Pit stop automático — ventana cerrada');
+                const pidx = s.standings.findIndex(r => r.name === "Tú");
+                if (pidx >= 0 && pidx < s.standings.length - 3) {
+                    const [player] = s.standings.splice(pidx, 1);
+                    s.standings.splice(Math.min(pidx + 3, s.standings.length), 0, player);
+                    s.standings = s.standings.map((r, i) => ({ ...r, pos: i + 1 }));
+                }
+            }
+        }
+
+        const pace         = getVehiclePace(s.vehicleId);
+        const tireBonus    = format.hasTires ? tire.paceBonus : 0;
+        const degradePenalty = format.hasTires ? (1 - s.tireCondition) * 22 : 0;
+        const playerTime   = pace + tireBonus + degradePenalty + (Math.random() - 0.5) * 3;
+
         s.prevStandings = s.standings.map(x => ({ ...x }));
-        s.standings = s.standings.map(r => ({
-            ...r,
-            lapTime: r.name === "Tú"
-                ? pace + (Math.random() - 0.5) * 3
-                : r.basePace + (Math.random() - 0.5) * 4
-        }));
+
+        if (format.isRally) {
+            s.stageEvent = RALLY_EVENTS[Math.floor(Math.random() * RALLY_EVENTS.length)];
+            const ev = s.stageEvent;
+            s.standings = s.standings.map(r => ({
+                ...r,
+                lapTime: r.name === "Tú"
+                    ? playerTime + ev.effect * (0.9 + Math.random() * 0.2)
+                    : r.basePace + ev.effect * (0.8 + Math.random() * 0.4) + (Math.random() - 0.5) * 5
+            }));
+        } else {
+            s.standings = s.standings.map(r => ({
+                ...r,
+                lapTime: r.name === "Tú"
+                    ? playerTime
+                    : r.basePace + (Math.random() - 0.5) * 4
+            }));
+        }
+
         s.standings.sort((a, b) => a.lapTime - b.lapTime);
         s.standings = s.standings.map((r, i) => ({ ...r, pos: i + 1 }));
         this._renderLap();
     },
 
     _renderLap() {
-        const s   = this.state;
-        const el  = this.el();
+        const s      = this.state;
+        const el     = this.el();
         if (!el) return;
-        const def = VEHICLE_CATALOG[s.vehicleId];
+        const def    = VEHICLE_CATALOG[s.vehicleId];
+        const format = RACE_FORMAT[s.vehicleId];
 
-        const pct  = Math.round((s.lap / s.totalLaps) * 100);
-        const info = s.seriesMode > 1
+        const pct      = Math.round((s.lap / s.totalLaps) * 100);
+        const lapLabel = format.isRally ? 'Etapa' : (def.lapLabel || 'Vuelta');
+        const info     = s.seriesMode > 1
             ? `${def.icon} Carrera ${s.seriesRace + 1}/${s.seriesMode}`
-            : `${def.icon} Carrera rápida`;
-
-        const lapLabel = def.lapLabel || "Vuelta";
+            : `${def.icon} ${format.isRally ? 'Rally' : 'Carrera rápida'}`;
 
         const rows = s.standings.map((r, i) => {
             const prevIdx = s.prevStandings.findIndex(x => x.name === r.name);
@@ -260,6 +486,32 @@ const RaceManager = {
             </div>`;
         }).join("");
 
+        // Tire condition bar
+        const tireHtml = format.hasTires ? (() => {
+            const tire = TIRE_COMPOUNDS[s.tireCompound] || TIRE_COMPOUNDS.medium;
+            const tp   = Math.round(s.tireCondition * 100);
+            const clr  = tp > 50 ? 'var(--green)' : tp > 25 ? 'var(--orange)' : 'var(--red)';
+            return `<div class="live-tire-row">
+                <span class="lt-icon">${tire.icon}</span>
+                <div class="lt-bar-wrap"><div class="lt-bar" style="width:${tp}%;background:${clr}"></div></div>
+                <span class="lt-pct" style="color:${clr}">${tp}%</span>
+            </div>`;
+        })() : '';
+
+        // Formula pit stop button
+        const pitHtml = format.hasPit
+            ? (s._pitOpen && !s.pitDone
+                ? `<button class="rbtn pit-stop-btn" onclick="RaceManager.doPitStop()">🔧 PIT STOP — neumáticos nuevos</button>`
+                : (!s.pitDone && s._pitWindow && s.lap < s._pitWindow[0])
+                    ? `<div class="pit-reminder">🔧 Ventana de pit en vuelta ${s._pitWindow[0]}</div>`
+                    : s.pitDone ? `<div class="pit-done-tag">✅ Pit completado</div>` : '')
+            : '';
+
+        // Rally event badge
+        const rallyHtml = (format.isRally && s.stageEvent)
+            ? `<div class="rally-event-badge">${s.stageEvent.label} <span style="color:${s.stageEvent.effect > 0 ? 'var(--orange)' : 'var(--green)'}">${s.stageEvent.effect > 0 ? '+' : ''}${s.stageEvent.effect}s</span></div>`
+            : '';
+
         el.innerHTML = `
         <div class="race-card">
             <div class="race-live-header">
@@ -267,7 +519,10 @@ const RaceManager = {
                 <span class="lap-badge" style="background:${def.color}">${lapLabel} ${s.lap}/${s.totalLaps}</span>
             </div>
             <div class="lap-track"><div class="lap-track-fill" style="width:${pct}%;background:${def.color}"></div></div>
+            ${rallyHtml}
+            ${tireHtml}
             <div class="live-standings">${rows}</div>
+            ${pitHtml}
         </div>`;
     },
 
@@ -302,6 +557,20 @@ const RaceManager = {
         if (pos === 1)      game.medals.gold++;
         else if (pos === 2) game.medals.silver++;
         else if (pos === 3) game.medals.bronze++;
+
+        // Stats & task tracking
+        if (!game.stats) game.stats = {};
+        game.stats.totalRacesRun = (game.stats.totalRacesRun || 0) + 1;
+        if (pos === 1) {
+            game.stats.totalWins = (game.stats.totalWins || 0) + 1;
+            if (window.TaskManager) TaskManager.trackDaily('win');
+        }
+        game.stats.totalRaceCoins = (game.stats.totalRaceCoins || 0) + cash;
+        if (window.TaskManager) {
+            TaskManager.trackDaily('race');
+            TaskManager.trackDaily('raceCoins', cash);
+            TaskManager._updateBadge();
+        }
 
         // League points for all drivers
         LeagueManager.add_league_points(vehicleId, s.standings);

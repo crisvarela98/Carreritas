@@ -19,7 +19,7 @@
             <span class="header-title">Motorsport Garage Tycoon</span>
         </div>
         <div class="header-right">
-            <span class="hdr-coins"  id="hdrCoins">$0</span>
+            <span class="hdr-coins"   id="hdrCoins">$0</span>
             <span class="hdr-diamonds" id="hdrDiamonds">💎 0</span>
         </div>
     </header>
@@ -57,6 +57,15 @@
 
     </main>
 
+    <!-- Floating Action Buttons -->
+    <div class="fab-group">
+        <button class="fab-minigame" onclick="MiniGame.open()" title="Minijuego: Camión Ciudad">🚛</button>
+        <button class="fab-tasks" id="tasksFab" onclick="openTasksOverlay()" title="Tareas">
+            🎯
+            <span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
+        </button>
+    </div>
+
     <!-- Bottom Nav -->
     <nav id="mainNav">
         <button data-screen="dashboard" onclick="showScreen('dashboard')" class="nav-active">
@@ -81,12 +90,39 @@
 
 </div>
 
+<!-- Tasks overlay (outside #app so it sits above everything) -->
+<div id="tasksOverlay" class="tasks-overlay">
+    <div class="tasks-overlay-panel">
+        <div class="tov-header">
+            <span class="tov-title">📋 Tareas</span>
+            <button class="tov-close" onclick="closeTasksOverlay()">✕</button>
+        </div>
+        <div class="tov-tabs">
+            <button class="tov-tab tov-tab-active" data-tab="daily" onclick="_setTasksTab('daily')">⏱ Diarias</button>
+            <button class="tov-tab" data-tab="super" onclick="_setTasksTab('super')">💎 Súper tareas</button>
+        </div>
+        <div id="tasksOverlayBody" class="tov-body"></div>
+    </div>
+</div>
+
+<!-- Mini-game overlay -->
+<div id="minigameOverlay" class="minigame-overlay">
+    <div class="mg-panel">
+        <div class="mg-panel-hdr">
+            <button class="mg-close-btn" onclick="MiniGame.close()">✕ Salir</button>
+            <span class="mg-panel-title">🚛 CAMIÓN CIUDAD</span>
+            <span></span>
+        </div>
+        <div id="mgGameArea" class="mg-game-area"></div>
+    </div>
+</div>
+
 <!-- Core -->
 <script src="js/core/gameState.js"></script>
 <script src="js/core/saveSystem.js"></script>
 <script src="js/core/notifications.js"></script>
 
-<!-- Modules (order matters: economy → vehicles → leagues → upgrades → workshop → races → employees → sponsors → offline) -->
+<!-- Modules -->
 <script src="js/modules/economy.js"></script>
 <script src="js/modules/vehicles.js"></script>
 <script src="js/modules/leagues.js"></script>
@@ -96,6 +132,8 @@
 <script src="js/modules/employees.js"></script>
 <script src="js/modules/sponsors.js"></script>
 <script src="js/modules/offline.js"></script>
+<script src="js/modules/tasks.js"></script>
+<script src="js/modules/minigame.js"></script>
 
 <!-- Features -->
 <script src="js/features/monetization.js"></script>
