@@ -12,85 +12,143 @@
 
 <div id="app">
 
-    <!-- Header -->
-    <header id="appHeader">
-        <div class="header-left">
-            <span class="header-logo">🏎</span>
-            <span class="header-title">Motorsport Garage Tycoon</span>
-        </div>
-        <div class="header-right">
-            <span class="hdr-coins"   id="hdrCoins">$0</span>
-            <span class="hdr-diamonds" id="hdrDiamonds">💎 0</span>
-        </div>
-    </header>
+    <!-- ══════════════ DASHBOARD — GARAGE SCENE ══════════════ -->
+    <div class="screen active" id="dashboard">
 
-    <!-- Screens -->
-    <main id="mainContent">
+        <!-- Background -->
+        <img id="garageBg" src="assets/garage-bg.png" alt="">
 
-        <div class="screen active" id="dashboard">
-            <div class="screen-inner" id="dashboardContent"></div>
-        </div>
-
-        <div class="screen" id="workshop">
-            <div class="screen-inner" id="workshopContent"></div>
-        </div>
-
-        <div class="screen" id="race">
-            <div class="screen-inner" id="raceContent"></div>
-        </div>
-
-        <div class="screen" id="league">
-            <div class="screen-inner" id="leagueContent"></div>
-        </div>
-
-        <div class="screen" id="employees">
-            <div class="screen-inner" id="employeesContent"></div>
-        </div>
-
-        <div class="screen" id="sponsors">
-            <div class="screen-inner" id="sponsorsContent"></div>
+        <!-- ── Top HUD ── -->
+        <div id="garageHud">
+            <div id="hudLeft">
+                <div class="hud-player-card">
+                    <span class="hud-player-icon">👤</span>
+                    <div class="hud-player-info">
+                        <span id="hudPlayerName">Jugador</span>
+                        <div class="hud-xp-bar"><div id="hudXpFill" class="hud-xp-fill"></div></div>
+                    </div>
+                    <span id="hudLevel" class="hud-level-badge">Nv.1</span>
+                </div>
+            </div>
+            <div id="hudCenter">
+                <button class="hud-sponsor-btn" onclick="showScreen('sponsors')">
+                    💰 <span id="hudSponsorName">Sponsors</span>
+                </button>
+            </div>
+            <div id="hudRight">
+                <div class="hud-stat-pill diamond-pill">
+                    <span>💎</span><span id="hudDiamonds">0</span>
+                </div>
+                <div class="hud-money-box">
+                    <span class="hud-money-icon">💵</span>
+                    <span id="hudMoney">$0</span>
+                </div>
+            </div>
         </div>
 
-        <div class="screen" id="profile">
-            <div class="screen-inner" id="profileContent"></div>
+        <!-- ── Rooftop car spots ── -->
+        <div class="garage-car-spot" id="gspot-car"   onclick="showScreen('race')" title="Auto de Taller">🚗</div>
+        <div class="garage-car-spot" id="gspot-moto"  onclick="showScreen('race')" title="Moto">🏍</div>
+        <div class="garage-car-spot" id="gspot-rally" onclick="showScreen('race')" title="Rally">🚙</div>
+        <div class="garage-car-spot" id="gspot-f1"    onclick="showScreen('race')" title="F1">🏎</div>
+
+        <!-- ── Floor workshop slots ── -->
+        <div class="garage-floor-slot" id="gslot-1" onclick="repair_car()"><span>1</span></div>
+        <div class="garage-floor-slot" id="gslot-2" onclick="repair_car()"><span>2</span></div>
+        <div class="garage-floor-slot" id="gslot-3" onclick="repair_car()"><span>3</span></div>
+        <div class="garage-floor-slot" id="gslot-4" onclick="repair_car()"><span>4</span></div>
+        <div class="garage-floor-slot" id="gslot-5" onclick="repair_car()"><span>5</span></div>
+
+        <!-- ── Recibir button ── -->
+        <button id="garageRecibirBtn" onclick="repair_car()">＋ Recibir</button>
+
+        <!-- ── FABs ── -->
+        <div id="garageFabs">
+            <button class="gfab" onclick="MiniGame.open()" title="Minijuego">🚛</button>
+            <button class="gfab" id="tasksFab" onclick="openTasksOverlay()" title="Tareas">
+                🎯<span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
+            </button>
         </div>
 
-    </main>
+        <!-- ── Bottom Nav ── -->
+        <nav id="garageNav">
+            <button class="gnav-btn" onclick="showScreen('employees')">
+                <div class="gnav-portraits">
+                    <span>👩</span><span>👨</span><span>🧔</span>
+                </div>
+                <span class="gnav-label">Staff</span>
+            </button>
+            <button class="gnav-btn gnav-center" onclick="showScreen('workshop')">
+                <span class="gnav-icon">🔧</span>
+                <span class="gnav-label">Taller</span>
+            </button>
+            <button class="gnav-btn" onclick="showScreen('race')">
+                <span class="gnav-icon">🏁</span>
+                <span class="gnav-label">Carrera</span>
+            </button>
+        </nav>
 
-    <!-- Floating Action Buttons -->
-    <div class="fab-group">
-        <button class="fab-minigame" onclick="MiniGame.open()" title="Minijuego: Camión Ciudad">🚛</button>
-        <button class="fab-tasks" id="tasksFab" onclick="openTasksOverlay()" title="Tareas">
-            🎯
-            <span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
-        </button>
+    </div><!-- /dashboard -->
+
+    <!-- ══════════════ OTHER SCREENS (overlay panels) ══════════════ -->
+
+    <div class="screen overlay-screen" id="workshop">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">🔧 Taller</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="workshopContent"></div>
     </div>
 
-    <!-- Bottom Nav -->
-    <nav id="mainNav">
-        <button data-screen="dashboard" onclick="showScreen('dashboard')" class="nav-active">
-            <span class="nav-icon">🏠</span><span class="nav-label">Inicio</span>
-        </button>
-        <button data-screen="workshop" onclick="showScreen('workshop')">
-            <span class="nav-icon">🔧</span><span class="nav-label">Taller</span>
-        </button>
-        <button data-screen="race" onclick="showScreen('race')">
-            <span class="nav-icon">🏁</span><span class="nav-label">Carreras</span>
-        </button>
-        <button data-screen="employees" onclick="showScreen('employees')">
-            <span class="nav-icon">👷</span><span class="nav-label">Staff</span>
-        </button>
-        <button data-screen="sponsors" onclick="showScreen('sponsors')">
-            <span class="nav-icon">🤝</span><span class="nav-label">Sponsors</span>
-        </button>
-        <button data-screen="profile" onclick="showScreen('profile')">
-            <span class="nav-icon">👤</span><span class="nav-label">Perfil</span>
-        </button>
-    </nav>
+    <div class="screen overlay-screen" id="race">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">🏁 Carreras</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="raceContent"></div>
+    </div>
 
-</div>
+    <div class="screen overlay-screen" id="league">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">🏆 Liga</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="leagueContent"></div>
+    </div>
 
-<!-- Tasks overlay (outside #app so it sits above everything) -->
+    <div class="screen overlay-screen" id="employees">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">👷 Staff</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="employeesContent"></div>
+    </div>
+
+    <div class="screen overlay-screen" id="sponsors">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">🤝 Sponsors</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="sponsorsContent"></div>
+    </div>
+
+    <div class="screen overlay-screen" id="profile">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">👤 Perfil</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="profileContent"></div>
+    </div>
+
+</div><!-- /app -->
+
+<!-- Tasks overlay -->
 <div id="tasksOverlay" class="tasks-overlay">
     <div class="tasks-overlay-panel">
         <div class="tov-header">
@@ -117,6 +175,8 @@
     </div>
 </div>
 
+<!-- First-run profile modal (rendered by JS) -->
+
 <!-- Core -->
 <script src="js/core/gameState.js"></script>
 <script src="js/core/saveSystem.js"></script>
@@ -141,16 +201,6 @@
 
 <!-- App -->
 <script src="js/app.js"></script>
-
-<!-- Header live update -->
-<script>
-setInterval(() => {
-    const c = document.getElementById("hdrCoins");
-    const d = document.getElementById("hdrDiamonds");
-    if (c) c.textContent = "$" + (game.money || 0).toLocaleString();
-    if (d) d.textContent = "💎 " + (game.diamonds || 0);
-}, 500);
-</script>
 
 </body>
 </html>

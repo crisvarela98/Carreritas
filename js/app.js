@@ -1,83 +1,103 @@
 // ── Screen routing ────────────────────────────────────────────────
 function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("nav-active"));
     const screen = document.getElementById(id);
     if (screen) screen.classList.add("active");
-    const btn = document.querySelector(`nav button[data-screen="${id}"]`);
-    if (btn) btn.classList.add("nav-active");
 
     if (id === "race")      renderRaceScreen();
     if (id === "sponsors")  renderSponsors();
     if (id === "employees") renderEmployees();
     if (id === "workshop")  renderWorkshop();
     if (id === "profile")   renderProfile();
+    if (id === "dashboard") updateGarageHud();
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────
+// ── Garage HUD live update ────────────────────────────────────────
+function updateGarageHud() {
+    const el = (id) => document.getElementById(id);
+
+    // Player name
+    const nameEl = el("hudPlayerName");
+    if (nameEl) nameEl.textContent = game.playerName || "Jugador";
+
+    // Level badge
+    const lvEl = el("hudLevel");
+    if (lvEl) lvEl.textContent = "Nv." + (game.level || 1);
+
+    // XP bar
+    const xpFill = el("hudXpFill");
+    if (xpFill) {
+        const pct = Math.min(100, ((game.xp || 0) / ((game.level || 1) * 1000)) * 100);
+        xpFill.style.width = pct + "%";
+    }
+
+    // Diamonds
+    const diaEl = el("hudDiamonds");
+    if (diaEl) diaEl.textContent = game.diamonds || 0;
+
+    // Money
+    const monEl = el("hudMoney");
+    if (monEl) monEl.textContent = "$" + (game.money || 0).toLocaleString();
+
+    // Sponsor button label
+    const spEl = el("hudSponsorName");
+    if (spEl) spEl.textContent = game.sponsor ? game.sponsor.name : "Sponsors";
+
+    // Update car spots (show owned vehicles)
+    updateCarSpots();
+
+    // Update floor slots (workshop state)
+    updateFloorSlots();
+}
+
+function updateCarSpots() {
+    const spotMap = {
+        "gspot-car":   "car",
+        "gspot-moto":  "moto",
+        "gspot-rally": "rally",
+        "gspot-f1":    "f1"
+    };
+    for (const [spotId, vehicleId] of Object.entries(spotMap)) {
+        const el = document.getElementById(spotId);
+        if (!el) continue;
+        const owned = game.vehicles && game.vehicles[vehicleId] && game.vehicles[vehicleId].owned;
+        if (owned) {
+            el.classList.remove("spot-locked");
+        } else {
+            el.classList.add("spot-locked");
+        }
+    }
+}
+
+function updateFloorSlots() {
+    const active = (game.workshop && game.workshop.active) || [];
+    const queue  = (game.workshop && game.workshop.queue)  || [];
+    const allCars = [...active, ...queue];
+
+    for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById("gslot-" + i);
+        if (!el) continue;
+        const car = allCars[i - 1];
+        el.classList.remove("slot-busy", "slot-done");
+        if (car) {
+            if (car.progress >= 100) {
+                el.classList.add("slot-done");
+            } else {
+                el.classList.add("slot-busy");
+            }
+            // Show progress % in slot
+            const span = el.querySelector("span");
+            if (span) span.textContent = Math.floor(car.progress || 0) + "%";
+        } else {
+            const span = el.querySelector("span");
+            if (span) span.textContent = i;
+        }
+    }
+}
+
+// ── Dashboard (legacy renderDashboard kept for compatibility) ──────
 function renderDashboard() {
-    const el = document.getElementById("dashboardContent");
-    if (!el) return;
-
-    const medalRow = (game.medals.gold + game.medals.silver + game.medals.bronze) > 0
-        ? `<div class="dash-medals-row">
-               ${game.medals.gold   > 0 ? `<span class="medal gold-m">🥇 ${game.medals.gold}</span>`   : ""}
-               ${game.medals.silver > 0 ? `<span class="medal silv-m">🥈 ${game.medals.silver}</span>` : ""}
-               ${game.medals.bronze > 0 ? `<span class="medal bron-m">🥉 ${game.medals.bronze}</span>` : ""}
-           </div>`
-        : "";
-
-    const ownedVehicles = Object.entries(VEHICLE_CATALOG).filter(([id]) => game.vehicles[id]?.owned);
-    const leagueRows = ownedVehicles.map(([id, def]) => {
-        const rank = LeagueManager.getPlayerRank(id);
-        const pts  = LeagueManager.getPlayerPoints(id);
-        return `<div class="dash-stat-row">${def.icon} <span>Liga ${def.name}</span><strong>${pts}pts (${rank}°)</strong></div>`;
-    }).join("");
-
-    const nextUnlock = Object.entries(VEHICLE_CATALOG).find(([id]) => !game.vehicles[id]?.owned);
-    const nextHint   = nextUnlock
-        ? `<div class="unlock-hint">🔓 ${nextUnlock[1].icon} ${nextUnlock[1].name} en Nivel ${nextUnlock[1].unlockLevel}</div>`
-        : "";
-
-    el.innerHTML = `
-    <div class="dash-header">
-        <div>
-            <div class="dash-title">${game.garageName || "Motorsport Garage Tycoon"}</div>
-            ${game.playerName ? `<div class="dash-player-tag">👤 ${game.playerName}</div>` : ""}
-        </div>
-        <div class="dash-level">Nivel ${game.level}</div>
-    </div>
-
-    <div class="dash-currency-row">
-        <div class="dash-currency-box">
-            <div class="dcb-label">Monedas</div>
-            <div class="dcb-val green">$${game.money.toLocaleString()}</div>
-        </div>
-        <div class="dash-currency-box">
-            <div class="dcb-label">Diamantes</div>
-            <div class="dcb-val diamond">💎 ${game.diamonds}</div>
-        </div>
-    </div>
-
-    <div class="dash-xp-bar-wrap">
-        <div class="dash-xp-bar" style="width:${Math.min(100,(game.xp/(game.level*1000))*100)}%"></div>
-    </div>
-    <div class="dash-xp-label">${game.xp} / ${game.level * 1000} XP · Siguiente nivel: +1000💰 +2💎</div>
-
-    ${medalRow}
-    ${nextHint}
-
-    <div class="dash-stats-panel">
-        <div class="dash-stat-row">🏆 <span>Reputación</span><strong>${game.reputation}</strong></div>
-        <div class="dash-stat-row">🔧 <span>Nivel taller</span><strong>${game.workshop.level}</strong></div>
-        <div class="dash-stat-row">👷 <span>Mecánicos</span><strong>${game.mechanics.length}</strong></div>
-        ${game.sponsor ? `<div class="dash-stat-row">🤝 <span>Sponsor</span><strong>${game.sponsor.name} ×${game.sponsor.money}</strong></div>` : ""}
-        ${leagueRows}
-    </div>
-
-    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()" style="margin-top:8px">📺 Ver anuncio — +3 💎</button>
-    <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
-    `;
+    updateGarageHud();
 }
 
 // ── Profile screen ────────────────────────────────────────────────
@@ -123,7 +143,11 @@ function renderProfile() {
         <button class="rbtn iap-pack-btn" onclick="IAPManager.purchaseVehicleUpgradePack()">
             <span>Pack Upgrades +$20K</span><span class="iap-price">$4.99</span>
         </button>
-    </div>`;
+    </div>
+
+    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +3 💎</button>
+    <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
+    `;
 }
 
 function saveProfile() {
@@ -133,7 +157,7 @@ function saveProfile() {
     game.garageName = (garageEl && garageEl.value.trim()) || "Mi Garage";
     save_user_progress();
     notifySuccess("Perfil guardado ✅");
-    renderDashboard();
+    updateGarageHud();
     if (window.FTUEManager) FTUEManager.onProfileSaved();
 }
 
@@ -165,7 +189,7 @@ function submitProfileModal() {
     const overlay = document.getElementById("profileModal");
     if (overlay) overlay.remove();
     save_user_progress();
-    renderDashboard();
+    updateGarageHud();
     if (window.FTUEManager) FTUEManager.onProfileSaved();
 }
 
@@ -176,7 +200,7 @@ function init() {
     initAllLeagues();
     checkVehicleUnlocks();
 
-    renderDashboard();
+    updateGarageHud();
     renderWorkshop();
     renderEmployees();
     renderSponsors();
@@ -186,8 +210,9 @@ function init() {
     if (window.TaskManager) TaskManager.init();
     if (!game.playerName) showProfileModal();
 
+    // Live HUD refresh every second
     setInterval(() => {
-        renderDashboard();
+        updateGarageHud();
         checkSponsors();
         checkVehicleUnlocks();
     }, 1000);
