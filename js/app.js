@@ -235,13 +235,18 @@ function showProfileModal() {
     overlay.className = "profile-modal-overlay";
     overlay.innerHTML = `
     <div class="profile-modal">
-        <div class="pm-title">🏎 Motorsport Garage Tycoon</div>
-        <div class="pm-subtitle">¡Bienvenido! Configura tu taller para comenzar.</div>
+        <div class="pm-tata-row">
+            <img src="assets/tata-lion.png" class="pm-tata-img" alt="Tata Lion">
+            <div class="pm-tata-speech">
+                <div class="pm-speech-from">🦁 Tata Lion</div>
+                <div class="pm-speech-text">¡Bienvenido al Team Piston Performance! Soy Tata Lion, el jefe. ¿Cómo te llamas, piloto?</div>
+            </div>
+        </div>
         <label class="profile-label">Tu nombre</label>
         <input class="profile-input" id="pmPlayerName" placeholder="Ej: Carlos" maxlength="24">
         <label class="profile-label">Nombre de tu garage</label>
         <input class="profile-input" id="pmGarageName" placeholder="Ej: Scuderia Veloz" maxlength="32">
-        <button class="rbtn accent-btn pm-start-btn" onclick="submitProfileModal()">🚦 ¡Comenzar!</button>
+        <button class="rbtn accent-btn pm-start-btn" onclick="submitProfileModal()">🚦 ¡A correr!</button>
     </div>`;
     document.body.appendChild(overlay);
     setTimeout(() => { const i = document.getElementById("pmPlayerName"); if (i) i.focus(); }, 100);

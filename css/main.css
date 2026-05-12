@@ -1331,28 +1331,76 @@ html, body {
 .iap-btn-row      { display: flex; gap: 8px; }
 .iap-btn-row .rbtn { flex: 1; }
 
-/* ── FTUE Banner ─────────────────────────────────────────────── */
-#ftue-banner {
-    position: fixed;
-    bottom: calc(var(--nav-h) + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(96vw, 520px);
-    background: linear-gradient(135deg, #1a0f42, #2d1b69);
-    border: 1px solid var(--diamond);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    z-index: 500;
+/* ── FTUE — Tata Lion Guide ──────────────────────────────────── */
+#ftue-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 600;
     display: none;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    animation: ftue-slide-up 0.38s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
-#ftue-banner.ftue-visible { display: flex; }
-.ftue-step-label { font-size: 9px; color: var(--diamond); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-.ftue-title      { font-size: 14px; font-weight: 800; }
-.ftue-hint       { font-size: 12px; color: var(--text-sub); }
-.ftue-skip       { align-self: flex-start; background: none; border: none; color: var(--text-muted); font-size: 11px; cursor: pointer; padding: 0; margin-top: 4px; font-family: var(--font); }
+#ftue-overlay.ftue-visible { display: block; }
+@keyframes ftue-slide-up {
+    from { transform: translateY(110%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+.ftue-panel {
+    display: flex;
+    align-items: flex-end;
+    padding: 0 10px 12px;
+}
+.ftue-bubble {
+    flex: 1;
+    background: linear-gradient(135deg, #0c1628, #162240);
+    border: 1.5px solid rgba(167,139,250,0.55);
+    border-radius: 16px 16px 4px 16px;
+    padding: 13px 14px 12px;
+    position: relative;
+    box-shadow: 0 -6px 28px rgba(0,0,0,0.55), 0 0 0 1px rgba(167,139,250,0.08);
+    margin-right: -6px;
+}
+.ftue-bubble::after {
+    content: '';
+    position: absolute;
+    right: -10px; bottom: 22px;
+    width: 0; height: 0;
+    border-left: 10px solid rgba(167,139,250,0.55);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+.ftue-bubble-name {
+    font-size: 9px; font-weight: 900; color: var(--diamond);
+    letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 5px;
+}
+.ftue-bubble-title { font-size: 14px; font-weight: 900; line-height: 1.2; margin-bottom: 5px; }
+.ftue-bubble-hint  { font-size: 11px; color: var(--text-sub); line-height: 1.45; margin-bottom: 10px; }
+.ftue-bubble-footer { display: flex; align-items: center; justify-content: space-between; }
+.ftue-dots { display: flex; gap: 5px; align-items: center; }
+.ftue-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s;
+}
+.ftue-dot-active { width: 18px; border-radius: 3px; background: var(--diamond); }
+.ftue-skip-btn {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 10px; cursor: pointer; font-family: var(--font); padding: 0;
+}
+.ftue-character { width: 110px; flex-shrink: 0; align-self: flex-end; position: relative; z-index: 1; }
+.ftue-character img { width: 100%; display: block; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.7)); }
+
+/* ── Profile modal — Tata Lion intro ────────────────────────── */
+.pm-tata-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.pm-tata-img { width: 72px; flex-shrink: 0; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6)); }
+.pm-tata-speech {
+    flex: 1;
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 12px 12px 12px 4px;
+    padding: 10px 12px;
+}
+.pm-speech-from { font-size: 9px; font-weight: 900; color: var(--diamond); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.pm-speech-text { font-size: 12px; color: var(--text-sub); line-height: 1.4; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 380px) {
