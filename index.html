@@ -73,6 +73,9 @@
         <!-- ── GARAGE CAR VISUAL LAYER ── -->
         <div id="garageCarLayer"></div>
 
+        <!-- Cloud sync badge -->
+        <div id="cloudSyncBadge" class="cloud-badge"></div>
+
         <!-- ── SINGLE RECEIVE BUTTON (center floor) ── -->
         <button id="recieveCarBtn" onclick="repair_car()">
             <span class="rcv-icon">🚗</span>
@@ -158,6 +161,16 @@
         <div class="screen-inner" id="profileContent"></div>
     </div>
 
+    <!-- Leaderboard overlay -->
+    <div class="screen overlay-screen" id="leaderboard">
+        <div class="overlay-header">
+            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
+            <span class="overlay-title">🌍 Ranking Global</span>
+            <span></span>
+        </div>
+        <div class="screen-inner" id="leaderboardContent"></div>
+    </div>
+
 </div><!-- /app -->
 
 <!-- ══ PROFILE BOTTOM SHEET ══ -->
@@ -202,6 +215,7 @@
 <!-- Core -->
 <script src="js/core/gameState.js"></script>
 <script src="js/core/saveSystem.js"></script>
+<script src="js/core/cloudSave.js"></script>
 <script src="js/core/notifications.js"></script>
 
 <!-- Modules -->

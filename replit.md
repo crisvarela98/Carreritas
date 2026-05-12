@@ -4,15 +4,16 @@ A browser-based idle/tycoon game where players manage a racing garage — repair
 
 ## Run & Operate
 
-- **Dev server:** `npx --yes serve -s . -l 5000`
-- No environment variables required
-- No backend — fully static, all persistence via `localStorage`
+- **Dev server:** `node server.js` (port 5000)
+- **Requires:** `DATABASE_URL` environment variable (Replit PostgreSQL, provisioned automatically)
+- **Start:** `npm start`
 
 ## Stack
 
-- Vanilla HTML5 / CSS3 / JavaScript (ES6+)
-- Zero external dependencies
-- Served via `serve` (npx)
+- Vanilla HTML5 / CSS3 / JavaScript (ES6+) — frontend
+- Node.js + Express 5 — backend API server
+- Replit PostgreSQL — cloud saves & global leaderboard
+- `pg` npm package for DB access
 
 ## File Structure
 

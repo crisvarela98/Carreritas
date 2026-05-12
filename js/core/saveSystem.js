@@ -28,6 +28,8 @@ function save_user_progress() {
     } catch (e) {
         console.error("Save error:", e);
     }
+    // Cloud save — fire & forget, graceful if offline
+    if (window.CloudSave) CloudSave.save(game);
 }
 const saveGame = save_user_progress;
 

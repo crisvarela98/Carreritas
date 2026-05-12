@@ -2343,3 +2343,55 @@ html, body {
 .mg-timer-wrap { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
 .mg-timer-bar  { height: 100%; border-radius: 4px; transition: width 1s linear, background 0.4s; }
 .mg-hud-hint   { font-size: 10px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+
+/* ── Cloud Sync Badge ────────────────────────────────────────────── */
+.cloud-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 900;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+.cloud-badge:not(:empty) { opacity: 1; }
+.cloud-ok  { background: #1a3a1a; color: #4caf50; border: 1px solid #4caf5066; }
+.cloud-err { background: #3a1a1a; color: #ff5252; border: 1px solid #ff525266; }
+
+/* ── Leaderboard ─────────────────────────────────────────────────── */
+.lb-subtitle {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+.lb-list { display: flex; flex-direction: column; gap: 6px; }
+.lb-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface3);
+    border-radius: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+}
+.lb-me { border-color: var(--accent); background: rgba(79,195,247,.08); }
+.lb-rank { font-size: 18px; min-width: 28px; text-align: center; }
+.lb-info { flex: 1; min-width: 0; }
+.lb-name  { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-garage{ font-size: 10px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-stats { display: flex; gap: 6px; }
+.lb-stat  { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.lb-sv    { font-size: 11px; font-weight: 800; color: var(--text); white-space: nowrap; }
+.lb-sv.gold { color: var(--coin); }
+.lb-stat small { font-size: 8px; color: var(--text-muted); text-transform: uppercase; }
+.lb-loading { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 13px; }
+.empty-row  { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 12px; }
+

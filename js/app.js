@@ -4,12 +4,13 @@ function showScreen(id) {
     const screen = document.getElementById(id);
     if (screen) screen.classList.add("active");
 
-    if (id === "race")      renderRaceScreen();
-    if (id === "sponsors")  renderSponsors();
-    if (id === "employees") renderEmployees();
-    if (id === "workshop")  renderWorkshop();
-    if (id === "profile")   renderProfile();
-    if (id === "dashboard") updateGarageHud();
+    if (id === "race")        renderRaceScreen();
+    if (id === "sponsors")    renderSponsors();
+    if (id === "employees")   renderEmployees();
+    if (id === "workshop")    renderWorkshop();
+    if (id === "profile")     renderProfile();
+    if (id === "leaderboard") renderLeaderboard();
+    if (id === "dashboard")   updateGarageHud();
 }
 
 // ── Garage HUD live update ────────────────────────────────────────
@@ -163,6 +164,7 @@ function openProfileSheet() {
         </button>
     </div>
 
+    <button class="rbtn" onclick="closeProfileSheet(); showScreen('leaderboard')">🌍 Ranking Global</button>
     <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +3 💎</button>
     <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
     `;
@@ -213,6 +215,7 @@ function renderProfile() {
             <div class="dash-stat-row">🥇 <span>Victorias</span><strong>${game.medals.gold}</strong></div>
         </div>
     </div>
+    <button class="rbtn" onclick="showScreen('leaderboard')">🌍 Ranking Global</button>
     <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +3 💎</button>
     <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
     `;
@@ -266,9 +269,56 @@ function submitProfileModal() {
     if (window.FTUEManager) FTUEManager.onProfileSaved();
 }
 
+// ── Leaderboard ───────────────────────────────────────────────────
+async function renderLeaderboard() {
+    const el = document.getElementById("leaderboardContent");
+    if (!el) return;
+
+    el.innerHTML = `<div class="race-card"><div class="race-hero-title">🌍 RANKING GLOBAL</div><div class="lb-loading">Cargando...</div></div>`;
+
+    const rows = await CloudSave.fetchLeaderboard();
+
+    if (!rows.length) {
+        el.innerHTML = `<div class="race-card"><div class="race-hero-title">🌍 RANKING GLOBAL</div><div class="empty-row">Aún no hay jugadores en el ranking. ¡Sé el primero!</div></div>`;
+        return;
+    }
+
+    // Find current player's rank
+    const myId = CloudSave.getDeviceId();
+
+    const rowsHtml = rows.map((r, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${r.rank}`;
+        const isMe  = (r.device_id === myId);  // not exposed, but rank matches player_name
+        return `
+        <div class="lb-row ${isMe ? 'lb-me' : ''}">
+            <div class="lb-rank">${medal}</div>
+            <div class="lb-info">
+                <div class="lb-name">${escHtml(r.player_name || 'Anónimo')}</div>
+                <div class="lb-garage">${escHtml(r.garage_name || '')}</div>
+            </div>
+            <div class="lb-stats">
+                <div class="lb-stat"><span class="lb-sv">Nv.${r.level}</span><small>nivel</small></div>
+                <div class="lb-stat"><span class="lb-sv gold">🥇${r.total_wins}</span><small>wins</small></div>
+                <div class="lb-stat"><span class="lb-sv">🔧${Number(r.total_repairs).toLocaleString()}</span><small>rep.</small></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    el.innerHTML = `
+    <div class="race-card">
+        <div class="race-hero-title">🌍 RANKING GLOBAL</div>
+        <div class="lb-subtitle">Top ${rows.length} jugadores · actualizado en tiempo real</div>
+        <div class="lb-list">${rowsHtml}</div>
+    </div>`;
+}
+
+function escHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 // ── Init ──────────────────────────────────────────────────────────
-function init() {
-    load_user_progress();
+async function init() {
+    load_user_progress();   // immediate localStorage load
     applyOffline();
     initAllLeagues();
     checkVehicleUnlocks();
@@ -290,6 +340,20 @@ function init() {
     }, 1000);
 
     startAutoSave();
+
+    // Background cloud load — silently merge if newer
+    try {
+        const cloudData = await CloudSave.load();
+        if (cloudData && typeof cloudData === 'object') {
+            const localTs = (() => { try { return JSON.parse(localStorage.getItem('mgt_save_v4') || '{}').timestamp || 0; } catch(_){return 0;} })();
+            const cloudTs = cloudData.lastTime || 0;
+            if (cloudTs > localTs + 30000) {  // cloud is >30s newer
+                deepMerge(game, cloudData);
+                updateGarageHud();
+                notifyInfo('☁️ Save restaurado desde la nube');
+            }
+        }
+    } catch(_) { /* offline — no problem */ }
 }
 
 window.addEventListener("DOMContentLoaded", init);
