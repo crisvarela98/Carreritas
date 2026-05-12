@@ -46,6 +46,7 @@ function addXP(amount) {
         notifySuccess(`¡Nivel ${game.level}! +1000 💰 +2 💎`);
         checkSponsors();
         checkVehicleUnlocks();
+        if (window.FTUEManager && FTUEManager.onLevelUp) FTUEManager.onLevelUp(game.level);
 
         need = game.level * 1000;
     }

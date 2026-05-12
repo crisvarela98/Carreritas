@@ -62,7 +62,9 @@ function updateFloorSlots() {
 
     if (allCars.length > 0) {
         const first = allCars[0];
-        const pct   = Math.floor(first.progress || 0);
+        const pct = first.duration > 0
+            ? Math.min(100, Math.floor((first.progress / first.duration) * 100))
+            : 0;
         if (pct >= 100) {
             btn.classList.add("rcv-done");
             if (iconEl)  iconEl.textContent  = "✅";
@@ -71,7 +73,7 @@ function updateFloorSlots() {
         } else {
             btn.classList.add("rcv-busy");
             if (iconEl)  iconEl.textContent  = "🔧";
-            if (labelEl) labelEl.textContent = pct + "% — " + allCars.length + " auto" + (allCars.length > 1 ? "s" : "");
+            if (labelEl) labelEl.textContent = allCars.length + " auto" + (allCars.length > 1 ? "s" : "") + " · " + pct + "%";
             if (bar)     bar.style.width     = pct + "%";
         }
     } else {

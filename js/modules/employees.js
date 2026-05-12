@@ -32,6 +32,9 @@ function _doHire(def) {
     });
     notifySuccess(`${def.icon} ${def.name} contratado!`);
     renderEmployees();
+    if (!game.stats) game.stats = {};
+    game.stats.totalStaff = (game.stats.totalStaff || 0) + 1;
+    if (window.TaskManager) { TaskManager.trackDaily('hirestaff'); TaskManager._updateBadge(); }
     if (window.FTUEManager) FTUEManager.onMechanicHired();
 }
 

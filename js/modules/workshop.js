@@ -1,6 +1,4 @@
 // ── Workshop Module ───────────────────────────────────────────────
-// Handles customer car repairs (idle money-making loop)
-// and garage upgrades.
 
 let workshopTab = "garage";
 
@@ -13,13 +11,14 @@ function showWorkshopTab(tab) {
 function generateCustomerCar() {
     const rare     = Math.random() < 0.15;
     const stockLvl = game.garageUpgrades.partsStock || 0;
-    const durMult  = 1 - stockLvl * 0.1;
+    const durMult  = 1 - stockLvl * 0.08;
+    // 90-180 seconds so video acceleration is worth it
+    const base = 90 + Math.random() * 90;
     return {
         id:       Date.now() + Math.random(),
-        duration: Math.max(5, (12 + Math.random() * 10) * durMult),
+        duration: Math.max(30, Math.round(base * durMult)),
         progress: 0,
-        // Balanced rewards: max $150 rare, $60 normal
-        reward:   rare ? 100 + Math.floor(Math.random() * 50) : 30 + Math.floor(Math.random() * 30),
+        reward:   rare ? 400 + Math.floor(Math.random() * 200) : 120 + Math.floor(Math.random() * 80),
         rare
     };
 }
@@ -27,11 +26,11 @@ function generateCustomerCar() {
 // ── repair_car() — accept customer car ────────────────────────────
 function repair_car() {
     if (game.workshop.queue.length >= 5) {
-        notifyWarn("Cola llena — espera un espacio libre");
+        notifyWarn("¡Plaza llena! (5 en espera) — espera que se libere un lugar.");
         return;
     }
     game.workshop.queue.push(generateCustomerCar());
-    renderWorkshop();
+    renderDashboardCars();
     if (window.FTUEManager) FTUEManager.onCarReceived();
 }
 
@@ -53,7 +52,7 @@ function assignCars() {
 // ── Garage upgrades ───────────────────────────────────────────────
 const GARAGE_UPGRADES_DEF = [
     { key: "speedBoost", label: "Herramientas Pro",  icon: "⚡", desc: "+0.5 velocidad de reparación por nivel", max: 6, cost: lvl => [1800, 4500, 9000, 16000, 26000, 40000][lvl] || 0 },
-    { key: "partsStock", label: "Stock de repuestos",icon: "📦", desc: "-10% duración de reparación por nivel",  max: 5, cost: lvl => [1500, 4000, 8000, 15000, 28000][lvl] || 0 }
+    { key: "partsStock", label: "Stock de repuestos",icon: "📦", desc: "-8% duración de reparación por nivel",   max: 5, cost: lvl => [1500, 4000, 8000, 15000, 28000][lvl] || 0 }
 ];
 
 function buyGarageUpgrade(key) {
@@ -69,7 +68,91 @@ function buyGarageUpgrade(key) {
 
     notifySuccess(`${def.label} mejorado — Nv.${game.garageUpgrades[key]}`);
     renderWorkshop();
+    if (window.TaskManager) { TaskManager.trackDaily('upgradegarage'); TaskManager._updateBadge(); }
     if (window.FTUEManager) FTUEManager.onGarageUpgradePurchased();
+}
+
+// ── Dashboard car visual layer ────────────────────────────────────
+function renderDashboardCars() {
+    const layer = document.getElementById('garageCarLayer');
+    if (!layer) return;
+
+    const capacity = game.workshop.capacity || 2;
+
+    // Elevator slots (active repairs — up to capacity)
+    const elevHtml = Array.from({ length: capacity }, (_, i) => {
+        const car = game.workshop.active[i];
+        if (!car) {
+            return `<div class="garage-elevator-slot garage-slot-empty">
+                <div class="gslot-label">BAHÍA ${i + 1}</div>
+                <div class="gslot-empty">Libre</div>
+            </div>`;
+        }
+        const pct     = Math.min(100, Math.floor((car.progress / car.duration) * 100));
+        const remSecs = Math.max(0, Math.ceil(car.duration - car.progress));
+        const timeStr = remSecs >= 60
+            ? `${Math.floor(remSecs / 60)}:${String(remSecs % 60).padStart(2, '0')}`
+            : `${remSecs}s`;
+        return `<div class="garage-elevator-slot" onclick="showCarVideoPopup('${car.id}')">
+            <div class="gslot-type">${car.rare ? '⭐' : '🚗'}</div>
+            <div class="gslot-timer">${timeStr}</div>
+            <div class="gslot-pbar"><div class="gslot-pfill${car.rare ? ' pfill-rare' : ''}" style="width:${pct}%"></div></div>
+            <div class="gslot-tap">📺 Ver video</div>
+        </div>`;
+    }).join('');
+
+    // Parking slots (queued cars — up to 5)
+    const parkHtml = Array.from({ length: 5 }, (_, i) => {
+        const car = game.workshop.queue[i];
+        if (!car) return `<div class="garage-parking-slot gpark-empty"></div>`;
+        return `<div class="garage-parking-slot">
+            <div class="gpark-car">${car.rare ? '⭐' : '🚗'}</div>
+            <div class="gpark-label">#${i + 1}</div>
+        </div>`;
+    }).join('');
+
+    layer.innerHTML = `
+        <div class="garage-elevators">${elevHtml}</div>
+        <div class="garage-parking">${parkHtml}</div>
+    `;
+}
+
+// ── Car video popup ───────────────────────────────────────────────
+function showCarVideoPopup(carId) {
+    const car = game.workshop.active.find(c => String(c.id) === String(carId));
+    if (!car) return;
+
+    let popup = document.getElementById('carVideoPopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'carVideoPopup';
+        popup.className = 'car-video-popup-overlay';
+        popup.onclick = e => { if (e.target === popup) popup.classList.remove('cvp-open'); };
+        (document.getElementById('app') || document.body).appendChild(popup);
+    }
+
+    const pct     = Math.min(100, Math.floor((car.progress / car.duration) * 100));
+    const remSecs = Math.max(0, Math.ceil(car.duration - car.progress));
+    const timeStr = remSecs >= 60
+        ? `${Math.floor(remSecs / 60)}:${String(remSecs % 60).padStart(2, '0')}`
+        : `${remSecs}s`;
+
+    popup.innerHTML = `
+    <div class="cvp-panel">
+        <div class="cvp-car">${car.rare ? '⭐ Auto Raro' : '🚗 Auto Normal'}</div>
+        <div class="cvp-time">⏱ Tiempo restante: <strong>${timeStr}</strong></div>
+        <div class="cvp-pbar-wrap"><div class="cvp-pbar" style="width:${pct}%"></div></div>
+        <div class="cvp-reward">Recompensa: <strong>$${car.reward.toLocaleString()}</strong></div>
+        <button class="rbtn accent-btn cvp-ad-btn"
+            onclick="AdsManager.offer_ad_to_speed_repair('${carId}'); document.getElementById('carVideoPopup').classList.remove('cvp-open')">
+            📺 Ver video — Completar ahora
+        </button>
+        <button class="rbtn cvp-cancel"
+            onclick="document.getElementById('carVideoPopup').classList.remove('cvp-open')">
+            Cancelar
+        </button>
+    </div>`;
+    popup.classList.add('cvp-open');
 }
 
 // ── Workshop tick (every second) ──────────────────────────────────
@@ -81,8 +164,6 @@ setInterval(() => {
 
     game.workshop.active.forEach(car => {
         car.progress += totalSpeed;
-        // Small upkeep cost while repairing
-        game.money = Math.max(0, game.money - 0.2);
 
         if (car.progress >= car.duration) {
             const boost  = game.sponsor ? game.sponsor.money : 1;
@@ -93,15 +174,13 @@ setInterval(() => {
             notify(`🚗 Auto terminado +$${reward}`, "success");
             game.workshop.active = game.workshop.active.filter(c => c.id !== car.id);
             if (window.FTUEManager) FTUEManager.onCarCompleted();
-            // Stats & task tracking
             if (!game.stats) game.stats = {};
             game.stats.totalRepairs = (game.stats.totalRepairs || 0) + 1;
-            if (window.TaskManager) {
-                TaskManager.trackDaily('repair');
-                TaskManager._updateBadge();
-            }
+            if (window.TaskManager) { TaskManager.trackDaily('repair'); TaskManager._updateBadge(); }
         }
     });
+
+    renderDashboardCars();
 
 }, 1000);
 
@@ -112,7 +191,7 @@ function renderWorkshop() {
 
     if (workshopTab === "vehicles") {
         el.innerHTML = _makeTabBar() + `<div id="vehiclesTabContent"></div>`;
-        renderVehiclesTab();
+        if (typeof renderVehiclesTab === 'function') renderVehiclesTab();
         return;
     }
     _renderGarageTab(el);
@@ -123,58 +202,6 @@ function _makeTabBar() {
     <div class="wtab-bar">
         <button class="wtab ${workshopTab === "vehicles" ? "wtab-active" : ""}" onclick="showWorkshopTab('vehicles')">🚗 Vehículos</button>
         <button class="wtab ${workshopTab === "garage"   ? "wtab-active" : ""}" onclick="showWorkshopTab('garage')">🏗 Garage</button>
-    </div>`;
-}
-
-function _renderRepairTab(el) {
-    if (!el) return;
-
-    let activeHtml = game.workshop.active.length === 0
-        ? `<div class="empty-row">Sin autos en reparación</div>`
-        : game.workshop.active.map(car => {
-            const pct = Math.floor((car.progress / car.duration) * 100);
-            const adBtn = AdsManager.canOffer("speed_repair")
-                ? `<button class="rbtn ad-btn ad-btn-sm" onclick="AdsManager.offer_ad_to_speed_repair('${car.id}')">📺 Acelerar</button>`
-                : "";
-            return `
-            <div class="car-card">
-                <div class="car-card-top">
-                    <span>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"}</span>
-                    <span class="car-pct">${pct}%</span>
-                </div>
-                <div class="car-progress-track">
-                    <div class="car-progress-fill ${car.rare ? "rare" : ""}" style="width:${pct}%"></div>
-                </div>
-                ${adBtn}
-            </div>`;
-        }).join("");
-
-    let queueHtml = game.workshop.queue.length === 0
-        ? `<div class="empty-row">Cola vacía</div>`
-        : game.workshop.queue.map(car => `
-            <div class="car-card queued">
-                <span>${car.rare ? "⭐ Auto raro" : "🚗 Auto normal"}</span>
-                <span class="car-queue-tag">en cola</span>
-            </div>`).join("");
-
-    const totalSpeed = (game.workshop.speed || 1) + getTotalMechanicSpeed();
-
-    el.innerHTML = `
-    ${_makeTabBar()}
-    <div class="race-card">
-        <div class="ws-top-row">
-            <div>
-                <div class="ws-money">💰 $${game.money.toLocaleString()}</div>
-                <div class="ws-sub">Bahías: ${game.workshop.active.length}/${game.workshop.capacity} · Vel: ${totalSpeed.toFixed(1)}x</div>
-            </div>
-            <button class="rbtn accent-btn ws-recv-btn" onclick="repair_car()">+ Recibir</button>
-        </div>
-    </div>
-    <div class="race-card">
-        <div class="race-divider">EN REPARACIÓN</div>${activeHtml}
-    </div>
-    <div class="race-card">
-        <div class="race-divider">EN COLA (${game.workshop.queue.length}/5)</div>${queueHtml}
     </div>`;
 }
 
@@ -209,6 +236,7 @@ function _renderGarageTab(el) {
     ${_makeTabBar()}
     <div class="race-card">
         <div class="race-hero-title">🏗 MEJORAS DEL GARAGE</div>
+        <div class="ws-sub" style="margin-bottom:8px">Bahías activas: ${game.workshop.active.length}/${game.workshop.capacity} · Vel: ${((game.workshop.speed || 1) + getTotalMechanicSpeed()).toFixed(1)}x</div>
         ${upgradesHtml}
     </div>`;
 }

@@ -47,6 +47,9 @@ function upgrade_vehicle(vehicleId, partKey) {
 
     renderVehiclesTab();
 
+    if (!game.stats) game.stats = {};
+    game.stats.totalUpgCar = (game.stats.totalUpgCar || 0) + 1;
+    if (window.TaskManager) { TaskManager.trackDaily('upgradecar'); TaskManager._updateBadge(); }
     if (window.FTUEManager) FTUEManager.onCarUpgraded();
 }
 

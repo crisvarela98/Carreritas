@@ -136,31 +136,36 @@
     box-shadow: 0 0 6px rgba(59,130,246,0.6);
 }
 
-/* ── SPONSORS BUTTON ── */
-.hud-sponsor-btn {
-    flex-shrink: 0;
+/* ── SPONSORS + STAFF BUTTONS (compact, stacked in HUD) ── */
+.hud-mid-btns {
     display: flex;
     flex-direction: column;
+    gap: 3px;
+    flex-shrink: 0;
+}
+.hud-top-btn {
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 2px;
+    gap: 5px;
     background: rgba(8,12,26,0.90);
     border: 1px solid rgba(255,255,255,0.14);
-    border-top: 2px solid rgba(249,115,22,0.7);
-    border-radius: 10px;
+    border-radius: 8px;
     color: #fff;
-    font-size: 9px;
-    font-weight: 800;
-    padding: 5px 7px;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    white-space: nowrap;
+    padding: 5px 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
     transition: background 0.15s;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+    white-space: nowrap;
+    min-width: 72px;
 }
-.hud-sponsor-btn:hover  { background: rgba(40,25,8,0.93); }
-.hud-sponsor-icon  { font-size: 15px; line-height: 1; }
-.hud-sponsor-wheel { font-size: 9px; opacity: 0.55; }
+.hud-top-btn:hover  { background: rgba(30,55,120,0.9); }
+.hud-top-btn:active { transform: scale(0.95); }
+.htb-icon  { font-size: 13px; flex-shrink: 0; }
+.htb-label { font-size: 8px; font-weight: 900; letter-spacing: 0.4px; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-sponsor-btn { border-top: 2px solid rgba(249,115,22,0.7); }
+.hud-staff-btn   { border-top: 2px solid rgba(59,130,246,0.7); }
 
 /* ── CURRENCY COLUMN ── */
 #hudCurrency {
@@ -255,7 +260,7 @@
 #recieveCarBtn {
     position: absolute;
     left: 50%;
-    bottom: 18%;
+    bottom: 28px;
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
@@ -386,6 +391,111 @@
     border-color: rgba(167,139,250,0.45) !important;
     box-shadow: 0 4px 20px rgba(99,60,220,0.4) !important;
 }
+
+/* ── Garage Car Visual Layer ────────────────────────────────── */
+#garageCarLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+.garage-elevators {
+    position: absolute;
+    top: 37%;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 80px;
+    pointer-events: all;
+}
+.garage-elevator-slot {
+    flex: 1;
+    max-width: 140px;
+    background: rgba(6,10,22,0.78);
+    border: 1.5px solid rgba(59,130,246,0.5);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 8px 8px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s, background 0.2s, transform 0.1s;
+    min-height: 90px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+}
+.garage-elevator-slot:not(.garage-slot-empty):hover { border-color: rgba(59,130,246,0.9); background: rgba(10,20,55,0.88); }
+.garage-elevator-slot:active { transform: scale(0.96); }
+.garage-slot-empty { border-style: dashed; cursor: default; opacity: 0.38; }
+.gslot-label { font-size: 8px; font-weight: 900; color: rgba(255,255,255,0.4); letter-spacing: 0.8px; text-transform: uppercase; }
+.gslot-empty { font-size: 11px; color: rgba(255,255,255,0.28); }
+.gslot-type  { font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+.gslot-timer { font-size: 12px; font-weight: 900; color: #fff; letter-spacing: 0.3px; }
+.gslot-pbar  { width: 100%; height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
+.gslot-pfill { height: 100%; background: linear-gradient(90deg,#3b82f6,#22c55e); border-radius: 2px; transition: width 1s linear; }
+.gslot-pfill.pfill-rare { background: linear-gradient(90deg,#7c3aed,#f97316); }
+.gslot-tap   { font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.55); letter-spacing: 0.3px; }
+
+/* Parking row */
+.garage-parking {
+    position: absolute;
+    bottom: 22%;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 14px;
+    pointer-events: none;
+}
+.garage-parking-slot {
+    width: 46px;
+    height: 52px;
+    background: rgba(6,10,22,0.55);
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+.gpark-empty { opacity: 0.25; }
+.gpark-car   { font-size: 20px; line-height: 1; }
+.gpark-label { font-size: 8px; font-weight: 900; color: rgba(255,255,255,0.55); }
+
+/* ── Car Video Popup ─────────────────────────────────────────── */
+.car-video-popup-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 650;
+    background: rgba(0,0,0,0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+.car-video-popup-overlay.cvp-open { display: flex; }
+.cvp-panel {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border-hi);
+    padding: 22px 18px 18px;
+    width: min(88%, 300px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+}
+.cvp-car    { font-size: 16px; font-weight: 900; text-align: center; }
+.cvp-time   { font-size: 13px; color: var(--text-sub); text-align: center; }
+.cvp-reward { font-size: 12px; color: var(--text-sub); text-align: center; }
+.cvp-pbar-wrap { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.cvp-pbar   { height: 100%; background: linear-gradient(90deg,#3b82f6,#22c55e); border-radius: 3px; }
+.cvp-ad-btn { font-size: 13px; font-weight: 900; }
+.cvp-cancel { opacity: 0.5; font-size: 12px; }
 
 /* ── PROFILE BOTTOM SHEET ── */
 .psheet-overlay {
@@ -1386,6 +1496,28 @@ html, body {
     background: none; border: none; color: var(--text-muted);
     font-size: 10px; cursor: pointer; font-family: var(--font); padding: 0;
 }
+.ftue-footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+.ftue-next-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 7px 13px;
+    cursor: pointer;
+    font-family: var(--font);
+    letter-spacing: 0.3px;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+.ftue-next-btn:hover  { background: #2563eb; }
+.ftue-next-btn:active { transform: scale(0.94); }
 .ftue-character { width: 110px; flex-shrink: 0; align-self: flex-end; position: relative; z-index: 1; }
 .ftue-character img { width: 100%; display: block; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.7)); }
 

@@ -1,42 +1,48 @@
 // ── Daily Task Pool ───────────────────────────────────────────────
 const DAILY_TASK_POOL = [
-    { id: 'rep3',    icon: '🔧', desc: 'Reparar 3 vehículos',          type: 'repair',    target: 3,    reward: { coins: 600,  xp: 60  } },
-    { id: 'rep5',    icon: '🔧', desc: 'Reparar 5 vehículos',          type: 'repair',    target: 5,    reward: { coins: 900,  xp: 90  } },
-    { id: 'rep10',   icon: '🔧', desc: 'Reparar 10 vehículos',         type: 'repair',    target: 10,   reward: { coins: 1500, xp: 150 } },
-    { id: 'race1',   icon: '🏁', desc: 'Correr 1 carrera',             type: 'race',      target: 1,    reward: { coins: 400,  xp: 40  } },
-    { id: 'race3',   icon: '🏁', desc: 'Correr 3 carreras',            type: 'race',      target: 3,    reward: { coins: 900,  xp: 90  } },
-    { id: 'win1',    icon: '🥇', desc: 'Ganar 1 carrera',              type: 'win',       target: 1,    reward: { coins: 700,  xp: 80  } },
-    { id: 'pole1',   icon: '🟣', desc: 'Conseguir 1 pole position',    type: 'pole',      target: 1,    reward: { coins: 500,  xp: 70  } },
-    { id: 'coins2k', icon: '💰', desc: 'Ganar $2000 en carreras',      type: 'raceCoins', target: 2000, reward: { coins: 500,  xp: 50  } },
-    { id: 'coins5k', icon: '💰', desc: 'Ganar $5000 en carreras',      type: 'raceCoins', target: 5000, reward: { coins: 1000, xp: 100 } },
-    { id: 'mg1',     icon: '🚛', desc: 'Jugar 1 vez el minijuego',     type: 'minigame',  target: 1,    reward: { coins: 300,  xp: 30  } },
-    { id: 'win3',    icon: '🥇', desc: 'Ganar 3 carreras',             type: 'win',       target: 3,    reward: { coins: 1200, xp: 120 } },
-    { id: 'pole3',   icon: '🟣', desc: 'Conseguir 3 poles',            type: 'pole',      target: 3,    reward: { coins: 800,  xp: 100 } },
+    { id: 'rep3',       icon: '🔧', desc: 'Reparar 3 vehículos',             type: 'repair',        target: 3,    reward: { coins: 600,  xp: 60  } },
+    { id: 'rep5',       icon: '🔧', desc: 'Reparar 5 vehículos',             type: 'repair',        target: 5,    reward: { coins: 900,  xp: 90  } },
+    { id: 'rep10',      icon: '🔧', desc: 'Reparar 10 vehículos',            type: 'repair',        target: 10,   reward: { coins: 1500, xp: 150 } },
+    { id: 'race1',      icon: '🏁', desc: 'Correr 1 carrera',                type: 'race',          target: 1,    reward: { coins: 400,  xp: 40  } },
+    { id: 'race3',      icon: '🏁', desc: 'Correr 3 carreras',               type: 'race',          target: 3,    reward: { coins: 900,  xp: 90  } },
+    { id: 'win1',       icon: '🥇', desc: 'Ganar 1 carrera',                 type: 'win',           target: 1,    reward: { coins: 700,  xp: 80  } },
+    { id: 'pole1',      icon: '🟣', desc: 'Conseguir 1 pole position',       type: 'pole',          target: 1,    reward: { coins: 500,  xp: 70  } },
+    { id: 'coins2k',    icon: '💰', desc: 'Ganar $2000 en carreras',         type: 'raceCoins',     target: 2000, reward: { coins: 500,  xp: 50  } },
+    { id: 'coins5k',    icon: '💰', desc: 'Ganar $5000 en carreras',         type: 'raceCoins',     target: 5000, reward: { coins: 1000, xp: 100 } },
+    { id: 'mg1',        icon: '🚛', desc: 'Jugar 1 vez el minijuego',        type: 'minigame',      target: 1,    reward: { coins: 300,  xp: 30  } },
+    { id: 'win3',       icon: '🥇', desc: 'Ganar 3 carreras',                type: 'win',           target: 3,    reward: { coins: 1200, xp: 120 } },
+    { id: 'pole3',      icon: '🟣', desc: 'Conseguir 3 poles',               type: 'pole',          target: 3,    reward: { coins: 800,  xp: 100 } },
+    { id: 'upcar1',     icon: '⚙️', desc: 'Mejorar 1 pieza del auto',        type: 'upgradecar',    target: 1,    reward: { coins: 500,  xp: 60  } },
+    { id: 'upcar3',     icon: '⚙️', desc: 'Mejorar 3 piezas del auto',       type: 'upgradecar',    target: 3,    reward: { coins: 1200, xp: 130 } },
+    { id: 'upgarage1',  icon: '🏗',  desc: 'Mejorar 1 mejora del garage',    type: 'upgradegarage', target: 1,    reward: { coins: 600,  xp: 70  } },
+    { id: 'upstaff1',   icon: '👷', desc: 'Contratar 1 mecánico',            type: 'hirestaff',     target: 1,    reward: { coins: 800,  xp: 80  } },
 ];
 
 // ── Super Tasks (milestones — permanent, give diamonds) ───────────
 const SUPER_TASKS = [
-    { id: 'sr30',    icon: '🔧', group: 'Taller',   desc: 'Preparar 30 vehículos',     type: 'totalRepair', target: 30,    reward: { diamonds: 5   } },
-    { id: 'sr90',    icon: '🔧', group: 'Taller',   desc: 'Preparar 90 vehículos',     type: 'totalRepair', target: 90,    reward: { diamonds: 10  } },
-    { id: 'sr150',   icon: '🔧', group: 'Taller',   desc: 'Preparar 150 vehículos',    type: 'totalRepair', target: 150,   reward: { diamonds: 15  } },
-    { id: 'sr300',   icon: '🔧', group: 'Taller',   desc: 'Preparar 300 vehículos',    type: 'totalRepair', target: 300,   reward: { diamonds: 25  } },
-    { id: 'sr600',   icon: '🔧', group: 'Taller',   desc: 'Preparar 600 vehículos',    type: 'totalRepair', target: 600,   reward: { diamonds: 40  } },
-    { id: 'sr1500',  icon: '🔧', group: 'Taller',   desc: 'Preparar 1500 vehículos',   type: 'totalRepair', target: 1500,  reward: { diamonds: 60  } },
-    { id: 'sr3000',  icon: '🔧', group: 'Taller',   desc: 'Preparar 3000 vehículos',   type: 'totalRepair', target: 3000,  reward: { diamonds: 80  } },
-    { id: 'sr6000',  icon: '🔧', group: 'Taller',   desc: 'Preparar 6000 vehículos',   type: 'totalRepair', target: 6000,  reward: { diamonds: 120 } },
-    { id: 'sr15000', icon: '🔧', group: 'Taller',   desc: 'Preparar 15000 vehículos',  type: 'totalRepair', target: 15000, reward: { diamonds: 200 } },
-    { id: 'sw1',     icon: '🥇', group: 'Carreras', desc: 'Ganar 1 carrera',           type: 'totalWin',    target: 1,     reward: { diamonds: 3   } },
-    { id: 'sw5',     icon: '🥇', group: 'Carreras', desc: 'Ganar 5 carreras',          type: 'totalWin',    target: 5,     reward: { diamonds: 8   } },
-    { id: 'sw25',    icon: '🥇', group: 'Carreras', desc: 'Ganar 25 carreras',         type: 'totalWin',    target: 25,    reward: { diamonds: 20  } },
-    { id: 'sw100',   icon: '🥇', group: 'Carreras', desc: 'Ganar 100 carreras',        type: 'totalWin',    target: 100,   reward: { diamonds: 50  } },
-    { id: 'sp1',     icon: '🟣', group: 'Carreras', desc: 'Conseguir 1 pole',          type: 'totalPole',   target: 1,     reward: { diamonds: 2   } },
-    { id: 'sp10',    icon: '🟣', group: 'Carreras', desc: 'Conseguir 10 poles',        type: 'totalPole',   target: 10,    reward: { diamonds: 15  } },
-    { id: 'sp50',    icon: '🟣', group: 'Carreras', desc: 'Conseguir 50 poles',        type: 'totalPole',   target: 50,    reward: { diamonds: 35  } },
-    { id: 'sl10',    icon: '⭐', group: 'Progresión',desc: 'Alcanzar nivel 10',        type: 'level',       target: 10,    reward: { diamonds: 10  } },
-    { id: 'sl25',    icon: '⭐', group: 'Progresión',desc: 'Alcanzar nivel 25',        type: 'level',       target: 25,    reward: { diamonds: 25  } },
-    { id: 'sl50',    icon: '⭐', group: 'Progresión',desc: 'Alcanzar nivel 50',        type: 'level',       target: 50,    reward: { diamonds: 50  } },
-    { id: 'smg5',    icon: '🚛', group: 'Minijuego',desc: 'Jugar 5 partidas del camión',type: 'totalMini',  target: 5,     reward: { diamonds: 5   } },
-    { id: 'smg20',   icon: '🚛', group: 'Minijuego',desc: 'Jugar 20 partidas del camión',type: 'totalMini', target: 20,    reward: { diamonds: 15  } },
+    { id: 'sr30',    icon: '🔧', group: 'Taller',     desc: 'Preparar 30 vehículos',          type: 'totalRepair', target: 30,    reward: { diamonds: 5   } },
+    { id: 'sr90',    icon: '🔧', group: 'Taller',     desc: 'Preparar 90 vehículos',          type: 'totalRepair', target: 90,    reward: { diamonds: 10  } },
+    { id: 'sr150',   icon: '🔧', group: 'Taller',     desc: 'Preparar 150 vehículos',         type: 'totalRepair', target: 150,   reward: { diamonds: 15  } },
+    { id: 'sr300',   icon: '🔧', group: 'Taller',     desc: 'Preparar 300 vehículos',         type: 'totalRepair', target: 300,   reward: { diamonds: 25  } },
+    { id: 'sr600',   icon: '🔧', group: 'Taller',     desc: 'Preparar 600 vehículos',         type: 'totalRepair', target: 600,   reward: { diamonds: 40  } },
+    { id: 'sr1500',  icon: '🔧', group: 'Taller',     desc: 'Preparar 1500 vehículos',        type: 'totalRepair', target: 1500,  reward: { diamonds: 60  } },
+    { id: 'sw1',     icon: '🥇', group: 'Carreras',   desc: 'Ganar 1 carrera',                type: 'totalWin',    target: 1,     reward: { diamonds: 3   } },
+    { id: 'sw5',     icon: '🥇', group: 'Carreras',   desc: 'Ganar 5 carreras',               type: 'totalWin',    target: 5,     reward: { diamonds: 8   } },
+    { id: 'sw25',    icon: '🥇', group: 'Carreras',   desc: 'Ganar 25 carreras',              type: 'totalWin',    target: 25,    reward: { diamonds: 20  } },
+    { id: 'sw100',   icon: '🥇', group: 'Carreras',   desc: 'Ganar 100 carreras',             type: 'totalWin',    target: 100,   reward: { diamonds: 50  } },
+    { id: 'sp1',     icon: '🟣', group: 'Carreras',   desc: 'Conseguir 1 pole',               type: 'totalPole',   target: 1,     reward: { diamonds: 2   } },
+    { id: 'sp10',    icon: '🟣', group: 'Carreras',   desc: 'Conseguir 10 poles',             type: 'totalPole',   target: 10,    reward: { diamonds: 15  } },
+    { id: 'sp50',    icon: '🟣', group: 'Carreras',   desc: 'Conseguir 50 poles',             type: 'totalPole',   target: 50,    reward: { diamonds: 35  } },
+    { id: 'sl10',    icon: '⭐', group: 'Progresión', desc: 'Alcanzar nivel 10',              type: 'level',       target: 10,    reward: { diamonds: 10  } },
+    { id: 'sl25',    icon: '⭐', group: 'Progresión', desc: 'Alcanzar nivel 25',              type: 'level',       target: 25,    reward: { diamonds: 25  } },
+    { id: 'sl50',    icon: '⭐', group: 'Progresión', desc: 'Alcanzar nivel 50',              type: 'level',       target: 50,    reward: { diamonds: 50  } },
+    { id: 'smg5',    icon: '🚛', group: 'Minijuego',  desc: 'Jugar 5 partidas del camión',   type: 'totalMini',   target: 5,     reward: { diamonds: 5   } },
+    { id: 'smg20',   icon: '🚛', group: 'Minijuego',  desc: 'Jugar 20 partidas del camión',  type: 'totalMini',   target: 20,    reward: { diamonds: 15  } },
+    { id: 'suc1',    icon: '⚙️', group: 'Mejoras',    desc: 'Mejorar 5 piezas del auto',     type: 'totalUpgCar', target: 5,     reward: { diamonds: 4   } },
+    { id: 'suc2',    icon: '⚙️', group: 'Mejoras',    desc: 'Mejorar 20 piezas del auto',    type: 'totalUpgCar', target: 20,    reward: { diamonds: 12  } },
+    { id: 'sug1',    icon: '🏗',  group: 'Mejoras',    desc: 'Mejorar el garage 3 veces',     type: 'totalUpgGar', target: 3,     reward: { diamonds: 5   } },
+    { id: 'ssh1',    icon: '👷', group: 'Mejoras',    desc: 'Contratar 3 mecánicos',         type: 'totalStaff',  target: 3,     reward: { diamonds: 6   } },
+    { id: 'ssh2',    icon: '👷', group: 'Mejoras',    desc: 'Contratar 10 mecánicos',        type: 'totalStaff',  target: 10,    reward: { diamonds: 18  } },
 ];
 
 // ── Google Play Achievement hooks ─────────────────────────────────
@@ -66,7 +72,7 @@ const TaskManager = {
 
     init() {
         if (!game.tasks) game.tasks = { dailyReset: 0, dailyIds: [], dailyProgress: {}, dailyClaimed: {}, superClaimed: {} };
-        if (!game.stats)  game.stats = { totalRepairs: 0, totalRacesRun: 0, totalWins: 0, totalPoles: 0, totalMinigames: 0, totalRaceCoins: 0 };
+        if (!game.stats)  game.stats = { totalRepairs: 0, totalRacesRun: 0, totalWins: 0, totalPoles: 0, totalMinigames: 0, totalRaceCoins: 0, totalUpgCar: 0, totalUpgGar: 0, totalStaff: 0 };
         this.checkDailyReset();
         this._updateBadge();
     },
@@ -97,11 +103,14 @@ const TaskManager = {
     getSuperProgress(task) {
         const s = game.stats || {};
         switch (task.type) {
-            case 'totalRepair': return s.totalRepairs    || 0;
-            case 'totalWin':    return s.totalWins       || 0;
-            case 'totalPole':   return s.totalPoles      || 0;
-            case 'level':       return game.level        || 1;
-            case 'totalMini':   return s.totalMinigames  || 0;
+            case 'totalRepair':  return s.totalRepairs   || 0;
+            case 'totalWin':     return s.totalWins      || 0;
+            case 'totalPole':    return s.totalPoles     || 0;
+            case 'level':        return game.level       || 1;
+            case 'totalMini':    return s.totalMinigames || 0;
+            case 'totalUpgCar':  return s.totalUpgCar    || 0;
+            case 'totalUpgGar':  return s.totalUpgGar    || 0;
+            case 'totalStaff':   return s.totalStaff     || 0;
         }
         return 0;
     },
@@ -201,7 +210,6 @@ function _renderTasksContent() {
         _renderSuperTasks(body);
     }
 
-    // Update tab highlights
     document.querySelectorAll('.tov-tab').forEach(btn => {
         btn.classList.toggle('tov-tab-active', btn.dataset.tab === _tasksTab);
     });
@@ -210,12 +218,11 @@ function _renderTasksContent() {
 function _renderDailyTasks(el) {
     const tasks = TaskManager.getDailyTasks();
 
-    // Time until next reset
-    const now     = Date.now();
+    const now      = Date.now();
     const tomorrow = (game.tasks.dailyReset || 0) + 86400000;
-    const diff    = Math.max(0, tomorrow - now);
-    const hrs     = Math.floor(diff / 3600000);
-    const mins    = Math.floor((diff % 3600000) / 60000);
+    const diff     = Math.max(0, tomorrow - now);
+    const hrs      = Math.floor(diff / 3600000);
+    const mins     = Math.floor((diff % 3600000) / 60000);
 
     const taskCards = tasks.map(task => {
         const prog     = TaskManager.getDailyProgress(task);

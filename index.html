@@ -40,12 +40,17 @@
                 </div>
             </div>
 
-            <!-- Sponsors button (center) -->
-            <button class="hud-sponsor-btn" onclick="showScreen('sponsors')">
-                <span class="hud-sponsor-icon">💰</span>
-                <span id="hudSponsorName">Sponsors</span>
-                <span class="hud-sponsor-wheel">⚙</span>
-            </button>
+            <!-- Sponsors + Staff buttons (compact, stacked) -->
+            <div class="hud-mid-btns">
+                <button class="hud-top-btn hud-sponsor-btn" onclick="showScreen('sponsors')">
+                    <span class="htb-icon">💰</span>
+                    <span id="hudSponsorName" class="htb-label">Sponsors</span>
+                </button>
+                <button class="hud-top-btn hud-staff-btn" onclick="showScreen('employees')">
+                    <span class="htb-icon">👷</span>
+                    <span class="htb-label">Staff</span>
+                </button>
+            </div>
 
             <!-- Currency column (right) — money top, diamonds bottom, store btn below -->
             <div id="hudCurrency">
@@ -65,6 +70,9 @@
 
         </div><!-- /garageHud -->
 
+        <!-- ── GARAGE CAR VISUAL LAYER ── -->
+        <div id="garageCarLayer"></div>
+
         <!-- ── SINGLE RECEIVE BUTTON (center floor) ── -->
         <button id="recieveCarBtn" onclick="repair_car()">
             <span class="rcv-icon">🚗</span>
@@ -72,12 +80,8 @@
             <div class="rcv-bar-wrap"><div class="rcv-bar" id="rcvBar"></div></div>
         </button>
 
-        <!-- ── LEFT FLOATING BUTTONS (Staff + Taller + Carrera) ── -->
+        <!-- ── LEFT FLOATING BUTTONS (Taller + Carrera) ── -->
         <div id="leftFabs">
-            <button class="lfab-btn" onclick="showScreen('employees')">
-                <div class="lfab-faces"><span>👩</span><span>👨</span><span>🧔</span></div>
-                <span class="lfab-label">Staff</span>
-            </button>
             <button class="lfab-btn" onclick="showScreen('workshop')">
                 <span class="lfab-icon">🔧</span>
                 <span class="lfab-label">Taller</span>

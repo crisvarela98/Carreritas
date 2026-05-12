@@ -8,7 +8,7 @@ const VEHICLE_CATALOG = {
         color:        "#3b82f6",
         unlockLevel:  1,
         leagueId:     "car",
-        basePace:     92,       // seconds per lap (lower = faster)
+        basePace:     92,
         baseStats:    { hp: 350, torque: 476, cv: 355 },
         lapLabel:     "Vuelta",
         totalLaps:    20,
@@ -55,47 +55,47 @@ const VEHICLE_CATALOG = {
     }
 };
 
-// ── Rivals per vehicle type ───────────────────────────────────────
+// ── Rivals per vehicle type (fictional names) ─────────────────────
 const VEHICLE_RIVALS = {
     car: [
-        { name: "Hamilton",   basePace: 82 },
-        { name: "Verstappen", basePace: 81 },
-        { name: "Leclerc",    basePace: 83 },
-        { name: "Norris",     basePace: 84 },
-        { name: "Sainz",      basePace: 85 },
-        { name: "Russell",    basePace: 84 },
-        { name: "Alonso",     basePace: 86 },
-        { name: "Pérez",      basePace: 86 },
+        { name: "Lanston",  basePace: 82 },
+        { name: "Velstra",  basePace: 81 },
+        { name: "Laclair",  basePace: 83 },
+        { name: "Noris",    basePace: 84 },
+        { name: "Saenz",    basePace: 85 },
+        { name: "Reston",   basePace: 84 },
+        { name: "Alende",   basePace: 86 },
+        { name: "Peraza",   basePace: 86 },
     ],
     moto: [
-        { name: "Márquez",    basePace: 54 },
-        { name: "Bagnaia",    basePace: 55 },
-        { name: "Quartararo", basePace: 56 },
-        { name: "Binder",     basePace: 57 },
-        { name: "Viñales",    basePace: 57 },
-        { name: "Zarco",      basePace: 58 },
-        { name: "Miller",     basePace: 58 },
-        { name: "Bastianini", basePace: 56 },
+        { name: "Markes",    basePace: 54 },
+        { name: "Padagna",   basePace: 55 },
+        { name: "Quartetti", basePace: 56 },
+        { name: "Brinder",   basePace: 57 },
+        { name: "Venales",   basePace: 57 },
+        { name: "Zarko",     basePace: 58 },
+        { name: "Muller",    basePace: 58 },
+        { name: "Bastini",   basePace: 56 },
     ],
     rally: [
-        { name: "Ogier",       basePace: 95 },
-        { name: "Loeb",        basePace: 96 },
-        { name: "Evans",       basePace: 97 },
-        { name: "Neuville",    basePace: 96 },
-        { name: "Rovanperä",   basePace: 95 },
-        { name: "Fourmaux",    basePace: 98 },
-        { name: "Lappi",       basePace: 98 },
-        { name: "Solberg",     basePace: 99 },
+        { name: "Ovier",     basePace: 95 },
+        { name: "Lieb",      basePace: 96 },
+        { name: "Evano",     basePace: 97 },
+        { name: "Nouvella",  basePace: 96 },
+        { name: "Romanera",  basePace: 95 },
+        { name: "Formaux",   basePace: 98 },
+        { name: "Lappo",     basePace: 98 },
+        { name: "Solbeck",   basePace: 99 },
     ],
     formula: [
-        { name: "Hamilton",    basePace: 68 },
-        { name: "Verstappen",  basePace: 67 },
-        { name: "Leclerc",     basePace: 69 },
-        { name: "Senna",       basePace: 68 },
-        { name: "Schumacher",  basePace: 70 },
-        { name: "Prost",       basePace: 69 },
-        { name: "Norris",      basePace: 70 },
-        { name: "Piastri",     basePace: 71 },
+        { name: "Lanston",   basePace: 68 },
+        { name: "Velstra",   basePace: 67 },
+        { name: "Laclair",   basePace: 69 },
+        { name: "Seno",      basePace: 68 },
+        { name: "Shumack",   basePace: 70 },
+        { name: "Proth",     basePace: 69 },
+        { name: "Noris",     basePace: 70 },
+        { name: "Piartri",   basePace: 71 },
     ]
 };
 
@@ -137,14 +137,12 @@ function getVehiclePace(vehicleId) {
     const up       = veh.upgrades;
     const base     = def.basePace;
 
-    // Part bonuses (seconds reduction per lap)
     const motorBonus      = ((up.motor      || 1) - 1) * 2.0;
     const turboBonus      = (up.turbo       || 0) * 1.5;
     const brakesBonus     = ((up.brakes     || 1) - 1) * 0.8;
     const tiresBonus      = ((up.tires      || 1) - 1) * 1.2;
     const suspensionBonus = ((up.suspension || 1) - 1) * 0.6;
 
-    // Other bonuses
     const repBonus     = Math.min(game.reputation * 0.05, 5);
     const sponsorBonus = game.sponsor ? 1 : 0;
     const mechBonus    = Math.min(getTotalMechanicSpeed() * 0.3, 3);
@@ -159,6 +157,7 @@ function unlockVehicle(vehicleId) {
     game.vehicles[vehicleId].owned = true;
     notifySuccess(`¡${VEHICLE_CATALOG[vehicleId].icon} ${VEHICLE_CATALOG[vehicleId].name} desbloqueado!`);
     if (window.LeagueManager) LeagueManager.init(vehicleId);
+    if (window.FTUEManager && FTUEManager.onVehicleUnlocked) FTUEManager.onVehicleUnlocked(vehicleId);
 }
 
 function checkVehicleUnlocks() {

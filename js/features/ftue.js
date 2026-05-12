@@ -18,6 +18,19 @@ const FTUEManager = (() => {
         }
     ];
 
+    // Tips shown at specific levels/events (after FTUE is done)
+    const LEVEL_TIPS = {
+        5:  { title: '¡Conseguí un sponsor!',   hint: 'Toca 💰 Sponsors arriba. Un sponsor te da más dinero en cada carrera. ¡No te lo pierdas!' },
+        10: { title: '¡Mejorá el taller!',       hint: 'Toca 🔧 Taller → Garage. Las herramientas Pro aceleran las reparaciones. ¡Ahorrás tiempo!' },
+        20: { title: '¡Completá tus tareas!',    hint: 'Toca 🎯 arriba a la derecha. Las tareas diarias te dan monedas y XP gratis todos los días.' },
+    };
+
+    const VEHICLE_TIPS = {
+        moto:    { title: '¡Moto desbloqueada! 🏍',       hint: 'La moto es más rápida que el auto. Úsala en carreras para sumar más puntos de liga.' },
+        rally:   { title: '¡Camioneta Rally! 🚙',          hint: 'Terreno, barro, grava... ¡la Rally lo maneja todo! Llevala al off-road y dominá el campeonato.' },
+        formula: { title: '¡Fórmula desbloqueada! 🏎',    hint: 'La categoría reina del automovilismo. Mejorá todas las piezas al máximo para competir de verdad.' },
+    };
+
     function step()   { return game.ftue ? game.ftue.step : 0; }
     function isDone() { return game.ftue && game.ftue.completed; }
 
@@ -47,39 +60,63 @@ const FTUEManager = (() => {
         return el;
     }
 
-    function _show(s) {
-        const el = _getContainer();
-        const dots = s.dots.map(active =>
-            `<div class="ftue-dot${active ? ' ftue-dot-active' : ''}"></div>`
-        ).join('');
-
-        el.innerHTML = `
+    function _buildBubble(title, hint, dots, nextLabel, nextAction) {
+        const dotsHtml = dots
+            ? dots.map(active => `<div class="ftue-dot${active ? ' ftue-dot-active' : ''}"></div>`).join('')
+            : '';
+        return `
         <div class="ftue-panel">
             <div class="ftue-bubble">
                 <div class="ftue-bubble-name">🦁 TATA LION</div>
-                <div class="ftue-bubble-title">${s.title}</div>
-                <div class="ftue-bubble-hint">${s.hint}</div>
+                <div class="ftue-bubble-title">${title}</div>
+                <div class="ftue-bubble-hint">${hint}</div>
                 <div class="ftue-bubble-footer">
-                    <div class="ftue-dots">${dots}</div>
-                    <button class="ftue-skip-btn" onclick="FTUEManager.skip()">Saltar tutorial</button>
+                    <div class="ftue-dots">${dotsHtml}</div>
+                    <div class="ftue-footer-right">
+                        <button class="ftue-next-btn" onclick="${nextAction}">${nextLabel}</button>
+                        ${dots ? `<button class="ftue-skip-btn" onclick="FTUEManager.skip()">Saltar tutorial</button>` : ''}
+                    </div>
                 </div>
             </div>
             <div class="ftue-character">
                 <img src="assets/tata-lion.png" alt="Tata Lion">
             </div>
         </div>`;
+    }
+
+    function _show(s) {
+        const el = _getContainer();
+        const nextStep  = s.step + 1;
+        const nextLabel = nextStep >= 3 ? 'Finalizar →' : 'Siguiente →';
+        el.innerHTML = _buildBubble(s.title, s.hint, s.dots, nextLabel, `FTUEManager.next()`);
+        el.classList.add('ftue-visible');
+    }
+
+    function _showTip(title, hint) {
+        const el = _getContainer();
+        el.innerHTML = _buildBubble(title, hint, null, '¡Entendido!', `FTUEManager.closeTip()`);
         el.classList.add('ftue-visible');
     }
 
     function _hide() {
         const el = document.getElementById('ftue-overlay');
-        if (el) { el.classList.remove('ftue-visible'); setTimeout(() => el.remove(), 300); }
+        if (el) { el.classList.remove('ftue-visible'); setTimeout(() => el.remove(), 320); }
     }
 
     function skip() {
         game.ftue = { completed: true, step: 3 };
         _hide();
         save_user_progress();
+    }
+
+    function next() {
+        const s = step();
+        if (s >= 2) { skip(); return; }
+        advance(s + 1);
+    }
+
+    function closeTip() {
+        _hide();
     }
 
     function init() {
@@ -93,16 +130,33 @@ const FTUEManager = (() => {
     return {
         init,
         skip,
+        next,
+        closeTip,
         isCompleted: isDone,
         currentStep: step,
-        onProfileSaved()          { if (step() === 0) advance(1); },
-        onCarReceived()           { if (step() === 1) advance(2); },
-        onCarCompleted()          { },
-        onRaceStarted()           { },
-        onRaceCompleted()         { if (step() === 2) advance(3); },
-        onCarUpgraded()           { },
-        onMechanicHired()         { },
-        onGarageUpgradePurchased(){ }
+        onProfileSaved()    { if (step() === 0) advance(1); },
+        onCarReceived()     { if (step() === 1) advance(2); },
+        onCarCompleted()    { },
+        onRaceStarted()     { },
+        onRaceCompleted()   { if (step() === 2) advance(3); },
+        onCarUpgraded()     { },
+        onMechanicHired()   { },
+        onGarageUpgradePurchased() { },
+
+        // Tip shown when a vehicle unlocks
+        onVehicleUnlocked(vehicleId) {
+            const tip = VEHICLE_TIPS[vehicleId];
+            if (tip) _showTip(tip.title, tip.hint);
+        },
+
+        // Tip shown on level-up milestones
+        onLevelUp(level) {
+            const tip = LEVEL_TIPS[level];
+            if (tip) _showTip(tip.title, tip.hint);
+        },
+
+        // Manual tip trigger (can be called from anywhere)
+        showTip: _showTip
     };
 })();
 
