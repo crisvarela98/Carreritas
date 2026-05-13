@@ -2302,64 +2302,69 @@ html, body {
     overflow: hidden;
 }
 
-/* First-person sky + asphalt background */
+/* First-person sky + asphalt — fills the road div.
+   Visible only through the transparent windshield in cabin.png */
 .mg-road.mg-fp {
     background: linear-gradient(
         to bottom,
-        #7ec8e3 0%,      /* sky top */
-        #a8dce8 30%,     /* sky horizon */
-        #5a5a5a 38%,     /* road edge */
-        #3a3a3a 55%,     /* mid road */
-        #1e1e1e 100%     /* near road */
+        #87ceeb 0%,      /* sky top */
+        #b0dff0 28%,     /* sky near horizon */
+        #6a8a6a 35%,     /* treeline / horizon */
+        #505050 40%,     /* road edge */
+        #363636 58%,     /* mid road */
+        #1a1a1a 100%     /* near road (dark, under cabin) */
     );
 }
 
-/* Perspective lane dividers — thin at horizon, wide at bottom */
+/* Perspective lane dividers — converge at windshield center (~55%)
+   to match the A-pillar-offset windshield of the new cabin image */
 .mg-lane {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.80);
+    z-index: 4;
 }
-.mg-lane.l1 { clip-path: polygon(39% 33%, 41% 33%, 27% 100%, 23% 100%); }
-.mg-lane.l2 { clip-path: polygon(59% 33%, 61% 33%, 77% 100%, 73% 100%); }
+.mg-lane.l1 { clip-path: polygon(54% 32%, 56% 32%, 39% 100%, 37% 100%); }
+.mg-lane.l2 { clip-path: polygon(62% 32%, 64% 32%, 71% 100%, 69% 100%); }
 
-/* Cabin overlay — cabin.png already active */
+/* ── Cabin — full-screen foreground overlay ─────────────────────
+   The PNG has a transparent windshield area at the top.
+   Obstacles (z-index 9) show THROUGH that transparent window.
+   Opaque parts (dashboard, A-pillar, ceiling) mask everything
+   behind them naturally — no extra clipping needed.          */
 .mg-fp-cabin {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 45%;
+    inset: 0;
     background-image: url('/assets/cabin.png');
     background-size: cover;
     background-position: top center;
     pointer-events: none;
-    z-index: 15;
+    z-index: 50;
 }
 
-/* Invisible player hitbox — sits just above cabin */
+/* Invisible player hitbox — behind cabin, collision still fires */
 /* Uncomment background to debug: background: rgba(255,0,0,0.35); */
 .mg-player-hitbox {
     position: absolute;
-    bottom: 43%;
+    top: 42%;
     width: 52px;
     height: 48px;
     transform: translateX(-50%);
     transition: left 0.12s ease;
-    z-index: 16;
+    z-index: 48;
     pointer-events: none;
 }
 
-/* ── Lane indicator ─────────────────────────────────────────────── */
+/* ── Lane indicator — inside windshield, above cabin ────────────── */
 .mg-lane-ind {
     position: absolute;
-    bottom: 47%;
-    left: 50%;
+    top: 38%;
+    left: 60%;
     transform: translateX(-50%);
     display: flex;
     gap: 6px;
-    z-index: 22;
+    z-index: 55;
     pointer-events: none;
 }
 .mg-li {
@@ -2407,13 +2412,13 @@ html, body {
 .car-blue   { background: linear-gradient(145deg, #4a90e2, #1a3a7a); }
 .car-green  { background: linear-gradient(145deg, #3dba6f, #145e30); }
 
-/* Tap zones (invisible touch areas) */
+/* Tap zones — above cabin so touch works through overlay */
 .mg-tap-z {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 33.3%;
-    z-index: 20;
+    z-index: 60;
     cursor: pointer;
 }
 .mg-tap-left  { left: 0; }

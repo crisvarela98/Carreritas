@@ -1,10 +1,11 @@
 // ── Mini-game: Camión Ciudad — First Person View ──────────────────
 // Lane x% at the BOTTOM of the visible road (where player is)
-const MG_LANE_BOT = [20, 50, 80];
-// Lane x% at the HORIZON (where all lanes converge)
-const MG_LANE_HOR = [47, 50, 53];
+// Shifted right because the A-pillar sits on the left side of the windshield
+const MG_LANE_BOT = [38, 55, 72];
+// Lane x% at the HORIZON (all lanes converge near windshield center ~58%)
+const MG_LANE_HOR = [55, 58, 63];
 // Lane positions for hitbox (matches bottom spread)
-const MG_LANE_PCTS = ['20%', '50%', '80%'];
+const MG_LANE_PCTS = ['38%', '55%', '72%'];
 // Lane labels
 const MG_LANE_LABELS = ['IZQ', 'CEN', 'DER'];
 
