@@ -173,7 +173,6 @@ function openProfileSheet() {
 
     <button class="rbtn" onclick="closeProfileSheet(); showScreen('leaderboard')">🌍 Ranking Global</button>
     <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +2 💎</button>
-    <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
 
     <!-- Version info -->
     <div class="profile-info-btn-wrap">
@@ -250,7 +249,6 @@ function renderProfile() {
     </div>
     <button class="rbtn" onclick="showScreen('leaderboard')">🌍 Ranking Global</button>
     <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +2 💎</button>
-    <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
     <div class="profile-info-btn-wrap">
         <button class="rbtn profile-info-btn" onclick="showVersionInfo()">ℹ️ Información · v1.0</button>
     </div>
