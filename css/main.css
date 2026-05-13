@@ -2324,14 +2324,13 @@ html, body {
 .mg-lane.l1 { clip-path: polygon(39% 33%, 41% 33%, 27% 100%, 23% 100%); }
 .mg-lane.l2 { clip-path: polygon(59% 33%, 61% 33%, 77% 100%, 73% 100%); }
 
-/* Cabin overlay — set background-image to assets/cabin.png when ready */
-/* background-image: url('/assets/cabin.png');                            */
+/* Cabin overlay — cabin.png already active */
 .mg-fp-cabin {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 55%;
+    height: 45%;
     background-image: url('/assets/cabin.png');
     background-size: cover;
     background-position: top center;
@@ -2339,18 +2338,54 @@ html, body {
     z-index: 15;
 }
 
-/* Invisible player hitbox — the player IS the camera */
-/* Uncomment background below to debug hitbox position  */
+/* Invisible player hitbox — sits just above cabin */
+/* Uncomment background to debug: background: rgba(255,0,0,0.35); */
 .mg-player-hitbox {
     position: absolute;
-    bottom: 58%;          /* sits just above the cabin overlay */
+    bottom: 43%;
     width: 52px;
     height: 48px;
     transform: translateX(-50%);
     transition: left 0.12s ease;
     z-index: 16;
     pointer-events: none;
-    /* background: rgba(255,0,0,0.35); */
+}
+
+/* ── Lane indicator ─────────────────────────────────────────────── */
+.mg-lane-ind {
+    position: absolute;
+    bottom: 47%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 22;
+    pointer-events: none;
+}
+.mg-li {
+    width: 42px;
+    height: 22px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.45);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.45);
+    font-size: 9px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.8px;
+    transition: background 0.12s, border-color 0.12s, color 0.12s, box-shadow 0.12s;
+}
+.mg-li.active {
+    background: rgba(59,130,246,0.85);
+    border-color: #93c5fd;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(59,130,246,0.7);
+}
+.mg-li.flash {
+    background: rgba(255,255,255,0.9);
+    color: #1e40af;
 }
 
 /* ── Obstacle cars — colored DIV squares ───────────────────────

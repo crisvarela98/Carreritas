@@ -1,14 +1,18 @@
 // ── Mini-game: Camión Ciudad — First Person View ──────────────────
-// Lane positions (% from left) — used for obstacles & hitbox
+// Lane x% at the BOTTOM of the visible road (where player is)
+const MG_LANE_BOT = [20, 50, 80];
+// Lane x% at the HORIZON (where all lanes converge)
+const MG_LANE_HOR = [47, 50, 53];
+// Lane positions for hitbox (matches bottom spread)
 const MG_LANE_PCTS = ['20%', '50%', '80%'];
+// Lane labels
+const MG_LANE_LABELS = ['IZQ', 'CEN', 'DER'];
 
-// Obstacle colors — swap className or set innerHTML for PNG later:
-//   el.className = 'mg-car car-red';   ← change color here
-//   el.innerHTML = '<img src="cars/auto1.png">';  ← or swap to PNG
+// Obstacle colors — swap for PNG: el.innerHTML = '<img src="cars/auto1.png">';
 const MG_CAR_COLORS = ['car-red', 'car-yellow', 'car-blue', 'car-green'];
 
 const MiniGame = {
-    lane:       1,      // 0=left  1=center  2=right
+    lane:       1,
     score:      0,
     running:    false,
     _scoreInt:  null,
@@ -33,7 +37,7 @@ const MiniGame = {
             <div class="mg-big-icon">🚛</div>
             <div class="mg-start-title">CAMIÓN CIUDAD</div>
             <div class="mg-start-desc">Esquivá el tráfico · Ganás <span style="color:var(--green)">$150</span> por segundo</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">30 segundos de supervivencia = $4,500</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">60 segundos de supervivencia = $9,000</div>
             <button class="rbtn accent-btn mg-start-btn" onclick="MiniGame.start()">▶ ARRANCAR</button>
             <div class="mg-tap-hint">◀ Toca izquierda/derecha para cambiar carril ▶</div>
         </div>`;
@@ -48,15 +52,20 @@ const MiniGame = {
         this._obstacles = [];
         this._startTs   = Date.now();
 
-        // ── First-person road HTML ──────────────────────────────────
-        // mgPlayer is an INVISIBLE hitbox — the player IS the camera
-        // To add a cabin image later, set background-image on .mg-fp-cabin
         area.innerHTML = `
         <div id="mgRoad" class="mg-road mg-fp">
             <div class="mg-lane l1"></div>
             <div class="mg-lane l2"></div>
             <div class="mg-fp-cabin"></div>
             <div id="mgPlayer" class="mg-player-hitbox"></div>
+
+            <!-- Lane indicator: shows IZQ / CEN / DER -->
+            <div class="mg-lane-ind">
+                <div id="mgLaneL" class="mg-li">IZQ</div>
+                <div id="mgLaneC" class="mg-li active">CEN</div>
+                <div id="mgLaneR" class="mg-li">DER</div>
+            </div>
+
             <div class="mg-tap-z mg-tap-left"
                  ontouchstart="MiniGame.moveLeft();event.preventDefault()"
                  onclick="MiniGame.moveLeft()"></div>
@@ -93,11 +102,9 @@ const MiniGame = {
             if (pct >= 100) { clearInterval(barTick); this._endGame(true); }
         }, 500);
 
-        // Spawn & collide
         this._spawnObstacle();
         this._collInt = setInterval(() => this._checkCollision(), 200);
 
-        // Keyboard support — unchanged
         this._keyHandler = (e) => {
             if (e.key === 'ArrowLeft')  this.moveLeft();
             if (e.key === 'ArrowRight') this.moveRight();
@@ -105,18 +112,39 @@ const MiniGame = {
         document.addEventListener('keydown', this._keyHandler);
     },
 
-    // ── Hitbox only (player = camera, not drawn) ────────────────────
+    // ── Invisible hitbox + lane indicator update ────────────────────
     _positionPlayer() {
         const p = document.getElementById('mgPlayer');
-        if (!p) return;
-        p.style.left      = MG_LANE_PCTS[this.lane];
-        p.style.transform = 'translateX(-50%)';
+        if (p) {
+            p.style.left      = MG_LANE_PCTS[this.lane];
+            p.style.transform = 'translateX(-50%)';
+        }
+        // Update lane indicator highlight
+        ['mgLaneL', 'mgLaneC', 'mgLaneR'].forEach((id, i) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('active', i === this.lane);
+        });
     },
 
-    moveLeft()  { if (this.lane > 0) { this.lane--; this._positionPlayer(); } },
-    moveRight() { if (this.lane < 2) { this.lane++; this._positionPlayer(); } },
+    moveLeft() {
+        if (this.lane > 0) { this.lane--; this._positionPlayer(); this._flashLane(); }
+    },
+    moveRight() {
+        if (this.lane < 2) { this.lane++; this._positionPlayer(); this._flashLane(); }
+    },
 
-    // ── Obstacle spawn — first-person perspective ───────────────────
+    // Brief flash to confirm lane change
+    _flashLane() {
+        const ids = ['mgLaneL', 'mgLaneC', 'mgLaneR'];
+        const el  = document.getElementById(ids[this.lane]);
+        if (!el) return;
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 220);
+    },
+
+    // ── Obstacle spawn — perspective-correct x position ─────────────
+    // Cars start at the horizon (all lanes near 50%) and drift to
+    // their real lane position as they approach the player.
     _spawnObstacle() {
         if (!this.running) return;
         const road = document.getElementById('mgRoad');
@@ -125,37 +153,46 @@ const MiniGame = {
         const lane       = Math.floor(Math.random() * 3);
         const colorClass = MG_CAR_COLORS[Math.floor(Math.random() * MG_CAR_COLORS.length)];
 
-        // ── To swap to PNG later: replace className + add innerHTML ──
-        // el.className = 'mg-car car-red';
+        // ── To swap to PNG later: ────────────────────────────────────
+        // el.className = 'mg-car';
         // el.innerHTML = '<img src="cars/auto1.png">';
         const el = document.createElement('div');
         el.className    = `mg-car ${colorClass}`;
         el.dataset.lane = lane;
-
-        // Start at lane column, near the horizon
-        el.style.left      = MG_LANE_PCTS[lane];
-        el.style.position  = 'absolute';
+        el.style.position = 'absolute';
         road.appendChild(el);
         this._obstacles.push(el);
 
-        const roadH = road.offsetHeight || 500;
+        const roadH   = road.offsetHeight || 500;
+        // Y where lanes visually converge (horizon line)
+        const horizonY = roadH * 0.28;
+        // Y at top of cabin (bottom of visible road)
+        const cabinY   = roadH * 0.55;
 
-        // Depth animation: starts small & high (horizon), grows as it approaches
-        let y     = -80;      // px from top of road area
-        let scale = 0.3;      // starts small
+        // Returns perspective-correct x% for a given y
+        const perspX = (y) => {
+            const p = Math.max(0, Math.min(1, (y - horizonY) / (cabinY - horizonY)));
+            return MG_LANE_HOR[lane] + (MG_LANE_BOT[lane] - MG_LANE_HOR[lane]) * p;
+        };
+
+        let y     = -80;
+        let scale = 0.2;
         const speed = 4 + Math.random() * 3;
 
         el.style.top       = y + 'px';
+        el.style.left      = '50%';
         el.style.transform = `translateX(-50%) scale(${scale})`;
 
         const anim = setInterval(() => {
             if (!this.running) { clearInterval(anim); el.remove(); return; }
             y     += speed;
-            scale += 0.015;
+            scale += 0.013;
+            const x = perspX(y);
             el.style.top       = y + 'px';
+            el.style.left      = x + '%';
             el.style.transform = `translateX(-50%) scale(${Math.min(scale, 3)})`;
 
-            // Remove when past 70% of road height (car passed the player)
+            // Remove when past bottom of visible road
             if (y > roadH * 0.70) {
                 clearInterval(anim);
                 el.remove();
@@ -163,12 +200,11 @@ const MiniGame = {
             }
         }, 30);
 
-        // Spawn next — gets faster over time
         const delay = Math.max(600, 1400 - Math.min(800, (Date.now() - this._startTs) / 60));
         this._spawnTO = setTimeout(() => this._spawnObstacle(), delay);
     },
 
-    // ── Collision detection — unchanged: uses getBoundingClientRect ─
+    // ── Collision detection — unchanged ─────────────────────────────
     _checkCollision() {
         const player = document.getElementById('mgPlayer');
         if (!player) return;
@@ -178,10 +214,7 @@ const MiniGame = {
             const or      = obs.getBoundingClientRect();
             const overlap = !(pr.right < or.left || pr.left > or.right ||
                                pr.bottom < or.top  || pr.top > or.bottom);
-            if (overlap) {
-                this._endGame(false);
-                return;
-            }
+            if (overlap) { this._endGame(false); return; }
         }
     },
 
@@ -199,7 +232,7 @@ const MiniGame = {
         game.stats.totalMinigames = (game.stats.totalMinigames || 0) + 1;
         if (window.TaskManager) { TaskManager.trackDaily('minigame'); TaskManager._updateBadge(); }
 
-        const area       = document.getElementById('mgGameArea');
+        const area      = document.getElementById('mgGameArea');
         if (!area) return;
         const resultIcon = survived ? '🏆' : '💥';
         const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
