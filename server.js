@@ -2,24 +2,9 @@ const express = require('express');
 const { Pool }  = require('pg');
 const cors      = require('cors');
 const path      = require('path');
-const fs        = require('fs');
 
 const app  = express();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-// Determine public server URL and write it to a static JS file so
-// GitHub Pages (or any external host) can reach the API.
-const serverUrl = process.env.REPLIT_DEV_DOMAIN
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-    : '';
-try {
-    fs.writeFileSync(
-        path.join(__dirname, 'js', 'server-url.js'),
-        `/* Auto-generated on server startup — do not edit manually */\nwindow.MGT_SERVER_URL = '${serverUrl}';\n`
-    );
-} catch (e) {
-    console.warn('[config] Could not write js/server-url.js:', e.message);
-}
 
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '2mb' }));

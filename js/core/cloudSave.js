@@ -8,7 +8,29 @@ const CloudSave = (() => {
     let _deviceId = null;
     let _syncing   = false;
     let _lastSyncedAt = 0;
-    let _offlineSilenced = false;   // avoid repeating offline warning
+    let _offlineSilenced = false;
+
+    // Replit server public URL — used when the game runs outside of Replit
+    // (e.g. GitHub Pages). Update this if the Repl URL ever changes.
+    const REPLIT_SERVER = 'https://dd7f52b6-ea99-43b2-8887-9c037baba08d-00-2qx1ff8q2g7g2.picard.replit.dev';
+
+    // Returns the API base URL.
+    // On Replit itself → empty string (relative URLs work fine).
+    // Everywhere else  → absolute Replit server URL.
+    function _base() {
+        const host = window.location.hostname;
+        if (
+            host === 'localhost' ||
+            host === '127.0.0.1' ||
+            host.endsWith('.replit.dev') ||
+            host.endsWith('.replit.app') ||
+            host.endsWith('.picard.replit.dev') ||
+            host.endsWith('.id.repl.co')
+        ) {
+            return '';
+        }
+        return REPLIT_SERVER;
+    }
 
     function _getDeviceId() {
         if (_deviceId) return _deviceId;
@@ -23,8 +45,6 @@ const CloudSave = (() => {
         _deviceId = id;
         return id;
     }
-
-    function _base() { return (window.MGT_SERVER_URL || ''); }
 
     async function save(gameState) {
         if (_syncing) return;
@@ -43,7 +63,6 @@ const CloudSave = (() => {
                 _updateSyncBadge(true);
             }
         } catch (_) {
-            // Only show offline badge once per session to avoid annoyance
             if (!_offlineSilenced) {
                 _updateSyncBadge(false);
                 _offlineSilenced = true;
@@ -81,7 +100,6 @@ const CloudSave = (() => {
             clearTimeout(el._t);
             el._t = setTimeout(() => { el.textContent = ''; }, 3000);
         } else {
-            // Offline — show briefly, don't keep nagging
             el.textContent = '⚠️ Sin conexión';
             el.className   = 'cloud-badge cloud-err';
             clearTimeout(el._t);
@@ -89,7 +107,7 @@ const CloudSave = (() => {
         }
     }
 
-    return { save, load, fetchLeaderboard, getDeviceId: _getDeviceId };
+    return { save, load, fetchLeaderboard, getDeviceId: _getDeviceId, base: _base };
 })();
 
 window.CloudSave = CloudSave;

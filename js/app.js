@@ -313,7 +313,7 @@ async function renderLeaderboard() {
     let rows = [];
     let connected = false;
     try {
-        const res  = await fetch((window.MGT_SERVER_URL || '') + '/api/leaderboard', { signal: AbortSignal.timeout(8000) });
+        const res  = await fetch(CloudSave.base() + '/api/leaderboard', { signal: AbortSignal.timeout(8000) });
         const json = await res.json();
         if (json.ok) { rows = json.rows; connected = true; }
     } catch (err) {
@@ -328,7 +328,7 @@ async function renderLeaderboard() {
             <div class="race-hero-title">🌍 RANKING GLOBAL</div>
             <div class="lb-offline-banner">
                 ⚠️ Sin conexión al servidor<br>
-                <small>Jugá en <strong>Replit</strong> para acceder al ranking global. El juego en GitHub Pages es solo local.</small>
+                <small>El servidor no responde en este momento. Intentá de nuevo más tarde.</small>
             </div>
             <div class="lb-mycard">
                 <div style="font-size:13px;font-weight:700;margin-bottom:6px">Tu progreso local:</div>
