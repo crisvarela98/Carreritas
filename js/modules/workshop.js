@@ -186,6 +186,20 @@ setInterval(() => {
 
 }, 1000);
 
+// ── Workshop Sheet open / close ───────────────────────────────────
+function openWorkshopSheet() {
+    const sheet = document.getElementById('workshopSheet');
+    if (sheet) sheet.classList.add('psheet-open');
+    const moneyEl = document.getElementById('workshopSheetMoney');
+    if (moneyEl) moneyEl.textContent = '$' + (game.money || 0).toLocaleString();
+    renderWorkshop();
+}
+
+function closeWorkshopSheet() {
+    const sheet = document.getElementById('workshopSheet');
+    if (sheet) sheet.classList.remove('psheet-open');
+}
+
 // ── renderWorkshop() ─────────────────────────────────────────────
 function renderWorkshop() {
     const el = document.getElementById("workshopContent");

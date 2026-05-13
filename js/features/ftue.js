@@ -124,16 +124,22 @@ const FTUEManager = (() => {
         if (el) { el.classList.remove('ftue-visible'); setTimeout(() => { if (el.parentNode) el.remove(); }, 320); }
     }
 
-    // ── Floating Tata Lion button (shown after tutorial) ──────────
+    // ── Tata Lion button is always in the HTML rightFabs column ──────
+    // _showFloatingBtn is now a no-op (button is always visible)
     function _showFloatingBtn() {
-        if (document.getElementById('tataFloatBtn')) return;
-        const btn = document.createElement('button');
-        btn.id        = 'tataFloatBtn';
-        btn.className = 'tata-float-btn';
-        btn.innerHTML = `<img src="assets/tata-lion.png" alt="Tata">`;
-        btn.title     = 'Tata Lion';
-        btn.onclick   = () => _showRandomTip();
-        (document.getElementById('app') || document.body).appendChild(btn);
+        // Button #tataFloatBtn lives permanently in #rightFabs (index.html)
+        // Nothing to inject — it's always there
+    }
+
+    // Called when player taps the Tata Lion button in rightFabs
+    function tataPress() {
+        if (!isDone()) {
+            // Show current tutorial step again
+            const s = STEPS.find(x => x.step === step());
+            if (s) _show(s);
+        } else {
+            _showRandomTip();
+        }
     }
 
     const _storyTips = [
@@ -194,6 +200,7 @@ const FTUEManager = (() => {
         skip,
         next,
         closeTip,
+        tataPress,
         isCompleted: isDone,
         currentStep: step,
         showTip: _showTip,

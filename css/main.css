@@ -19,7 +19,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
     z-index: 0;
     pointer-events: none;
 }
@@ -355,7 +355,7 @@
 .lfab-icon  { font-size: 22px; line-height: 1; }
 .lfab-label { font-size: 10px; font-weight: 900; letter-spacing: 0.3px; color: rgba(255,255,255,0.9); }
 
-/* ── RIGHT FABs ── */
+/* ── RIGHT FABs (Tasks + Truck + Tata Lion — 3-button column) ── */
 #rightFabs {
     position: absolute;
     right: 10px;
@@ -363,16 +363,16 @@
     z-index: 15;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 .rfab-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.15);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.15);
     background: rgba(8,12,26,0.88);
     color: #fff;
-    font-size: 22px;
+    font-size: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -381,9 +381,24 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     position: relative;
     transition: transform 0.12s, background 0.15s;
+    flex-shrink: 0;
 }
-.rfab-btn:hover  { background: rgba(30,55,120,0.9); transform: scale(1.1); }
+.rfab-btn:hover  { background: rgba(30,55,120,0.9); transform: scale(1.08); }
 .rfab-btn:active { transform: scale(0.92); }
+/* Tata Lion button — circular avatar */
+.rfab-tata {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    border-color: rgba(250,200,50,0.35);
+}
+.rfab-tata img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+}
 
 /* Carrera pill on left side — accent colour override */
 .lfab-carrera {
@@ -521,6 +536,21 @@
     flex-direction: column;
     overflow: hidden;
     animation: slide-up 0.22s ease;
+}
+/* Taller sheet variant for Workshop / Staff (more content) */
+.psheet-panel-tall {
+    max-height: 92vh;
+}
+/* Right side of sheet header (money box + close btn) */
+.psheet-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.psheet-money {
+    font-size: 12px !important;
+    padding: 3px 8px !important;
+    gap: 4px !important;
 }
 .psheet-handle {
     width: 40px;
@@ -676,6 +706,10 @@ html, body {
     height: 100%;
     overflow: hidden;
     background: var(--bg);
+    background-image: url('../assets/garage-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: var(--text);
     font-family: var(--font);
     font-size: 14px;

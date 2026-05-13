@@ -56,18 +56,20 @@ const VEHICLE_CATALOG = {
 };
 
 // ── Rivals per vehicle type ───────────────────────────────────────
-// Car rivals are SLOWER (trackday style) so new players can win and get excited
+// Car rivals — MEDIUM difficulty
+// Player base: 92s. Motor Lv1→90s, Lv2→88s, Lv3→86s + Turbo
+// Fresh player lands P4-P6. After Motor Lv2 fights for podium. Pole needs Lv3+.
 // basePace = lap time in seconds; HIGHER = slower
 const VEHICLE_RIVALS = {
     car: [
-        { name: "Lanston",  basePace: 103 },
-        { name: "Velstra",  basePace: 105 },
-        { name: "Laclair",  basePace: 101 },
-        { name: "Noris",    basePace: 107 },
-        { name: "Saenz",    basePace: 109 },
-        { name: "Reston",   basePace: 104 },
-        { name: "Alende",   basePace: 106 },
-        { name: "Peraza",   basePace: 108 },
+        { name: "Lanston",  basePace: 89  },   // fast — needs Motor Lv2 to beat
+        { name: "Velstra",  basePace: 91  },   // fast — needs Motor Lv1+
+        { name: "Laclair",  basePace: 94  },   // medium — close battle from start
+        { name: "Noris",    basePace: 96  },   // medium — beatable early
+        { name: "Saenz",    basePace: 98  },   // medium — beatable fresh
+        { name: "Reston",   basePace: 101 },   // slow — easy win from start
+        { name: "Alende",   basePace: 103 },   // slow
+        { name: "Peraza",   basePace: 106 },   // backmarker
     ],
     moto: [
         { name: "Markes",    basePace: 54 },

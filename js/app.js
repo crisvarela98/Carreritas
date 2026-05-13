@@ -1,13 +1,15 @@
 // ── Screen routing ────────────────────────────────────────────────
 function showScreen(id) {
+    // Workshop and Staff open as bottom sheets, not overlay screens
+    if (id === "workshop")  { openWorkshopSheet(); return; }
+    if (id === "employees") { openStaffSheet();    return; }
+
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     const screen = document.getElementById(id);
     if (screen) screen.classList.add("active");
 
     if (id === "race")        renderRaceScreen();
     if (id === "sponsors")    renderSponsors();
-    if (id === "employees")   renderEmployees();
-    if (id === "workshop")    renderWorkshop();
     if (id === "profile")     renderProfile();
     if (id === "leaderboard") renderLeaderboard();
     if (id === "dashboard")   updateGarageHud();
@@ -36,6 +38,11 @@ function updateGarageHud() {
 
     const monEl = $("hudMoney");
     if (monEl) monEl.textContent = "$" + (game.money || 0).toLocaleString();
+
+    const wsMoneyEl = $("workshopSheetMoney");
+    if (wsMoneyEl) wsMoneyEl.textContent = "$" + (game.money || 0).toLocaleString();
+    const stMoneyEl = $("staffSheetMoney");
+    if (stMoneyEl) stMoneyEl.textContent = "$" + (game.money || 0).toLocaleString();
 
     const spEl = $("hudSponsorName");
     if (spEl) spEl.textContent = game.sponsor ? game.sponsor.name : "Sponsors";

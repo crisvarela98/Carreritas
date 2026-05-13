@@ -1,5 +1,19 @@
 // ── Mechanics / Staff Module ──────────────────────────────────────
 
+function openStaffSheet() {
+    const sheet = document.getElementById('staffSheet');
+    if (sheet) sheet.classList.add('psheet-open');
+    const moneyEl = document.getElementById('staffSheetMoney');
+    if (moneyEl) moneyEl.textContent = '$' + (game.money || 0).toLocaleString();
+    renderEmployees();
+}
+
+function closeStaffSheet() {
+    const sheet = document.getElementById('staffSheet');
+    if (sheet) sheet.classList.remove('psheet-open');
+}
+
+
 // Speed is progress units added per second (car = 360s duration)
 // With base workshop speed of 1:
 //   Junior 0.8/s  → grouped car repair: ~280s (~4.5 min), stack more for faster

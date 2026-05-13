@@ -46,7 +46,7 @@
                     <span class="htb-icon">💰</span>
                     <span id="hudSponsorName" class="htb-label">Sponsors</span>
                 </button>
-                <button class="hud-top-btn hud-staff-btn" onclick="showScreen('employees')">
+                <button class="hud-top-btn hud-staff-btn" onclick="openStaffSheet()">
                     <span class="htb-icon">👷</span>
                     <span class="htb-label">Staff</span>
                 </button>
@@ -86,7 +86,7 @@
 
         <!-- ── LEFT FLOATING BUTTONS (Taller + Carrera) ── -->
         <div id="leftFabs">
-            <button class="lfab-btn" onclick="showScreen('workshop')">
+            <button class="lfab-btn" onclick="openWorkshopSheet()">
                 <span class="lfab-icon">🔧</span>
                 <span class="lfab-label">Taller</span>
             </button>
@@ -96,26 +96,20 @@
             </button>
         </div>
 
-        <!-- ── RIGHT FABs (Tasks + Mini-game) ── -->
+        <!-- ── RIGHT FABs (Tasks + Truck + Tata Lion — 3-column) ── -->
         <div id="rightFabs">
-            <button class="rfab-btn" onclick="MiniGame.open()">🚛</button>
             <button class="rfab-btn" id="tasksFab" onclick="openTasksOverlay()">
                 🎯<span id="tasksFabBadge" class="fab-badge" style="display:none">0</span>
+            </button>
+            <button class="rfab-btn" onclick="MiniGame.open()">🚛</button>
+            <button class="rfab-btn rfab-tata" id="tataFloatBtn" onclick="FTUEManager.tataPress()">
+                <img src="assets/tata-lion.png" alt="Tata">
             </button>
         </div>
 
     </div><!-- /dashboard -->
 
     <!-- ══════════════ OVERLAY SCREENS ══════════════ -->
-
-    <div class="screen overlay-screen" id="workshop">
-        <div class="overlay-header">
-            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
-            <span class="overlay-title">🔧 Taller</span>
-            <span></span>
-        </div>
-        <div class="screen-inner" id="workshopContent"></div>
-    </div>
 
     <div class="screen overlay-screen" id="race">
         <div class="overlay-header">
@@ -133,15 +127,6 @@
             <span></span>
         </div>
         <div class="screen-inner" id="leagueContent"></div>
-    </div>
-
-    <div class="screen overlay-screen" id="employees">
-        <div class="overlay-header">
-            <button class="overlay-back" onclick="showScreen('dashboard')">← Atrás</button>
-            <span class="overlay-title">👷 Staff</span>
-            <span></span>
-        </div>
-        <div class="screen-inner" id="employeesContent"></div>
     </div>
 
     <div class="screen overlay-screen" id="sponsors">
@@ -173,6 +158,42 @@
     </div>
 
 </div><!-- /app -->
+
+<!-- ══ WORKSHOP BOTTOM SHEET ══ -->
+<div id="workshopSheet" class="psheet-overlay" onclick="closeWorkshopSheet()">
+    <div class="psheet-panel psheet-panel-tall" onclick="event.stopPropagation()">
+        <div class="psheet-handle"></div>
+        <div class="psheet-header">
+            <span class="psheet-title">🔧 Taller</span>
+            <div class="psheet-header-right">
+                <div class="hud-money-box psheet-money">
+                    <span class="hud-money-icon">💵</span>
+                    <span id="workshopSheetMoney">$0</span>
+                </div>
+                <button class="psheet-close" onclick="closeWorkshopSheet()">✕</button>
+            </div>
+        </div>
+        <div class="psheet-body" id="workshopContent"></div>
+    </div>
+</div>
+
+<!-- ══ STAFF BOTTOM SHEET ══ -->
+<div id="staffSheet" class="psheet-overlay" onclick="closeStaffSheet()">
+    <div class="psheet-panel psheet-panel-tall" onclick="event.stopPropagation()">
+        <div class="psheet-handle"></div>
+        <div class="psheet-header">
+            <span class="psheet-title">👷 Staff</span>
+            <div class="psheet-header-right">
+                <div class="hud-money-box psheet-money">
+                    <span class="hud-money-icon">💵</span>
+                    <span id="staffSheetMoney">$0</span>
+                </div>
+                <button class="psheet-close" onclick="closeStaffSheet()">✕</button>
+            </div>
+        </div>
+        <div class="psheet-body" id="employeesContent"></div>
+    </div>
+</div>
 
 <!-- ══ PROFILE BOTTOM SHEET ══ -->
 <div id="profileSheet" class="psheet-overlay" onclick="closeProfileSheet()">
