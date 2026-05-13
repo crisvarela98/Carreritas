@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <!-- Sponsors + Staff buttons (compact, stacked) -->
+            <!-- Sponsors + Staff buttons -->
             <div class="hud-mid-btns">
                 <button class="hud-top-btn hud-sponsor-btn" onclick="showScreen('sponsors')">
                     <span class="htb-icon">💰</span>
@@ -52,7 +52,7 @@
                 </button>
             </div>
 
-            <!-- Currency column (right) — money top, diamonds bottom, store btn below -->
+            <!-- Currency column (right) — money top, diamonds below, watch-ad below diamonds -->
             <div id="hudCurrency">
                 <div class="hud-money-box">
                     <span class="hud-money-icon">💵</span>
@@ -62,9 +62,10 @@
                     <span class="hud-gem">💎</span>
                     <span id="hudDiamonds">0</span>
                 </div>
-                <button class="hud-store-btn" onclick="AdsManager.offer_ad_double_race_reward()">
+                <!-- Watch ad → earn 2 diamonds -->
+                <button class="hud-store-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">
                     <span class="hud-store-icon">📺</span>
-                    <span class="hud-store-label">+💎</span>
+                    <span class="hud-store-label">+2💎</span>
                 </button>
             </div>
 

@@ -8,17 +8,18 @@ function showWorkshopTab(tab) {
 }
 
 // ── Customer car generation ───────────────────────────────────────
+// Simple car: 360s (6 min), Star car: 900s (15 min)
 function generateCustomerCar() {
     const rare     = Math.random() < 0.15;
     const stockLvl = game.garageUpgrades.partsStock || 0;
     const durMult  = 1 - stockLvl * 0.08;
-    // 90-180 seconds so video acceleration is worth it
-    const base = 90 + Math.random() * 90;
+
+    const baseDuration = rare ? 900 : 360;   // 15 min star / 6 min simple
     return {
         id:       Date.now() + Math.random(),
-        duration: Math.max(30, Math.round(base * durMult)),
+        duration: Math.max(60, Math.round(baseDuration * durMult)),
         progress: 0,
-        reward:   rare ? 400 + Math.floor(Math.random() * 200) : 120 + Math.floor(Math.random() * 80),
+        reward:   rare ? 1800 + Math.floor(Math.random() * 600) : 600 + Math.floor(Math.random() * 200),
         rare
     };
 }
@@ -79,7 +80,6 @@ function renderDashboardCars() {
 
     const capacity = game.workshop.capacity || 2;
 
-    // Elevator slots (active repairs — up to capacity)
     const elevHtml = Array.from({ length: capacity }, (_, i) => {
         const car = game.workshop.active[i];
         if (!car) {
@@ -101,7 +101,6 @@ function renderDashboardCars() {
         </div>`;
     }).join('');
 
-    // Parking slots (queued cars — up to 5)
     const parkHtml = Array.from({ length: 5 }, (_, i) => {
         const car = game.workshop.queue[i];
         if (!car) return `<div class="garage-parking-slot gpark-empty"></div>`;
@@ -117,7 +116,7 @@ function renderDashboardCars() {
     `;
 }
 
-// ── Car video popup ───────────────────────────────────────────────
+// ── Car video popup — video completes repair instantly ────────────
 function showCarVideoPopup(carId) {
     const car = game.workshop.active.find(c => String(c.id) === String(carId));
     if (!car) return;
@@ -139,13 +138,13 @@ function showCarVideoPopup(carId) {
 
     popup.innerHTML = `
     <div class="cvp-panel">
-        <div class="cvp-car">${car.rare ? '⭐ Auto Raro' : '🚗 Auto Normal'}</div>
+        <div class="cvp-car">${car.rare ? '⭐ Auto Estrella' : '🚗 Auto Simple'}</div>
         <div class="cvp-time">⏱ Tiempo restante: <strong>${timeStr}</strong></div>
         <div class="cvp-pbar-wrap"><div class="cvp-pbar" style="width:${pct}%"></div></div>
         <div class="cvp-reward">Recompensa: <strong>$${car.reward.toLocaleString()}</strong></div>
         <button class="rbtn accent-btn cvp-ad-btn"
             onclick="AdsManager.offer_ad_to_speed_repair('${carId}'); document.getElementById('carVideoPopup').classList.remove('cvp-open')">
-            📺 Ver video — Completar ahora
+            📺 Ver video — Completar al instante
         </button>
         <button class="rbtn cvp-cancel"
             onclick="document.getElementById('carVideoPopup').classList.remove('cvp-open')">
@@ -160,7 +159,10 @@ setInterval(() => {
     if (!game.workshop || !Array.isArray(game.workshop.active)) return;
 
     assignCars();
-    const totalSpeed = (game.workshop.speed || 1) + getTotalMechanicSpeed();
+    const mechSpeed  = getTotalMechanicSpeed();
+    // Cap total speed so minimum repair time is ~20 seconds on a simple car
+    const MAX_SPEED  = 360 / 20;  // = 18 units/s
+    const totalSpeed = Math.min(MAX_SPEED, (game.workshop.speed || 1) + mechSpeed);
 
     game.workshop.active.forEach(car => {
         car.progress += totalSpeed;
@@ -169,9 +171,9 @@ setInterval(() => {
             const boost  = game.sponsor ? game.sponsor.money : 1;
             const reward = Math.floor(car.reward * boost);
             earn_coins(reward);
-            addXP(car.rare ? 60 : 25);
-            game.reputation += car.rare ? 1 : 0;
-            notify(`🚗 Auto terminado +$${reward}`, "success");
+            addXP(car.rare ? 120 : 40);
+            game.reputation += car.rare ? 2 : 0;
+            notify(`🚗 Auto terminado +$${reward.toLocaleString()}`, "success");
             game.workshop.active = game.workshop.active.filter(c => c.id !== car.id);
             if (window.FTUEManager) FTUEManager.onCarCompleted();
             if (!game.stats) game.stats = {};
@@ -206,6 +208,8 @@ function _makeTabBar() {
 }
 
 function _renderGarageTab(el) {
+    const totalSpeed = Math.min(18, (game.workshop.speed || 1) + getTotalMechanicSpeed());
+
     const upgradesHtml = GARAGE_UPGRADES_DEF.map(def => {
         const lvl   = game.garageUpgrades[def.key] || 0;
         const maxed = lvl >= def.max;
@@ -236,7 +240,12 @@ function _renderGarageTab(el) {
     ${_makeTabBar()}
     <div class="race-card">
         <div class="race-hero-title">🏗 MEJORAS DEL GARAGE</div>
-        <div class="ws-sub" style="margin-bottom:8px">Bahías activas: ${game.workshop.active.length}/${game.workshop.capacity} · Vel: ${((game.workshop.speed || 1) + getTotalMechanicSpeed()).toFixed(1)}x</div>
+        <div class="ws-sub" style="margin-bottom:4px">
+            💵 <strong>$${game.money.toLocaleString()}</strong> disponibles
+        </div>
+        <div class="ws-sub" style="margin-bottom:8px">
+            Bahías: ${game.workshop.active.length}/${game.workshop.capacity} · Vel. reparación: ${totalSpeed.toFixed(1)}/s
+        </div>
         ${upgradesHtml}
     </div>`;
 }

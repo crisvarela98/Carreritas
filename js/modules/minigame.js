@@ -13,6 +13,8 @@ const MiniGame = {
         const ov = document.getElementById('minigameOverlay');
         if (ov) ov.classList.add('mg-active');
         this._renderStart();
+        // FTUE hook
+        if (window.FTUEManager) FTUEManager.onMinigameStarted();
     },
 
     _renderStart() {
@@ -22,7 +24,8 @@ const MiniGame = {
         <div class="mg-start-screen">
             <div class="mg-big-icon">🚛</div>
             <div class="mg-start-title">CAMIÓN CIUDAD</div>
-            <div class="mg-start-desc">Esquiva el tráfico · Gana <span style="color:var(--green)">$50</span> por segundo</div>
+            <div class="mg-start-desc">Esquivá el tráfico · Ganás <span style="color:var(--green)">$150</span> por segundo</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">30 segundos de supervivencia = $4,500</div>
             <button class="rbtn accent-btn mg-start-btn" onclick="MiniGame.start()">▶ ARRANCAR</button>
             <div class="mg-tap-hint">◀ Toca izquierda/derecha para cambiar carril ▶</div>
         </div>`;
@@ -58,133 +61,138 @@ const MiniGame = {
 
         this._positionPlayer(false);
 
-        // Track stat
-        if (!game.stats) game.stats = {};
-        game.stats.totalMinigames = (game.stats.totalMinigames || 0) + 1;
-        if (window.TaskManager) {
-            TaskManager.trackDaily('minigame');
-            TaskManager._updateBadge();
-        }
-
-        // Score tick
+        // Score $150/s
         this._scoreInt = setInterval(() => {
             if (!this.running) return;
-            this.score += 50;
-            const el = document.getElementById('mgScoreDisp');
-            if (el) el.textContent = '$' + this.score.toLocaleString();
-            // Timer bar
-            const elapsed = Date.now() - this._startTs;
-            const pct     = Math.max(0, 100 - (elapsed / 60000) * 100);
-            const bar     = document.getElementById('mgTimerBar');
-            if (bar) { bar.style.width = pct + '%'; bar.style.background = pct > 40 ? 'var(--green)' : pct > 15 ? 'var(--orange)' : 'var(--red)'; }
+            this.score += 150;
+            const disp = document.getElementById('mgScoreDisp');
+            if (disp) disp.textContent = '$' + this.score.toLocaleString();
         }, 1000);
 
-        // Spawn with increasing difficulty
-        let delay = 1800;
-        const spawn = () => {
-            if (!this.running) return;
-            this._spawnCar();
-            delay = Math.max(700, delay - 40);
-            this._spawnTO = setTimeout(spawn, delay);
+        // Timer bar (60s max)
+        const MAX_MS  = 60000;
+        const barTick = setInterval(() => {
+            if (!this.running) { clearInterval(barTick); return; }
+            const bar  = document.getElementById('mgTimerBar');
+            const pct  = Math.min(100, (Date.now() - this._startTs) / MAX_MS * 100);
+            if (bar) {
+                bar.style.width = pct + '%';
+                bar.style.background = pct < 50 ? 'var(--accent)' : pct < 80 ? 'var(--orange)' : 'var(--red)';
+            }
+            if (pct >= 100) { clearInterval(barTick); this._endGame(true); }
+        }, 500);
+
+        // Spawn obstacles
+        this._spawnObstacle();
+
+        // Collision detection
+        this._collInt = setInterval(() => this._checkCollision(), 200);
+
+        // Keyboard support
+        this._keyHandler = (e) => {
+            if (e.key === 'ArrowLeft')  this.moveLeft();
+            if (e.key === 'ArrowRight') this.moveRight();
         };
-        this._spawnTO = setTimeout(spawn, 1200);
-
-        // Collision poll
-        this._collInt = setInterval(() => this._checkCollisions(), 60);
-
-        // Auto-win after 60s
-        setTimeout(() => { if (this.running) this._endGame(true); }, 60000);
+        document.addEventListener('keydown', this._keyHandler);
     },
-
-    moveLeft()  { if (!this.running || this.lane <= 0) return; this.lane--; this._positionPlayer(true); },
-    moveRight() { if (!this.running || this.lane >= 2) return; this.lane++; this._positionPlayer(true); },
 
     _positionPlayer(animate) {
         const p = document.getElementById('mgPlayer');
         if (!p) return;
-        const lefts = ['8%', '37%', '66%'];
-        p.style.left = lefts[this.lane];
+        const pcts = ['16%', '50%', '83%'];
+        p.style.left = pcts[this.lane];
+        p.style.transform = 'translateX(-50%)';
         if (animate) {
-            p.style.transition = 'left 0.12s ease';
             p.classList.add('mg-player-move');
-            setTimeout(() => { if (p) p.classList.remove('mg-player-move'); }, 200);
+            setTimeout(() => p.classList.remove('mg-player-move'), 200);
         }
     },
 
-    _spawnCar() {
+    moveLeft()  { if (this.lane > 0) { this.lane--; this._positionPlayer(true); } },
+    moveRight() { if (this.lane < 2) { this.lane++; this._positionPlayer(true); } },
+
+    _spawnObstacle() {
+        if (!this.running) return;
         const road = document.getElementById('mgRoad');
         if (!road) return;
-        const ICONS   = ['🚗','🚕','🚙','🏎','🚌','🚓','🚑'];
-        const icon    = ICONS[Math.floor(Math.random() * ICONS.length)];
-        const lane    = Math.floor(Math.random() * 3);
-        const lefts   = ['8%', '37%', '66%'];
-        const div     = document.createElement('div');
-        div.className = 'mg-obstacle';
-        div.textContent = icon;
-        div.style.left  = lefts[lane];
-        div.style.top   = '-70px';
-        div.dataset.lane = lane;
-        road.appendChild(div);
 
-        const obsRef = { el: div, lane, done: false };
-        this._obstacles.push(obsRef);
+        const lane = Math.floor(Math.random() * 3);
+        const icons = ['🚗','🚕','🚙','🏎','🚌','🚎'];
+        const el = document.createElement('div');
+        el.className = 'mg-obstacle';
+        el.textContent = icons[Math.floor(Math.random() * icons.length)];
+        const pcts = ['16%','50%','83%'];
+        el.style.left = pcts[lane];
+        el.style.top  = '-60px';
+        el.style.transform = 'translateX(-50%)';
+        el.dataset.lane = lane;
+        road.appendChild(el);
+        this._obstacles.push(el);
 
-        const elapsed = Date.now() - this._startTs;
-        const speed   = Math.min(11, 5 + elapsed / 12000);  // 5→11 over time
-        let top = -70;
+        // Animate downward
+        let y = -60;
+        const speed = 4 + Math.random() * 3;
         const anim = setInterval(() => {
-            if (!this.running || obsRef.done) { clearInterval(anim); if (div.parentNode) div.remove(); return; }
-            top += speed;
-            div.style.top = top + 'px';
-            if (top > 570) {
+            if (!this.running) { clearInterval(anim); el.remove(); return; }
+            y += speed;
+            el.style.top = y + 'px';
+            const roadH = road.offsetHeight || 500;
+            if (y > roadH + 60) {
                 clearInterval(anim);
-                if (div.parentNode) div.remove();
-                this._obstacles = this._obstacles.filter(o => o !== obsRef);
+                el.remove();
+                this._obstacles = this._obstacles.filter(o => o !== el);
             }
         }, 30);
+
+        // Spawn next
+        const delay = Math.max(600, 1400 - Math.min(800, (Date.now() - this._startTs) / 60));
+        this._spawnTO = setTimeout(() => this._spawnObstacle(), delay);
     },
 
-    _checkCollisions() {
+    _checkCollision() {
         const player = document.getElementById('mgPlayer');
         if (!player) return;
         const pr = player.getBoundingClientRect();
+
         for (const obs of this._obstacles) {
-            if (obs.done || parseInt(obs.el.dataset.lane) !== this.lane) continue;
-            const or = obs.el.getBoundingClientRect();
-            if (or.bottom > pr.top + 16 && or.top < pr.bottom - 16) {
-                obs.done = true;
+            const or = obs.getBoundingClientRect();
+            const overlap = !(pr.right < or.left || pr.left > or.right || pr.bottom < or.top || pr.top > or.bottom);
+            if (overlap) {
                 this._endGame(false);
                 return;
             }
         }
     },
 
-    _endGame(completed) {
+    _endGame(survived) {
         if (!this.running) return;
         this.running = false;
         clearInterval(this._scoreInt);
         clearTimeout(this._spawnTO);
         clearInterval(this._collInt);
-        this._obstacles.forEach(o => { o.done = true; });
+        if (this._keyHandler) document.removeEventListener('keydown', this._keyHandler);
 
-        if (this.score > 0) {
-            earn_coins(this.score);
-            if (window.save_user_progress) save_user_progress();
-        }
-        if (window.TaskManager) TaskManager._updateBadge();
+        earn_coins(this.score);
+        addXP(Math.floor(this.score / 30));
+        if (!game.stats) game.stats = {};
+        game.stats.totalMinigames = (game.stats.totalMinigames || 0) + 1;
 
-        const road = document.getElementById('mgRoad');
-        if (!road) return;
-        road.style.animation = 'none';
-        road.innerHTML = `
-        <div class="mg-end-screen">
-            <div class="mg-end-icon">${completed ? '🏆' : '💥'}</div>
-            <div class="mg-end-title">${completed ? '¡Misión cumplida!' : '¡Choque!'}</div>
-            <div class="mg-end-sub">${completed ? '60 segundos sobrevividos' : 'Más suerte la próxima'}</div>
-            <div class="mg-end-reward">+$${this.score.toLocaleString()}</div>
-            <button class="rbtn accent-btn" style="margin-top:16px" onclick="MiniGame.start()">🔄 Jugar de nuevo</button>
-            <button class="rbtn" style="margin-top:8px;opacity:0.7" onclick="MiniGame.close()">← Salir</button>
+        const area = document.getElementById('mgGameArea');
+        if (!area) return;
+
+        const resultIcon = survived ? '🏆' : '💥';
+        const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
+
+        area.innerHTML = `
+        <div class="mg-start-screen">
+            <div class="mg-big-icon">${resultIcon}</div>
+            <div class="mg-start-title">${resultMsg}</div>
+            <div class="mg-start-desc" style="color:var(--coin);font-size:22px">+$${this.score.toLocaleString()}</div>
+            <button class="rbtn accent-btn mg-start-btn" onclick="MiniGame.start()">▶ JUGAR DE NUEVO</button>
+            <button class="rbtn" onclick="MiniGame.close()">← Salir</button>
         </div>`;
+
+        save_user_progress();
     },
 
     close() {
@@ -192,7 +200,7 @@ const MiniGame = {
         clearInterval(this._scoreInt);
         clearTimeout(this._spawnTO);
         clearInterval(this._collInt);
-        this._obstacles.forEach(o => { o.done = true; });
+        if (this._keyHandler) document.removeEventListener('keydown', this._keyHandler);
         const ov = document.getElementById('minigameOverlay');
         if (ov) ov.classList.remove('mg-active');
     }

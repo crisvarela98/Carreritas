@@ -1,16 +1,16 @@
 // ── Race Circuits (10 per vehicle type = one full season) ─────────
 const RACE_CIRCUITS = {
     car: [
-        { name: "Circuito de Madrid",     flag: "🇪🇸", diff: 2, weather: "☀️" },
+        { name: "Circuito de Madrid",     flag: "🇪🇸", diff: 1, weather: "☀️" },
         { name: "Oval de Nevada",          flag: "🇺🇸", diff: 1, weather: "🌤" },
-        { name: "Curva del Diablo",        flag: "🇲🇽", diff: 4, weather: "⛅" },
-        { name: "Circuit de Monaco",       flag: "🇲🇨", diff: 5, weather: "☀️" },
-        { name: "Pista de Tokio",          flag: "🇯🇵", diff: 3, weather: "🌧" },
-        { name: "Autódromo São Paulo",     flag: "🇧🇷", diff: 3, weather: "⛅" },
-        { name: "Silverstone Circuit",     flag: "🇬🇧", diff: 4, weather: "🌥" },
-        { name: "Circuito de Dubái",       flag: "🇦🇪", diff: 2, weather: "☀️" },
-        { name: "Pista del Sahara",        flag: "🇲🇦", diff: 3, weather: "🌵" },
-        { name: "Gran Final — Monza",      flag: "🇮🇹", diff: 5, weather: "☀️" },
+        { name: "Curva del Diablo",        flag: "🇲🇽", diff: 2, weather: "⛅" },
+        { name: "Circuit de Monaco",       flag: "🇲🇨", diff: 2, weather: "☀️" },
+        { name: "Pista de Tokio",          flag: "🇯🇵", diff: 2, weather: "🌧" },
+        { name: "Autódromo São Paulo",     flag: "🇧🇷", diff: 2, weather: "⛅" },
+        { name: "Silverstone Circuit",     flag: "🇬🇧", diff: 3, weather: "🌥" },
+        { name: "Circuito de Dubái",       flag: "🇦🇪", diff: 1, weather: "☀️" },
+        { name: "Pista del Sahara",        flag: "🇲🇦", diff: 2, weather: "🌵" },
+        { name: "Gran Final — Monza",      flag: "🇮🇹", diff: 3, weather: "☀️" },
     ],
     moto: [
         { name: "Circuit de Barcelona",    flag: "🇪🇸", diff: 3, weather: "☀️" },
@@ -52,7 +52,7 @@ const RACE_CIRCUITS = {
 
 const DIFF_LABELS = ["", "Muy fácil", "Fácil", "Media", "Difícil", "Extrema"];
 
-// ── Tire compounds ────────────────────────────────────────────────
+// ── Tire compounds (only for formula) ─────────────────────────────
 const TIRE_COMPOUNDS = {
     soft:   { id: 'soft',   label: 'Blando', icon: '🔴', paceBonus: -3.5, degradation: 0.072 },
     medium: { id: 'medium', label: 'Medio',  icon: '🟡', paceBonus:  0,   degradation: 0.042 },
@@ -60,11 +60,12 @@ const TIRE_COMPOUNDS = {
 };
 
 // ── Race format per vehicle ───────────────────────────────────────
+// car: no tires (trackday style), moto: no tires, rally: stages, formula: tires + pit
 const RACE_FORMAT = {
-    car:     { laps: 20, interval: 1050, hasTires: true,  hasPit: false, isRally: false, pitWindow: null },
-    moto:    { laps: 20, interval: 1050, hasTires: true,  hasPit: false, isRally: false, pitWindow: null },
-    rally:   { laps: 10, interval: 1700, hasTires: false, hasPit: false, isRally: true,  pitWindow: null },
-    formula: { laps: 50, interval: 780,  hasTires: true,  hasPit: true,  isRally: false, pitWindow: [15, 35] },
+    car:     { laps: 20, interval: 800,  hasTires: false, hasPit: false, isRally: false, pitWindow: null },
+    moto:    { laps: 20, interval: 800,  hasTires: false, hasPit: false, isRally: false, pitWindow: null },
+    rally:   { laps: 10, interval: 1500, hasTires: false, hasPit: false, isRally: true,  pitWindow: null },
+    formula: { laps: 30, interval: 700,  hasTires: true,  hasPit: true,  isRally: false, pitWindow: [10, 22] },
 };
 
 // ── Rally stage events ────────────────────────────────────────────
@@ -148,6 +149,7 @@ const RaceManager = {
         const circ   = circs[done % circs.length] || circs[0] || {};
         s.phase      = "config";
 
+        // Only show tire selection for formula
         const tiresHtml = format.hasTires ? (() => {
             const btns = Object.values(TIRE_COMPOUNDS).map(t => {
                 const active    = s.tireCompound === t.id;
@@ -167,9 +169,9 @@ const RaceManager = {
 
         const pitHtml = format.hasPit ? (() => {
             const strats = [
-                { id:'early',  icon:'🔴', label:'Temprano', range:'Vuelta 10–18' },
-                { id:'normal', icon:'🟡', label:'Normal',   range:'Vuelta 20–30' },
-                { id:'late',   icon:'🟢', label:'Tardío',   range:'Vuelta 32–42' },
+                { id:'early',  icon:'🔴', label:'Temprano', range:'Vuelta 5–12' },
+                { id:'normal', icon:'🟡', label:'Normal',   range:'Vuelta 13–18' },
+                { id:'late',   icon:'🟢', label:'Tardío',   range:'Vuelta 19–25' },
             ];
             const btns = strats.map(st => `
             <button class="cfg-pit-btn${s.pitStrategy===st.id ? ' cfg-pit-active' : ''}"
@@ -184,6 +186,11 @@ const RaceManager = {
         const lapWord  = format.isRally ? 'etapas' : 'vueltas';
         const extraTag = format.hasPit ? ' · PIT STOP OBLIGATORIO' : format.isRally ? ' · ETAPAS ESPECIALES' : '';
 
+        // Trackday badge for car
+        const trackdayBadge = s.vehicleId === 'car'
+            ? `<div style="background:rgba(34,197,94,0.15);border:1px solid #22c55e44;border-radius:8px;padding:6px 10px;font-size:11px;color:#22c55e;margin-bottom:8px;text-align:center">🏁 Estilo Trackday — ¡Competencia amigable!</div>`
+            : '';
+
         el.innerHTML = `
         <div class="race-card">
             <div class="cfg-vehicle-header">
@@ -193,6 +200,7 @@ const RaceManager = {
                     <div class="cfg-v-format">${format.laps} ${lapWord}${extraTag}</div>
                 </div>
             </div>
+            ${trackdayBadge}
             <div class="cfg-circuit-box">
                 <span class="cfg-circuit-flag">${circ.flag || '🏁'}</span>
                 <div>
@@ -233,9 +241,10 @@ const RaceManager = {
         s.grid = rivals.map(r => ({
             name:      r.name,
             qualyTime: r.basePace + (Math.random() - 0.5) * 8,
-            basePace:  r.basePace + (Math.random() - 0.3) * 3
+            basePace:  r.basePace + (Math.random() - 0.3) * 3,
+            totalTime: 0
         }));
-        s.grid.push({ name: "Tú", qualyTime: pace + (Math.random() - 0.5) * 5, basePace: pace });
+        s.grid.push({ name: "Tú", qualyTime: pace + (Math.random() - 0.5) * 5, basePace: pace, totalTime: 0 });
 
         if (skipQualy) {
             s.grid.sort(() => Math.random() - 0.5);
@@ -277,15 +286,17 @@ const RaceManager = {
         const rivals    = VEHICLE_RIVALS[vehicleId] || [];
         const pace      = getVehiclePace(vehicleId);
 
-        const playerTime = Math.max(def.basePace * 0.4, pace + (Math.random() - 0.5) * 5);
+        // Player gets a fair qualifying time (based on pace)
+        const playerTime = Math.max(def.basePace * 0.4, pace + (Math.random() - 0.5) * 3);
 
         s.totalLaps = RACE_FORMAT[vehicleId].laps;
         s.grid = rivals.map(r => ({
             name:      r.name,
-            qualyTime: r.basePace + (Math.random() - 0.5) * 8,
-            basePace:  r.basePace + (Math.random() - 0.3) * 3
+            qualyTime: r.basePace + (Math.random() - 0.5) * 6,
+            basePace:  r.basePace + (Math.random() - 0.3) * 3,
+            totalTime: 0
         }));
-        s.grid.push({ name: "Tú", qualyTime: playerTime, basePace: pace });
+        s.grid.push({ name: "Tú", qualyTime: playerTime, basePace: pace, totalTime: 0 });
 
         const rivalBest = Math.min(...s.grid.filter(r => r.name !== "Tú").map(r => r.qualyTime));
         const gotPole   = playerTime < rivalBest;
@@ -378,7 +389,8 @@ const RaceManager = {
         const s      = this.state;
         s.phase      = "racing";
         s.lap        = 0;
-        s.standings     = s.grid.map((r, i) => ({ ...r, pos: i + 1 }));
+        // Initialize cumulative times from qualifying order
+        s.standings     = s.grid.map((r, i) => ({ ...r, pos: i + 1, totalTime: r.qualyTime || 0 }));
         s.prevStandings = s.standings.map(x => ({ ...x }));
         s.tireCondition = 1.0;
         s.pitDone       = false;
@@ -386,7 +398,7 @@ const RaceManager = {
         s.stageEvent    = null;
         const format = RACE_FORMAT[s.vehicleId];
         if (format.hasPit) {
-            const windows = { early:[10,18], normal:[20,30], late:[32,42] };
+            const windows = { early:[5,12], normal:[13,18], late:[19,25] };
             s._pitWindow = windows[s.pitStrategy] || windows.normal;
         } else {
             s._pitWindow = null;
@@ -407,7 +419,7 @@ const RaceManager = {
             return;
         }
 
-        // Tire degradation
+        // Tire degradation (formula only)
         if (format.hasTires) {
             s.tireCondition = Math.max(0.15, s.tireCondition - tire.degradation);
         }
@@ -431,30 +443,32 @@ const RaceManager = {
 
         const pace         = getVehiclePace(s.vehicleId);
         const tireBonus    = format.hasTires ? tire.paceBonus : 0;
-        const degradePenalty = format.hasTires ? (1 - s.tireCondition) * 22 : 0;
-        const playerTime   = pace + tireBonus + degradePenalty + (Math.random() - 0.5) * 3;
+        const degradePenalty = format.hasTires ? (1 - s.tireCondition) * 18 : 0;
+        const playerLapTime = pace + tireBonus + degradePenalty + (Math.random() - 0.5) * 2;
 
         s.prevStandings = s.standings.map(x => ({ ...x }));
 
+        // ── KEY FIX: use CUMULATIVE total time, not per-lap sort ───
         if (format.isRally) {
             s.stageEvent = RALLY_EVENTS[Math.floor(Math.random() * RALLY_EVENTS.length)];
             const ev = s.stageEvent;
-            s.standings = s.standings.map(r => ({
-                ...r,
-                lapTime: r.name === "Tú"
-                    ? playerTime + ev.effect * (0.9 + Math.random() * 0.2)
-                    : r.basePace + ev.effect * (0.8 + Math.random() * 0.4) + (Math.random() - 0.5) * 5
-            }));
+            s.standings = s.standings.map(r => {
+                const lapTime = r.name === "Tú"
+                    ? playerLapTime + ev.effect * (0.9 + Math.random() * 0.2)
+                    : r.basePace + ev.effect * (0.8 + Math.random() * 0.4) + (Math.random() - 0.5) * 4;
+                return { ...r, lapTime, totalTime: (r.totalTime || 0) + lapTime };
+            });
         } else {
-            s.standings = s.standings.map(r => ({
-                ...r,
-                lapTime: r.name === "Tú"
-                    ? playerTime
-                    : r.basePace + (Math.random() - 0.5) * 4
-            }));
+            s.standings = s.standings.map(r => {
+                const lapTime = r.name === "Tú"
+                    ? playerLapTime
+                    : r.basePace + (Math.random() - 0.5) * 3;
+                return { ...r, lapTime, totalTime: (r.totalTime || 0) + lapTime };
+            });
         }
 
-        s.standings.sort((a, b) => a.lapTime - b.lapTime);
+        // Sort by cumulative race time (lower = faster = ahead)
+        s.standings.sort((a, b) => a.totalTime - b.totalTime);
         s.standings = s.standings.map((r, i) => ({ ...r, pos: i + 1 }));
         this._renderLap();
     },
@@ -486,7 +500,7 @@ const RaceManager = {
             </div>`;
         }).join("");
 
-        // Tire condition bar
+        // Tire condition bar (formula only)
         const tireHtml = format.hasTires ? (() => {
             const tire = TIRE_COMPOUNDS[s.tireCompound] || TIRE_COMPOUNDS.medium;
             const tp   = Math.round(s.tireCondition * 100);
@@ -534,9 +548,9 @@ const RaceManager = {
         const pos       = playerIdx + 1;
         const vehicleId = s.vehicleId;
 
-        // Economy rewards (balanced)
-        const cashTable = [0, 1200, 700, 450, 300, 200, 130, 80, 50, 25, 10];
-        const xpTable   = [0, 250,  170, 120, 90,  70,  50,  30, 15, 8,  4];
+        // Improved economy rewards
+        const cashTable = [0, 4500, 2800, 1800, 1200, 800, 500, 300, 180, 90, 40];
+        const xpTable   = [0, 500,  350,  250,  180,  130, 90,  55,  30,  15, 6];
         const cash      = cashTable[pos] || 0;
         const xp        = xpTable[pos]   || 0;
         const lgPts     = PointsCalculator.forPosition(pos);
@@ -546,7 +560,7 @@ const RaceManager = {
         this._applyRaceResults(vehicleId, pos, cash, xp, lgPts);
     },
 
-    // ── start_race() / calculate_race_results() ──────────────────
+    // ── _applyRaceResults() ──────────────────────────────────────
 
     _applyRaceResults(vehicleId, pos, cash, xp, lgPts) {
         const s = this.state;
@@ -563,6 +577,9 @@ const RaceManager = {
         game.stats.totalRacesRun = (game.stats.totalRacesRun || 0) + 1;
         if (pos === 1) {
             game.stats.totalWins = (game.stats.totalWins || 0) + 1;
+            // Track wins by vehicle type
+            const wKey = 'wins_' + vehicleId;
+            game.stats[wKey] = (game.stats[wKey] || 0) + 1;
             if (window.TaskManager) TaskManager.trackDaily('win');
         }
         game.stats.totalRaceCoins = (game.stats.totalRaceCoins || 0) + cash;
@@ -619,9 +636,7 @@ const RaceManager = {
 
         const hasMore = s.seriesRace < s.seriesMode;
 
-        const adBtn = AdsManager.canOffer("double_race_reward")
-            ? `<button class="rbtn ad-btn" onclick="AdsManager.offer_ad_double_race_reward()">📺 Ver anuncio — Doblar recompensa</button>`
-            : "";
+        const adBtn = `<button class="rbtn ad-btn" onclick="AdsManager.offer_ad_double_race_reward()">📺 Ver anuncio — Doblar recompensa</button>`;
 
         el.innerHTML = `
         <div class="race-card">
@@ -657,228 +672,73 @@ const RaceManager = {
         <div class="race-card">
             <div class="race-hero-title" style="color:${def.color}">${trophy} CAMPEONATO FINAL</div>
             <div class="qualy-vehicle-badge">${def.icon} ${def.name}</div>
+            <div class="race-divider">CLASIFICACIÓN FINAL</div>
             <div class="result-standings">${rows}</div>
-            <button class="rbtn" onclick="RaceManager.backToMenu()">${s.leagueMode ? "← Volver a Liga" : "← Menú"}</button>
+            <button class="rbtn accent-btn" onclick="RaceManager.backToMenu()">✅ Listo</button>
         </div>`;
     },
 
     backToMenu() {
         const s = this.state;
-        s.phase        = "menu";
-        s.leagueMode   = false;
-        s.renderTarget = "raceContent";
-        renderRaceScreen();
+        if (s.raceInterval) { clearInterval(s.raceInterval); s.raceInterval = null; }
+        s.phase = "menu";
+        if (typeof renderRaceScreen === "function") renderRaceScreen();
+        else showScreen("dashboard");
     }
 };
 
-// ── Unified Paddock screen ────────────────────────────────────────
+// ── renderRaceScreen ─────────────────────────────────────────────
 function renderRaceScreen() {
     const el = document.getElementById("raceContent");
     if (!el) return;
-    if (RaceManager.state.phase !== "menu") return;
 
-    const vehicleId = game.activeVehicle;
-    const def       = VEHICLE_CATALOG[vehicleId];
-    const lg        = game.leagues[vehicleId] || { currentRace: 1, standings: [] };
+    const s = RaceManager.state;
+    if (s.phase !== "menu" && s.phase !== "config") return;
 
-    // ── Vehicle tab bar ───────────────────────────────────────────
-    const tabsHtml = Object.values(VEHICLE_CATALOG).map(v => {
-        const owned  = game.vehicles[v.id]?.owned;
-        const active = v.id === vehicleId;
-        const shortName = { car: "Auto", moto: "Moto", rally: "Rally", formula: "F1" }[v.id];
+    const ownedVehicles = Object.entries(VEHICLE_CATALOG).filter(([id]) => game.vehicles[id]?.owned);
+
+    const cards = ownedVehicles.map(([id, def]) => {
+        const stats = getVehicleStats(id);
+        const pace  = getVehiclePace(id);
         return `
-        <button class="pdk-vtab ${active ? "pdk-vtab-active" : ""} ${!owned ? "pdk-vtab-locked" : ""}"
-                onclick="${owned ? `setRaceVehicle('${v.id}')` : ""}"
-                style="${active ? `border-bottom-color:${v.color};color:${v.color}` : ""}">
-            <span class="pdk-vtab-icon">${v.icon}</span>
-            <span class="pdk-vtab-label">${shortName}</span>
-            ${!owned ? `<span class="pdk-lock-badge">Nv.${v.unlockLevel}</span>` : ""}
-        </button>`;
-    }).join("");
-
-    // ── Season calculations ───────────────────────────────────────
-    const racesDone      = Math.max(0, (lg.currentRace || 1) - 1);
-    const seasonNum      = Math.floor(racesDone / 10) + 1;
-    const doneInSeason   = racesDone % 10;
-    const circuitIdx     = racesDone % 10;
-    const circuit        = RACE_CIRCUITS[vehicleId][circuitIdx];
-    const raceInSeason   = doneInSeason + 1;
-
-    const dots = Array.from({ length: 10 }, (_, i) => {
-        const done    = i < doneInSeason;
-        const current = i === doneInSeason;
-        const isFinal = i === 9;
-        return `<div class="sdot ${done ? "sdot-done" : ""} ${current ? "sdot-next" : ""} ${isFinal ? "sdot-final" : ""}"
-                     style="${(done || current) ? `background:${def.color};border-color:${def.color}` : ""}">
-            ${done ? "✓" : current ? `<span style="color:#fff;font-size:8px">▶</span>` : isFinal ? "🏆" : ""}
-        </div>`;
-    }).join("");
-
-    // ── Stats ─────────────────────────────────────────────────────
-    const rank    = LeagueManager.getPlayerRank(vehicleId);
-    const pts     = LeagueManager.getPlayerPoints(vehicleId);
-    const pace    = getVehiclePace(vehicleId);
-    const rivals  = VEHICLE_RIVALS[vehicleId] || [];
-    const fastest = rivals.reduce((a, b) => a.basePace < b.basePace ? a : b, rivals[0] || { basePace: 99, name: "—" });
-    const gap     = (pace - fastest.basePace).toFixed(1);
-    const warn    = gap > 8;
-    const best    = game.bestLapTimes[vehicleId];
-    const diffStars = "●".repeat(circuit.diff) + "○".repeat(5 - circuit.diff);
-
-    // ── Standings top-5 ───────────────────────────────────────────
-    const allStandings  = LeagueManager.getStandings(vehicleId);
-    const top5          = allStandings.slice(0, 5);
-    const standingsHtml = top5.length === 0
-        ? `<div class="empty-row">Sin carreras disputadas todavía</div>`
-        : top5.map((t, i) => {
-            const isPlayer = t.name === "Jugador";
-            const posIcon  = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
-            return `<div class="pdkst-row ${isPlayer ? "pdkst-player" : ""}">
-                <span class="pdkst-pos">${posIcon}</span>
-                <span class="pdkst-name">${isPlayer ? (game.playerName || "Tú") : t.name}</span>
-                <span class="pdkst-pts" style="${isPlayer ? `color:${def.color}` : ""}">${t.points}</span>
-            </div>`;
-        }).join("");
-
-    // ── All-leagues mini-grid ─────────────────────────────────────
-    const allLgHtml = Object.values(VEHICLE_CATALOG).map(v => {
-        const owned   = game.vehicles[v.id]?.owned;
-        const isActive = v.id === vehicleId;
-        if (!owned) {
-            return `<div class="pdklg-card pdklg-locked">
-                <div class="pdklg-vehicle-icon">${v.icon}</div>
-                <div class="pdklg-vname">${{ car:"Auto", moto:"Moto", rally:"Rally", formula:"F1" }[v.id]}</div>
-                <div class="pdklg-lock">🔒 Nv.${v.unlockLevel}</div>
-            </div>`;
-        }
-        const vRank = LeagueManager.getPlayerRank(v.id);
-        const vPts  = LeagueManager.getPlayerPoints(v.id);
-        const vDone = Math.max(0, (game.leagues[v.id]?.currentRace || 1) - 1) % 10;
-        return `<div class="pdklg-card ${isActive ? "pdklg-active" : ""}"
-                     onclick="setRaceVehicle('${v.id}')"
-                     style="border-color:${isActive ? v.color : "var(--border)"}">
-            <div class="pdklg-top">
-                <span class="pdklg-vehicle-icon">${v.icon}</span>
-                <span class="pdklg-rank" style="color:${v.color}">${vRank}°</span>
-            </div>
-            <div class="pdklg-vname">${{ car:"Auto", moto:"Moto", rally:"Rally", formula:"F1" }[v.id]}</div>
-            <div class="pdklg-pts">${vPts} pts</div>
-            <div class="pdklg-mini-bar"><div class="pdklg-mini-fill" style="width:${vDone * 10}%;background:${v.color}"></div></div>
-            <div class="pdklg-progress">${vDone}/10</div>
-        </div>`;
-    }).join("");
-
-    // ── Recent results for selected vehicle ───────────────────────
-    const recentResults = game.raceResults.filter(r => r.vehicleId === vehicleId).slice(-3).reverse();
-    const histHtml = recentResults.map(r => {
-        const medal = r.position === 1 ? "🥇" : r.position === 2 ? "🥈" : r.position === 3 ? "🥉" : `${r.position}°`;
-        return `<div class="pdk-hist-row">
-            <span>${medal}</span>
-            <span class="pdk-hist-reward">+$${r.moneyEarned.toLocaleString()}</span>
-            <span class="pdk-hist-pts" style="color:${def.color}">+${r.leaguePoints}pts</span>
-        </div>`;
-    }).join("");
-
-    // ── Render ────────────────────────────────────────────────────
-    el.innerHTML = `
-    <div class="pdk-vtabs">${tabsHtml}</div>
-
-    <!-- Season timeline -->
-    <div class="pdk-card pdk-season-card" style="border-top:3px solid ${def.color}">
-        <div class="pdk-season-header">
-            <div>
-                <div class="pdk-eyebrow">TEMPORADA ${seasonNum}</div>
-                <div class="pdk-season-title" style="color:${def.color}">${def.icon} Liga ${def.name}</div>
-            </div>
-            <div class="pdk-season-badge" style="background:${def.color}">T${seasonNum}</div>
-        </div>
-        <div class="sdots-row">${dots}</div>
-        <div class="pdk-season-stats">
-            <div class="pdk-sstat">
-                <div class="pdk-sstat-val" style="color:${def.color}">${rank}°</div>
-                <div class="pdk-sstat-lbl">Posición</div>
-            </div>
-            <div class="pdk-sstat">
-                <div class="pdk-sstat-val">${pts}</div>
-                <div class="pdk-sstat-lbl">Puntos</div>
-            </div>
-            <div class="pdk-sstat">
-                <div class="pdk-sstat-val">${doneInSeason}<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
-                <div class="pdk-sstat-lbl">Carreras</div>
-            </div>
-            <div class="pdk-sstat">
-                <div class="pdk-sstat-val">${best ? formatLapTime(best) : "—"}</div>
-                <div class="pdk-sstat-lbl">Mejor vuelta</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Next race -->
-    <div class="pdk-card pdk-next-card" style="border-left:4px solid ${def.color}">
-        <div class="pdk-nr-label">🚦 PRÓXIMA CARRERA — Ronda ${raceInSeason}/10</div>
-        <div class="pdk-nr-header">
-            <div class="pdk-nr-info">
-                <div class="pdk-nr-circuit">${circuit.flag} ${circuit.name}</div>
-                <div class="pdk-nr-meta">
-                    <span class="pdk-diff-stars" style="color:${def.color}">${diffStars}</span>
-                    <span class="pdk-diff-label">${DIFF_LABELS[circuit.diff]}</span>
-                    <span class="pdk-weather">${circuit.weather}</span>
+        <div class="race-vehicle-card" onclick="RaceManager.start('${id}')"
+             style="border-top-color:${def.color}">
+            <div class="rvc-header">
+                <span class="rvc-icon">${def.icon}</span>
+                <div>
+                    <div class="rvc-name" style="color:${def.color}">${def.name}</div>
+                    <div class="rvc-desc">${def.desc}</div>
                 </div>
             </div>
-        </div>
-        <div class="pdk-pace-row">
-            <div class="pdk-pace-box">
-                <div class="pdk-pace-val">${pace.toFixed(1)}s</div>
-                <div class="pdk-pace-lbl">Tu ritmo</div>
+            <div class="rvc-stats">
+                <div class="rvc-stat"><span>${stats ? stats.hp : '—'} HP</span><small>potencia</small></div>
+                <div class="rvc-stat"><span>${pace.toFixed(1)}s</span><small>tiempo/vuelta</small></div>
             </div>
-            <div class="pdk-vs">VS</div>
-            <div class="pdk-pace-box pdk-rival-box">
-                <div class="pdk-pace-val rival-clr">${fastest.basePace}s</div>
-                <div class="pdk-pace-lbl">${fastest.name}</div>
-            </div>
-            <div class="pdk-gap-box ${warn ? "gap-warn" : "gap-ok"}">
-                <div class="pdk-gap-val">${gap > 0 ? "+" : ""}${gap}s</div>
-                <div class="pdk-gap-lbl">Gap</div>
-            </div>
-        </div>
-        ${warn ? `<div class="pdk-warn-bar">⚠️ Mejora tu vehículo para cerrar el gap con los rivales</div>` : ""}
-        <button class="rbtn pdk-race-btn" style="background:${def.color};border-color:${def.color}"
-                onclick="RaceManager.startLeague('${vehicleId}', 1)">
-            🚦 CLASIFICAR — ${circuit.name}
-        </button>
-        ${histHtml ? `<div class="pdk-hist-row-wrap">${histHtml}</div>` : ""}
-    </div>
+            <button class="rbtn" style="background:${def.color};margin-top:4px">Correr →</button>
+        </div>`;
+    }).join("");
 
-    <!-- Quick TT -->
-    <div class="pdk-card pdk-tt-card">
-        <div class="pdk-tt-inner">
-            <div class="pdk-tt-left">
-                <div class="pdk-tt-title">⏱ VUELTA RÁPIDA</div>
-                <div class="pdk-tt-sub">Práctica libre · Sin puntos de liga</div>
+    const lockedVehicles = Object.entries(VEHICLE_CATALOG)
+        .filter(([id]) => !game.vehicles[id]?.owned)
+        .map(([id, def]) => `
+        <div class="race-vehicle-card rvc-locked">
+            <div class="rvc-header">
+                <span class="rvc-icon" style="opacity:0.3">🔒</span>
+                <div>
+                    <div class="rvc-name" style="color:${def.color};opacity:0.5">${def.name}</div>
+                    <div class="rvc-desc">Se desbloquea en nivel ${def.unlockLevel}</div>
+                </div>
             </div>
-            <button class="rbtn pdk-tt-btn" onclick="RaceManager.start('${vehicleId}', 1)">⚡ Correr</button>
-        </div>
-    </div>
+        </div>`).join("");
 
-    <!-- Standings -->
-    <div class="pdk-card">
-        <div class="pdk-section-label">🏆 CLASIFICACIÓN — ${def.name}</div>
-        <div class="pdk-standings">${standingsHtml}</div>
-        ${allStandings.length > 5 ? `<div class="pdk-more-hint">Top 5 de ${allStandings.length} pilotos</div>` : ""}
-    </div>
-
-    <!-- All leagues -->
-    <div class="pdk-card">
-        <div class="pdk-section-label">⚡ TODAS LAS LIGAS</div>
-        <div class="pdk-leagues-grid">${allLgHtml}</div>
-    </div>
-    `;
+    el.innerHTML = `
+    <div class="race-card">
+        <div class="race-hero-title">🏁 SELECCIONÁ TU VEHÍCULO</div>
+        ${cards}
+        ${lockedVehicles}
+        <button class="rbtn" onclick="showScreen('league')">🏆 Ver liga y campeonatos</button>
+    </div>`;
 }
 
-function setRaceVehicle(vehicleId) {
-    if (!game.vehicles[vehicleId]?.owned) return;
-    game.activeVehicle = vehicleId;
-    renderRaceScreen();
-}
-
-function selectRaceVehicle(vehicleId) { setRaceVehicle(vehicleId); }
+window.RaceManager  = RaceManager;
+window.renderRaceScreen = renderRaceScreen;

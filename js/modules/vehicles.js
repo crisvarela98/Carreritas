@@ -50,22 +50,24 @@ const VEHICLE_CATALOG = {
         basePace:     80,
         baseStats:    { hp: 1000, torque: 400, cv: 1014 },
         lapLabel:     "Vuelta",
-        totalLaps:    50,
+        totalLaps:    30,
         desc:         "La cúspide del automovilismo. La liga más competitiva."
     }
 };
 
-// ── Rivals per vehicle type (fictional names) ─────────────────────
+// ── Rivals per vehicle type ───────────────────────────────────────
+// Car rivals are SLOWER (trackday style) so new players can win and get excited
+// basePace = lap time in seconds; HIGHER = slower
 const VEHICLE_RIVALS = {
     car: [
-        { name: "Lanston",  basePace: 82 },
-        { name: "Velstra",  basePace: 81 },
-        { name: "Laclair",  basePace: 83 },
-        { name: "Noris",    basePace: 84 },
-        { name: "Saenz",    basePace: 85 },
-        { name: "Reston",   basePace: 84 },
-        { name: "Alende",   basePace: 86 },
-        { name: "Peraza",   basePace: 86 },
+        { name: "Lanston",  basePace: 103 },
+        { name: "Velstra",  basePace: 105 },
+        { name: "Laclair",  basePace: 101 },
+        { name: "Noris",    basePace: 107 },
+        { name: "Saenz",    basePace: 109 },
+        { name: "Reston",   basePace: 104 },
+        { name: "Alende",   basePace: 106 },
+        { name: "Peraza",   basePace: 108 },
     ],
     moto: [
         { name: "Markes",    basePace: 54 },

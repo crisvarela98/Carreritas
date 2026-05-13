@@ -8,12 +8,12 @@ const CloudSave = (() => {
     let _deviceId = null;
     let _syncing   = false;
     let _lastSyncedAt = 0;
+    let _offlineSilenced = false;   // avoid repeating offline warning
 
     function _getDeviceId() {
         if (_deviceId) return _deviceId;
         let id = localStorage.getItem(DEVICE_KEY);
         if (!id) {
-            // Simple UUID v4
             id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
                 const r = Math.random() * 16 | 0;
                 return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -31,15 +31,21 @@ const CloudSave = (() => {
             const res = await fetch('/api/save', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ deviceId: _getDeviceId(), saveData: gameState })
+                body:    JSON.stringify({ deviceId: _getDeviceId(), saveData: gameState }),
+                signal:  AbortSignal.timeout(6000)
             });
             const json = await res.json();
             if (json.ok) {
                 _lastSyncedAt = Date.now();
+                _offlineSilenced = false;
                 _updateSyncBadge(true);
             }
         } catch (_) {
-            _updateSyncBadge(false);
+            // Only show offline badge once per session to avoid annoyance
+            if (!_offlineSilenced) {
+                _updateSyncBadge(false);
+                _offlineSilenced = true;
+            }
         } finally {
             _syncing = false;
         }
@@ -47,7 +53,8 @@ const CloudSave = (() => {
 
     async function load() {
         try {
-            const res  = await fetch(`/api/load/${_getDeviceId()}`);
+            const res  = await fetch(`/api/load/${_getDeviceId()}`,
+                { signal: AbortSignal.timeout(6000) });
             const json = await res.json();
             if (json.ok && json.found) return json.saveData;
         } catch (_) { /* offline — caller uses localStorage */ }
@@ -56,7 +63,8 @@ const CloudSave = (() => {
 
     async function fetchLeaderboard() {
         try {
-            const res  = await fetch('/api/leaderboard');
+            const res  = await fetch('/api/leaderboard',
+                { signal: AbortSignal.timeout(8000) });
             const json = await res.json();
             return json.ok ? json.rows : [];
         } catch (_) { return []; }
@@ -65,10 +73,18 @@ const CloudSave = (() => {
     function _updateSyncBadge(ok) {
         const el = document.getElementById('cloudSyncBadge');
         if (!el) return;
-        el.textContent = ok ? '☁️ Guardado' : '⚠️ Sin conexión';
-        el.className   = ok ? 'cloud-badge cloud-ok' : 'cloud-badge cloud-err';
-        clearTimeout(el._t);
-        el._t = setTimeout(() => { el.textContent = ''; }, 4000);
+        if (ok) {
+            el.textContent = '☁️ Guardado';
+            el.className   = 'cloud-badge cloud-ok';
+            clearTimeout(el._t);
+            el._t = setTimeout(() => { el.textContent = ''; }, 3000);
+        } else {
+            // Offline — show briefly, don't keep nagging
+            el.textContent = '⚠️ Sin conexión';
+            el.className   = 'cloud-badge cloud-err';
+            clearTimeout(el._t);
+            el._t = setTimeout(() => { el.textContent = ''; el.className = 'cloud-badge'; }, 5000);
+        }
     }
 
     return { save, load, fetchLeaderboard, getDeviceId: _getDeviceId };

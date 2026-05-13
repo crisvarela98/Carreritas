@@ -131,16 +131,16 @@ function openProfileSheet() {
                 <div class="ps-stat-label">Nivel</div>
             </div>
             <div class="ps-stat-box">
-                <div class="ps-stat-val">${game.reputation}</div>
-                <div class="ps-stat-label">Reputación</div>
+                <div class="ps-stat-val">${(game.xp || 0).toLocaleString()}</div>
+                <div class="ps-stat-label">XP</div>
             </div>
             <div class="ps-stat-box">
                 <div class="ps-stat-val gold">🥇 ${game.medals.gold}</div>
                 <div class="ps-stat-label">Victorias</div>
             </div>
             <div class="ps-stat-box">
-                <div class="ps-stat-val">${game.raceResults.length}</div>
-                <div class="ps-stat-label">Carreras</div>
+                <div class="ps-stat-val">🟣 ${game.poleCount || 0}</div>
+                <div class="ps-stat-label">Poles</div>
             </div>
         </div>
     </div>
@@ -160,16 +160,40 @@ function openProfileSheet() {
                 <span>💎 +${p.diamonds}</span><span class="iap-price">${p.price}</span>
             </button>`).join("")}
         <button class="rbtn iap-pack-btn" onclick="IAPManager.purchaseVehicleUpgradePack()">
-            <span>Pack Upgrades +$20K</span><span class="iap-price">$4.99</span>
+            <span>Pack Upgrades +$50K</span><span class="iap-price">$4.99</span>
         </button>
     </div>
 
     <button class="rbtn" onclick="closeProfileSheet(); showScreen('leaderboard')">🌍 Ranking Global</button>
-    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +3 💎</button>
+    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +2 💎</button>
     <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
+
+    <!-- Version info -->
+    <div class="profile-info-btn-wrap">
+        <button class="rbtn profile-info-btn" onclick="showVersionInfo()">ℹ️ Información</button>
+    </div>
     `;
 
     document.getElementById("profileSheet").classList.add("psheet-open");
+}
+
+function showVersionInfo() {
+    const overlay = document.createElement('div');
+    overlay.className = 'ad-overlay';
+    overlay.innerHTML = `
+    <div class="ad-modal" style="max-width:320px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🏎</div>
+        <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px">Motorsport Garage Tycoon</div>
+        <div style="font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:700">Versión 1.0</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:16px">
+            Un juego de gestión de garage de carreras.<br>
+            Repará autos, corré en ligas, contratá mecánicos<br>
+            y dominá el campeonato mundial.<br><br>
+            <strong style="color:#fff">Desarrollado con ❤️ para los apasionados del motor.</strong>
+        </div>
+        <button class="rbtn accent-btn" onclick="this.closest('.ad-overlay').remove()">Cerrar</button>
+    </div>`;
+    document.body.appendChild(overlay);
 }
 
 function closeProfileSheet() {
@@ -211,13 +235,18 @@ function renderProfile() {
             <div class="dash-stat-row">💰 <span>Monedas</span><strong>$${game.money.toLocaleString()}</strong></div>
             <div class="dash-stat-row">💎 <span>Diamantes</span><strong>${game.diamonds}</strong></div>
             <div class="dash-stat-row">⭐ <span>Nivel</span><strong>${game.level}</strong></div>
+            <div class="dash-stat-row">📊 <span>XP</span><strong>${(game.xp||0).toLocaleString()}</strong></div>
             <div class="dash-stat-row">🏁 <span>Carreras</span><strong>${game.raceResults.length}</strong></div>
             <div class="dash-stat-row">🥇 <span>Victorias</span><strong>${game.medals.gold}</strong></div>
+            <div class="dash-stat-row">🟣 <span>Pole Positions</span><strong>${game.poleCount || 0}</strong></div>
         </div>
     </div>
     <button class="rbtn" onclick="showScreen('leaderboard')">🌍 Ranking Global</button>
-    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +3 💎</button>
+    <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +2 💎</button>
     <button class="rbtn dash-reset-btn" onclick="resetGame()">🔄 Reiniciar juego</button>
+    <div class="profile-info-btn-wrap">
+        <button class="rbtn profile-info-btn" onclick="showVersionInfo()">ℹ️ Información · v1.0</button>
+    </div>
     `;
 }
 
@@ -274,32 +303,71 @@ async function renderLeaderboard() {
     const el = document.getElementById("leaderboardContent");
     if (!el) return;
 
-    el.innerHTML = `<div class="race-card"><div class="race-hero-title">🌍 RANKING GLOBAL</div><div class="lb-loading">Cargando...</div></div>`;
+    el.innerHTML = `<div class="race-card"><div class="race-hero-title">🌍 RANKING GLOBAL</div><div class="lb-loading">Conectando al servidor...</div></div>`;
 
-    const rows = await CloudSave.fetchLeaderboard();
+    let rows = [];
+    let connected = false;
+    try {
+        const res  = await fetch('/api/leaderboard', { signal: AbortSignal.timeout(8000) });
+        const json = await res.json();
+        if (json.ok) { rows = json.rows; connected = true; }
+    } catch (err) {
+        console.warn('[leaderboard] No se pudo conectar:', err.message);
+    }
 
-    if (!rows.length) {
-        el.innerHTML = `<div class="race-card"><div class="race-hero-title">🌍 RANKING GLOBAL</div><div class="empty-row">Aún no hay jugadores en el ranking. ¡Sé el primero!</div></div>`;
+    const myDeviceId = CloudSave.getDeviceId();
+
+    if (!connected) {
+        el.innerHTML = `
+        <div class="race-card">
+            <div class="race-hero-title">🌍 RANKING GLOBAL</div>
+            <div class="lb-offline-banner">
+                ⚠️ Sin conexión al servidor<br>
+                <small>Jugá en <strong>Replit</strong> para acceder al ranking global. El juego en GitHub Pages es solo local.</small>
+            </div>
+            <div class="lb-mycard">
+                <div style="font-size:13px;font-weight:700;margin-bottom:6px">Tu progreso local:</div>
+                <div class="lb-stat-row">📊 Nivel <strong>${game.level}</strong></div>
+                <div class="lb-stat-row">🥇 Victorias <strong>${game.medals.gold}</strong></div>
+                <div class="lb-stat-row">🟣 Poles <strong>${game.poleCount || 0}</strong></div>
+            </div>
+        </div>`;
         return;
     }
 
-    // Find current player's rank
-    const myId = CloudSave.getDeviceId();
+    if (!rows.length) {
+        el.innerHTML = `
+        <div class="race-card">
+            <div class="race-hero-title">🌍 RANKING GLOBAL</div>
+            <div class="lb-subtitle">¡Sé el primero en aparecer!</div>
+            <div class="empty-row">Aún no hay jugadores. Completá una carrera y guardá tu perfil.</div>
+        </div>`;
+        return;
+    }
 
     const rowsHtml = rows.map((r, i) => {
-        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${r.rank}`;
-        const isMe  = (r.device_id === myId);  // not exposed, but rank matches player_name
+        const medal  = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${r.rank}`;
+        const isMe   = r.device_id === myDeviceId;
+        const winsByVehicle = [
+            r.wins_car     > 0 ? `🚗${r.wins_car}`   : '',
+            r.wins_moto    > 0 ? `🏍${r.wins_moto}`  : '',
+            r.wins_rally   > 0 ? `🚙${r.wins_rally}` : '',
+            r.wins_formula > 0 ? `🏎${r.wins_formula}`: '',
+        ].filter(Boolean).join(' ') || '—';
+
         return `
         <div class="lb-row ${isMe ? 'lb-me' : ''}">
             <div class="lb-rank">${medal}</div>
             <div class="lb-info">
-                <div class="lb-name">${escHtml(r.player_name || 'Anónimo')}</div>
+                <div class="lb-name">${escHtml(r.player_name || 'Anónimo')}${isMe ? ' <span class="lb-you-tag">Tú</span>' : ''}</div>
                 <div class="lb-garage">${escHtml(r.garage_name || '')}</div>
+                <div class="lb-wins-row">${winsByVehicle}</div>
             </div>
             <div class="lb-stats">
                 <div class="lb-stat"><span class="lb-sv">Nv.${r.level}</span><small>nivel</small></div>
+                <div class="lb-stat"><span class="lb-sv" style="color:var(--text-muted)">${Number(r.xp||0).toLocaleString()}</span><small>XP</small></div>
                 <div class="lb-stat"><span class="lb-sv gold">🥇${r.total_wins}</span><small>wins</small></div>
-                <div class="lb-stat"><span class="lb-sv">🔧${Number(r.total_repairs).toLocaleString()}</span><small>rep.</small></div>
+                <div class="lb-stat"><span class="lb-sv" style="color:#b57bee">🟣${r.total_poles||0}</span><small>poles</small></div>
             </div>
         </div>`;
     }).join('');
@@ -307,7 +375,7 @@ async function renderLeaderboard() {
     el.innerHTML = `
     <div class="race-card">
         <div class="race-hero-title">🌍 RANKING GLOBAL</div>
-        <div class="lb-subtitle">Top ${rows.length} jugadores · actualizado en tiempo real</div>
+        <div class="lb-subtitle">Top ${rows.length} jugadores · en tiempo real ☁️</div>
         <div class="lb-list">${rowsHtml}</div>
     </div>`;
 }
@@ -318,7 +386,7 @@ function escHtml(str) {
 
 // ── Init ──────────────────────────────────────────────────────────
 async function init() {
-    load_user_progress();   // immediate localStorage load
+    load_user_progress();
     applyOffline();
     initAllLeagues();
     checkVehicleUnlocks();
@@ -347,13 +415,13 @@ async function init() {
         if (cloudData && typeof cloudData === 'object') {
             const localTs = (() => { try { return JSON.parse(localStorage.getItem('mgt_save_v4') || '{}').timestamp || 0; } catch(_){return 0;} })();
             const cloudTs = cloudData.lastTime || 0;
-            if (cloudTs > localTs + 30000) {  // cloud is >30s newer
+            if (cloudTs > localTs + 30000) {
                 deepMerge(game, cloudData);
                 updateGarageHud();
-                notifyInfo('☁️ Save restaurado desde la nube');
+                notifyInfo('☁️ Progreso restaurado desde la nube');
             }
         }
-    } catch(_) { /* offline — no problem */ }
+    } catch(_) { /* offline */ }
 }
 
 window.addEventListener("DOMContentLoaded", init);
