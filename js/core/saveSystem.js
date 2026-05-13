@@ -129,5 +129,5 @@ function startAutoSave() {
     setInterval(() => {
         game.lastTime = Date.now();
         save_user_progress();
-    }, 10000);
+    }, 30000);
 }
