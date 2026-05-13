@@ -13,21 +13,26 @@ let db = null;
 
 const MONGO_URI = process.env.MONGODB_URI;
 if (MONGO_URI) {
-    const { MongoClient } = require('mongodb');
-    const client = new MongoClient(MONGO_URI);
-    client.connect()
-        .then(() => {
-            db = client.db('garage_motorsports');
-            return Promise.all([
-                db.collection('saves').createIndex({ device_id: 1 }, { unique: true }),
-                db.collection('leaderboard').createIndex({ device_id: 1 }, { unique: true })
-            ]);
-        })
-        .then(() => console.log('✅ MongoDB connected — garage_motorsports'))
-        .catch(err => {
-            console.warn('⚠️  MongoDB connection failed, using in-memory storage:', err.message);
-            db = null;
-        });
+    try {
+        const { MongoClient } = require('mongodb');
+        const client = new MongoClient(MONGO_URI);
+        client.connect()
+            .then(() => {
+                db = client.db('garage_motorsports');
+                return Promise.all([
+                    db.collection('saves').createIndex({ device_id: 1 }, { unique: true }),
+                    db.collection('leaderboard').createIndex({ device_id: 1 }, { unique: true })
+                ]);
+            })
+            .then(() => console.log('✅ MongoDB connected — garage_motorsports'))
+            .catch(err => {
+                console.warn('⚠️  MongoDB connection failed, using in-memory storage:', err.message);
+                db = null;
+            });
+    } catch (err) {
+        console.warn('⚠️  MongoDB URI inválida, usando almacenamiento en memoria:', err.message);
+        db = null;
+    }
 } else {
     console.log('ℹ️  MONGODB_URI not set — using in-memory storage (data resets on restart)');
 }
