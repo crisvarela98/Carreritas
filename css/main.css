@@ -2295,62 +2295,84 @@ html, body {
 .mg-end-sub     { font-size: 13px; color: var(--text-sub); }
 .mg-end-reward  { font-size: 28px; font-weight: 900; color: var(--coin); }
 
-/* Road */
+/* ── Road — First Person View ─────────────────────────────────── */
 .mg-road {
     flex: 1;
     position: relative;
-    background: #1a1a2e;
     overflow: hidden;
 }
-.mg-road-bg {
+
+/* First-person sky + asphalt background */
+.mg-road.mg-fp {
+    background: linear-gradient(
+        to bottom,
+        #7ec8e3 0%,      /* sky top */
+        #a8dce8 30%,     /* sky horizon */
+        #5a5a5a 38%,     /* road edge */
+        #3a3a3a 55%,     /* mid road */
+        #1e1e1e 100%     /* near road */
+    );
+}
+
+/* Perspective lane dividers — thin at horizon, wide at bottom */
+.mg-lane {
     position: absolute;
     inset: 0;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            transparent 0px,
-            transparent 40px,
-            rgba(255,255,255,0.06) 40px,
-            rgba(255,255,255,0.06) 41px
-        );
-    animation: road-scroll 0.5s linear infinite;
+    pointer-events: none;
+    background: rgba(255,255,255,0.75);
 }
-@keyframes road-scroll {
-    from { background-position-y: 0; }
-    to   { background-position-y: 41px; }
-}
-.mg-lane-mark {
+.mg-lane.l1 { clip-path: polygon(39% 33%, 41% 33%, 27% 100%, 23% 100%); }
+.mg-lane.l2 { clip-path: polygon(59% 33%, 61% 33%, 77% 100%, 73% 100%); }
+
+/* Cabin overlay — set background-image to assets/cabin.png when ready */
+/* background-image: url('/assets/cabin.png');                            */
+.mg-fp-cabin {
     position: absolute;
-    top: 0;
     bottom: 0;
-    width: 2px;
-    background: rgba(255,255,255,0.12);
+    left: 0;
+    right: 0;
+    height: 55%;
+    background-image: url('/assets/cabin.png');
+    background-size: cover;
+    background-position: top center;
+    pointer-events: none;
+    z-index: 15;
 }
-.mg-lm1 { left: 33.3%; }
-.mg-lm2 { left: 66.6%; }
 
-/* Player truck */
-.mg-player {
+/* Invisible player hitbox — the player IS the camera */
+/* Uncomment background below to debug hitbox position  */
+.mg-player-hitbox {
     position: absolute;
-    bottom: 60px;
-    font-size: 36px;
-    line-height: 1;
+    bottom: 58%;          /* sits just above the cabin overlay */
+    width: 52px;
+    height: 48px;
+    transform: translateX(-50%);
     transition: left 0.12s ease;
-    z-index: 10;
-    filter: drop-shadow(0 0 8px rgba(59,130,246,0.6));
+    z-index: 16;
+    pointer-events: none;
+    /* background: rgba(255,0,0,0.35); */
 }
-.mg-player-move { filter: drop-shadow(0 0 14px rgba(59,130,246,0.9)); }
 
-/* Obstacles */
-.mg-obstacle {
+/* ── Obstacle cars — colored DIV squares ───────────────────────
+   To swap to PNG: el.innerHTML = '<img src="cars/auto1.png">';
+   ──────────────────────────────────────────────────────────── */
+.mg-car {
     position: absolute;
-    font-size: 30px;
-    line-height: 1;
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+    transform-origin: center center;
     z-index: 9;
-    transition: none;
+    overflow: hidden;
 }
+.mg-car img { width: 100%; height: 100%; object-fit: contain; }
+.car-red    { background: linear-gradient(145deg, #fc4444, #a80000); }
+.car-yellow { background: linear-gradient(145deg, #ffd700, #b8860b); }
+.car-blue   { background: linear-gradient(145deg, #4a90e2, #1a3a7a); }
+.car-green  { background: linear-gradient(145deg, #3dba6f, #145e30); }
 
-/* Tap zones (invisible) */
+/* Tap zones (invisible touch areas) */
 .mg-tap-z {
     position: absolute;
     top: 0;

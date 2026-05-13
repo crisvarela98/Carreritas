@@ -1,19 +1,27 @@
-// ── Mini-game: Camión Ciudad ──────────────────────────────────────
+// ── Mini-game: Camión Ciudad — First Person View ──────────────────
+// Lane positions (% from left) — used for obstacles & hitbox
+const MG_LANE_PCTS = ['20%', '50%', '80%'];
+
+// Obstacle colors — swap className or set innerHTML for PNG later:
+//   el.className = 'mg-car car-red';   ← change color here
+//   el.innerHTML = '<img src="cars/auto1.png">';  ← or swap to PNG
+const MG_CAR_COLORS = ['car-red', 'car-yellow', 'car-blue', 'car-green'];
+
 const MiniGame = {
-    lane:      1,       // 0=left 1=center 2=right
-    score:     0,
-    running:   false,
-    _scoreInt: null,
-    _spawnTO:  null,
-    _collInt:  null,
-    _obstacles:[],
-    _startTs:  0,
+    lane:       1,      // 0=left  1=center  2=right
+    score:      0,
+    running:    false,
+    _scoreInt:  null,
+    _spawnTO:   null,
+    _collInt:   null,
+    _obstacles: [],
+    _startTs:   0,
+    _keyHandler:null,
 
     open() {
         const ov = document.getElementById('minigameOverlay');
         if (ov) ov.classList.add('mg-active');
         this._renderStart();
-        // FTUE hook
         if (window.FTUEManager) FTUEManager.onMinigameStarted();
     },
 
@@ -34,18 +42,21 @@ const MiniGame = {
     start() {
         const area = document.getElementById('mgGameArea');
         if (!area) return;
-        this.lane      = 1;
-        this.score     = 0;
-        this.running   = true;
+        this.lane       = 1;
+        this.score      = 0;
+        this.running    = true;
         this._obstacles = [];
-        this._startTs  = Date.now();
+        this._startTs   = Date.now();
 
+        // ── First-person road HTML ──────────────────────────────────
+        // mgPlayer is an INVISIBLE hitbox — the player IS the camera
+        // To add a cabin image later, set background-image on .mg-fp-cabin
         area.innerHTML = `
-        <div id="mgRoad" class="mg-road">
-            <div class="mg-road-bg"></div>
-            <div class="mg-lane-mark mg-lm1"></div>
-            <div class="mg-lane-mark mg-lm2"></div>
-            <div id="mgPlayer" class="mg-player">🚛</div>
+        <div id="mgRoad" class="mg-road mg-fp">
+            <div class="mg-lane l1"></div>
+            <div class="mg-lane l2"></div>
+            <div class="mg-fp-cabin"></div>
+            <div id="mgPlayer" class="mg-player-hitbox"></div>
             <div class="mg-tap-z mg-tap-left"
                  ontouchstart="MiniGame.moveLeft();event.preventDefault()"
                  onclick="MiniGame.moveLeft()"></div>
@@ -59,7 +70,7 @@ const MiniGame = {
             <span class="mg-hud-hint">↔ cambiar carril</span>
         </div>`;
 
-        this._positionPlayer(false);
+        this._positionPlayer();
 
         // Score $150/s
         this._scoreInt = setInterval(() => {
@@ -73,22 +84,20 @@ const MiniGame = {
         const MAX_MS  = 60000;
         const barTick = setInterval(() => {
             if (!this.running) { clearInterval(barTick); return; }
-            const bar  = document.getElementById('mgTimerBar');
-            const pct  = Math.min(100, (Date.now() - this._startTs) / MAX_MS * 100);
+            const bar = document.getElementById('mgTimerBar');
+            const pct = Math.min(100, (Date.now() - this._startTs) / MAX_MS * 100);
             if (bar) {
-                bar.style.width = pct + '%';
+                bar.style.width      = pct + '%';
                 bar.style.background = pct < 50 ? 'var(--accent)' : pct < 80 ? 'var(--orange)' : 'var(--red)';
             }
             if (pct >= 100) { clearInterval(barTick); this._endGame(true); }
         }, 500);
 
-        // Spawn obstacles
+        // Spawn & collide
         this._spawnObstacle();
-
-        // Collision detection
         this._collInt = setInterval(() => this._checkCollision(), 200);
 
-        // Keyboard support
+        // Keyboard support — unchanged
         this._keyHandler = (e) => {
             if (e.key === 'ArrowLeft')  this.moveLeft();
             if (e.key === 'ArrowRight') this.moveRight();
@@ -96,67 +105,79 @@ const MiniGame = {
         document.addEventListener('keydown', this._keyHandler);
     },
 
-    _positionPlayer(animate) {
+    // ── Hitbox only (player = camera, not drawn) ────────────────────
+    _positionPlayer() {
         const p = document.getElementById('mgPlayer');
         if (!p) return;
-        const pcts = ['16%', '50%', '83%'];
-        p.style.left = pcts[this.lane];
+        p.style.left      = MG_LANE_PCTS[this.lane];
         p.style.transform = 'translateX(-50%)';
-        if (animate) {
-            p.classList.add('mg-player-move');
-            setTimeout(() => p.classList.remove('mg-player-move'), 200);
-        }
     },
 
-    moveLeft()  { if (this.lane > 0) { this.lane--; this._positionPlayer(true); } },
-    moveRight() { if (this.lane < 2) { this.lane++; this._positionPlayer(true); } },
+    moveLeft()  { if (this.lane > 0) { this.lane--; this._positionPlayer(); } },
+    moveRight() { if (this.lane < 2) { this.lane++; this._positionPlayer(); } },
 
+    // ── Obstacle spawn — first-person perspective ───────────────────
     _spawnObstacle() {
         if (!this.running) return;
         const road = document.getElementById('mgRoad');
         if (!road) return;
 
-        const lane = Math.floor(Math.random() * 3);
-        const icons = ['🚗','🚕','🚙','🏎','🚌','🚎'];
+        const lane       = Math.floor(Math.random() * 3);
+        const colorClass = MG_CAR_COLORS[Math.floor(Math.random() * MG_CAR_COLORS.length)];
+
+        // ── To swap to PNG later: replace className + add innerHTML ──
+        // el.className = 'mg-car car-red';
+        // el.innerHTML = '<img src="cars/auto1.png">';
         const el = document.createElement('div');
-        el.className = 'mg-obstacle';
-        el.textContent = icons[Math.floor(Math.random() * icons.length)];
-        const pcts = ['16%','50%','83%'];
-        el.style.left = pcts[lane];
-        el.style.top  = '-60px';
-        el.style.transform = 'translateX(-50%)';
+        el.className    = `mg-car ${colorClass}`;
         el.dataset.lane = lane;
+
+        // Start at lane column, near the horizon
+        el.style.left      = MG_LANE_PCTS[lane];
+        el.style.position  = 'absolute';
         road.appendChild(el);
         this._obstacles.push(el);
 
-        // Animate downward
-        let y = -60;
+        const roadH = road.offsetHeight || 500;
+
+        // Depth animation: starts small & high (horizon), grows as it approaches
+        let y     = -80;      // px from top of road area
+        let scale = 0.3;      // starts small
         const speed = 4 + Math.random() * 3;
+
+        el.style.top       = y + 'px';
+        el.style.transform = `translateX(-50%) scale(${scale})`;
+
         const anim = setInterval(() => {
             if (!this.running) { clearInterval(anim); el.remove(); return; }
-            y += speed;
-            el.style.top = y + 'px';
-            const roadH = road.offsetHeight || 500;
-            if (y > roadH + 60) {
+            y     += speed;
+            scale += 0.015;
+            el.style.top       = y + 'px';
+            el.style.transform = `translateX(-50%) scale(${Math.min(scale, 3)})`;
+
+            // Remove when past 70% of road height (car passed the player)
+            if (y > roadH * 0.70) {
                 clearInterval(anim);
                 el.remove();
                 this._obstacles = this._obstacles.filter(o => o !== el);
             }
         }, 30);
 
-        // Spawn next
+        // Spawn next — gets faster over time
         const delay = Math.max(600, 1400 - Math.min(800, (Date.now() - this._startTs) / 60));
         this._spawnTO = setTimeout(() => this._spawnObstacle(), delay);
     },
 
+    // ── Collision detection — unchanged: uses getBoundingClientRect ─
     _checkCollision() {
         const player = document.getElementById('mgPlayer');
         if (!player) return;
         const pr = player.getBoundingClientRect();
 
         for (const obs of this._obstacles) {
-            const or = obs.getBoundingClientRect();
-            const overlap = !(pr.right < or.left || pr.left > or.right || pr.bottom < or.top || pr.top > or.bottom);
+            const or      = obs.getBoundingClientRect();
+            const overlap = !(pr.right < or.left || pr.left > or.right ||
+                               pr.bottom < or.top  || pr.top > or.bottom);
             if (overlap) {
                 this._endGame(false);
                 return;
@@ -178,9 +199,8 @@ const MiniGame = {
         game.stats.totalMinigames = (game.stats.totalMinigames || 0) + 1;
         if (window.TaskManager) { TaskManager.trackDaily('minigame'); TaskManager._updateBadge(); }
 
-        const area = document.getElementById('mgGameArea');
+        const area       = document.getElementById('mgGameArea');
         if (!area) return;
-
         const resultIcon = survived ? '🏆' : '💥';
         const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
 
