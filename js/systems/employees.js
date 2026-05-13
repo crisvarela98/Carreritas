@@ -1,8 +1,8 @@
 const MECHANIC_CATALOG = [
-    { id: "rookie",   name: "Mecánico Junior",  icon: "🔧", speed: 0.5, hireCost: 500,   salaryPerMin: 5,  desc: "Aprendiz, lento pero barato" },
-    { id: "mid",      name: "Mecánico Senior",  icon: "⚙️", speed: 1.0, hireCost: 1500,  salaryPerMin: 12, desc: "Experimentado, buen ritmo" },
-    { id: "expert",   name: "Mecánico Experto", icon: "🛠", speed: 1.8, hireCost: 4000,  salaryPerMin: 25, desc: "El mejor del paddock" },
-    { id: "premium",  name: "Ingeniero F1",     icon: "🏎", speed: 3.0, hireCost: 10000, salaryPerMin: 60, desc: "Ex-equipo de fórmula 1", premium: true }
+    { id: "rookie",   name: "Mecánico Junior",  icon: "🔧", speed: 0.4, hireCost: 2500,   salaryPerMin: 10,  desc: "Aprendiz, lento pero barato" },
+    { id: "mid",      name: "Mecánico Senior",  icon: "⚙️", speed: 0.9, hireCost: 8000,   salaryPerMin: 22, desc: "Experimentado, buen ritmo" },
+    { id: "expert",   name: "Mecánico Experto", icon: "🛠", speed: 1.6, hireCost: 22000,  salaryPerMin: 45, desc: "El mejor del paddock" },
+    { id: "premium",  name: "Ingeniero F1",     icon: "🏎", speed: 2.8, hireCost: 60000,  salaryPerMin: 120, desc: "Ex-equipo de fórmula 1", premium: true }
 ];
 
 function getTotalMechanicSpeed() {

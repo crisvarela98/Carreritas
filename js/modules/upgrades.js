@@ -27,6 +27,8 @@ function getUpgradeCost(vehicleId, partKey) {
     return base * Math.pow(1.8, lvl);
 }
 
+const VEHICLE_UPGRADE_DIAMOND_COST = 15; // all vehicles: level 5 costs 15 💎
+
 // ── upgrade_vehicle() ─────────────────────────────────────────────
 function upgrade_vehicle(vehicleId, partKey) {
     const def  = UPGRADE_PARTS.find(p => p.key === partKey);
@@ -36,14 +38,25 @@ function upgrade_vehicle(vehicleId, partKey) {
     if (!def || !veh || !vDef) return;
     if (!veh.owned) { notifyWarn("Vehículo no desbloqueado"); return; }
 
-    const currentLvl = veh.upgrades[partKey] || 0;
+    const currentLvl  = veh.upgrades[partKey] || 0;
     if (currentLvl >= def.max) { notify("Nivel máximo alcanzado"); return; }
 
-    const cost = Math.floor(getUpgradeCost(vehicleId, partKey));
-    if (!spend_coins(cost)) { notifyWarn("Monedas insuficientes"); return; }
+    const isMaxUpgrade = currentLvl === def.max - 1;
 
-    veh.upgrades[partKey] = currentLvl + 1;
-    notifySuccess(`${def.icon} ${def.label} mejorado — Nivel ${veh.upgrades[partKey]}`);
+    if (isMaxUpgrade) {
+        if ((game.diamonds || 0) < VEHICLE_UPGRADE_DIAMOND_COST) {
+            notifyWarn(`💎 Necesitás ${VEHICLE_UPGRADE_DIAMOND_COST} diamantes para la mejora máxima`);
+            return;
+        }
+        game.diamonds -= VEHICLE_UPGRADE_DIAMOND_COST;
+        veh.upgrades[partKey] = currentLvl + 1;
+        notifySuccess(`${def.icon} ${def.label} — NIVEL MÁXIMO 💎 usados`);
+    } else {
+        const cost = Math.floor(getUpgradeCost(vehicleId, partKey));
+        if (!spend_coins(cost)) { notifyWarn("Monedas insuficientes"); return; }
+        veh.upgrades[partKey] = currentLvl + 1;
+        notifySuccess(`${def.icon} ${def.label} mejorado — Nivel ${veh.upgrades[partKey]}`);
+    }
 
     renderVehiclesTab();
 
@@ -79,31 +92,44 @@ function renderVehiclesTab() {
         }
 
         const partsHtml = UPGRADE_PARTS.map(part => {
-            const lvl   = veh.upgrades[part.key] || 0;
-            const maxed = lvl >= part.max;
-            const cost  = maxed ? 0 : Math.floor(getUpgradeCost(def.id, part.key));
-            const canAf = game.money >= cost;
+            const lvl          = veh.upgrades[part.key] || 0;
+            const maxed        = lvl >= part.max;
+            const isMaxUpgrade = lvl === part.max - 1;
+            const cost         = (maxed || isMaxUpgrade) ? 0 : Math.floor(getUpgradeCost(def.id, part.key));
+            const canAfMoney   = game.money >= cost;
+            const canAfDia     = (game.diamonds || 0) >= VEHICLE_UPGRADE_DIAMOND_COST;
             const segs  = Array.from({ length: part.max }, (_, i) =>
                 `<div class="part-seg ${i < lvl ? "seg-on" : ""}"></div>`
             ).join("");
+
+            let btn;
+            if (maxed) {
+                btn = `<div class="part-maxed">MAX</div>`;
+            } else if (isMaxUpgrade) {
+                btn = `<button class="rbtn ${canAfDia ? "diamond-btn" : ""} ur-btn"
+                               onclick="upgrade_vehicle('${def.id}','${part.key}')"
+                               ${!canAfDia ? "disabled" : ""}>
+                           💎 ${VEHICLE_UPGRADE_DIAMOND_COST}
+                       </button>`;
+            } else {
+                btn = `<button class="rbtn ${canAfMoney ? "accent-btn" : ""} ur-btn"
+                               onclick="upgrade_vehicle('${def.id}','${part.key}')"
+                               ${!canAfMoney ? "disabled" : ""}>
+                           $${cost.toLocaleString()}
+                       </button>`;
+            }
 
             return `
             <div class="upgrade-row">
                 <div class="ur-left">
                     <span class="ur-icon">${part.icon}</span>
                     <div>
-                        <div class="ur-name">${part.label} <span class="ur-lv">Nv.${lvl}</span></div>
+                        <div class="ur-name">${part.label} <span class="ur-lv">Nv.${lvl}/${part.max}</span></div>
                         <div class="ur-desc">${part.desc} · -${part.pacePerLevel}s/nv</div>
                         <div class="part-segs">${segs}</div>
                     </div>
                 </div>
-                ${maxed
-                    ? `<div class="part-maxed">MAX</div>`
-                    : `<button class="rbtn ${canAf ? "accent-btn" : ""} ur-btn"
-                               onclick="upgrade_vehicle('${def.id}','${part.key}')"
-                               ${!canAf ? "disabled" : ""}>
-                           $${cost.toLocaleString()}
-                       </button>`}
+                ${btn}
             </div>`;
         }).join("");
 

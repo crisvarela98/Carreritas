@@ -1032,9 +1032,9 @@ html, body {
 .part-name   { font-size: 14px; font-weight: 800; flex: 1; }
 .part-lv     { font-size: 11px; color: var(--text-muted); font-weight: 700; }
 .part-desc   { font-size: 12px; color: var(--text-sub); line-height: 1.4; }
-.part-segs   { display: flex; gap: 4px; }
-.part-seg    { height: 4px; flex: 1; background: var(--border); border-radius: 2px; }
-.part-seg.seg-on { background: var(--accent); }
+.part-segs   { display: flex; gap: 5px; margin: 4px 0; }
+.part-seg    { width: 28px; height: 14px; flex-shrink: 0; background: var(--border); border-radius: 3px; transition: background 0.2s; }
+.part-seg.seg-on { background: var(--accent); box-shadow: 0 0 6px rgba(59,130,246,0.4); }
 .part-maxed  { font-size: 11px; font-weight: 800; color: var(--green); letter-spacing: 0.5px; }
 
 /* ── Vehicle cards ───────────────────────────────────────────── */

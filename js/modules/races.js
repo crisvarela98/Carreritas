@@ -238,12 +238,19 @@ const RaceManager = {
         const pace   = getVehiclePace(vid);
         s.totalLaps  = format.laps;
 
-        s.grid = rivals.map(r => ({
-            name:      r.name,
-            qualyTime: r.basePace + (Math.random() - 0.5) * 8,
-            basePace:  r.basePace + (Math.random() - 0.3) * 3,
-            totalTime: 0
-        }));
+        // Dynamic rivals: cluster around player pace for real competition
+        // Offsets: 2 slightly faster, 3 close, 3 slower → target ~6/10 wins
+        const offsets = [-1.0, -0.4, 0.2, 0.5, 0.8, 1.2, 2.5, 4.5];
+        s.grid = rivals.map((r, idx) => {
+            const offset    = offsets[idx % offsets.length];
+            const rivalPace = pace + offset;
+            return {
+                name:      r.name,
+                qualyTime: rivalPace + (Math.random() - 0.5) * 10,
+                basePace:  rivalPace,
+                totalTime: 0
+            };
+        });
         s.grid.push({ name: "Tú", qualyTime: pace + (Math.random() - 0.5) * 5, basePace: pace, totalTime: 0 });
 
         if (skipQualy) {
@@ -290,12 +297,18 @@ const RaceManager = {
         const playerTime = Math.max(def.basePace * 0.4, pace + (Math.random() - 0.5) * 3);
 
         s.totalLaps = RACE_FORMAT[vehicleId].laps;
-        s.grid = rivals.map(r => ({
-            name:      r.name,
-            qualyTime: r.basePace + (Math.random() - 0.5) * 6,
-            basePace:  r.basePace + (Math.random() - 0.3) * 3,
-            totalTime: 0
-        }));
+        // Dynamic rivals: cluster around player pace for real competition
+        const offsets = [-1.0, -0.4, 0.2, 0.5, 0.8, 1.2, 2.5, 4.5];
+        s.grid = rivals.map((r, idx) => {
+            const offset    = offsets[idx % offsets.length];
+            const rivalPace = pace + offset;
+            return {
+                name:      r.name,
+                qualyTime: rivalPace + (Math.random() - 0.5) * 10,
+                basePace:  rivalPace,
+                totalTime: 0
+            };
+        });
         s.grid.push({ name: "Tú", qualyTime: playerTime, basePace: pace, totalTime: 0 });
 
         const rivalBest = Math.min(...s.grid.filter(r => r.name !== "Tú").map(r => r.qualyTime));
@@ -381,6 +394,19 @@ const RaceManager = {
             <div class="grid-table">${rows}</div>
             <button class="rbtn accent-btn" onclick="RaceManager._beginRace()">🚥 ¡ARRANCAR!</button>
         </div>`;
+
+        // Tata Wolf tip when player didn't get pole
+        if (!gotPole) {
+            const tips = [
+                "⚙️ Tata Wolf: Con el motor mejorado podríamos haber sacado la pole.",
+                "💨 Tata Wolf: El turbo te daría las décimas que nos faltaron en clasificación.",
+                "🔩 Tata Wolf: Una mejor suspensión da más agarre en las curvas rápidas.",
+                "🛞 Tata Wolf: Neumáticos nuevos mejorarían el grip en la vuelta clasificatoria.",
+                "🛑 Tata Wolf: Frenando más tarde con mejores frenos podríamos haber sido pole."
+            ];
+            const tip = tips[Math.floor(Math.random() * tips.length)];
+            setTimeout(() => notifyInfo(tip), 800);
+        }
     },
 
     // ── Race loop ────────────────────────────────────────────────
@@ -453,16 +479,20 @@ const RaceManager = {
             s.stageEvent = RALLY_EVENTS[Math.floor(Math.random() * RALLY_EVENTS.length)];
             const ev = s.stageEvent;
             s.standings = s.standings.map(r => {
-                const lapTime = r.name === "Tú"
+                let lapTime = r.name === "Tú"
                     ? playerLapTime + ev.effect * (0.9 + Math.random() * 0.2)
-                    : r.basePace + ev.effect * (0.8 + Math.random() * 0.4) + (Math.random() - 0.5) * 4;
+                    : r.basePace + ev.effect * (0.8 + Math.random() * 0.4) + (Math.random() - 0.5) * 20;
+                // Random incident: 5% chance (+25s penalty)
+                if (r.name !== "Tú" && Math.random() < 0.05) lapTime += 25;
                 return { ...r, lapTime, totalTime: (r.totalTime || 0) + lapTime };
             });
         } else {
             s.standings = s.standings.map(r => {
-                const lapTime = r.name === "Tú"
+                let lapTime = r.name === "Tú"
                     ? playerLapTime
-                    : r.basePace + (Math.random() - 0.5) * 3;
+                    : r.basePace + (Math.random() - 0.5) * 20;
+                // Random incident: 5% chance (+25s penalty) — creates upsets
+                if (r.name !== "Tú" && Math.random() < 0.05) lapTime += 25;
                 return { ...r, lapTime, totalTime: (r.totalTime || 0) + lapTime };
             });
         }

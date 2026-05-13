@@ -7,15 +7,17 @@ function showWorkshopTab(tab) {
 
 // ── Car generation ────────────────────────────────────────────────
 function generateCar() {
-    const rare     = Math.random() < 0.2;
+    const rare     = Math.random() < 0.15;
     const stockLvl = game.garageUpgrades.partsStock || 0;
-    const durationReduction = 1 - stockLvl * 0.1;
+    const durationReduction = 1 - stockLvl * 0.08;
 
+    // Harder base repair times: 30–60s (was 10–20s)
+    const baseDuration = 30 + Math.random() * 30;
     return {
         id:       Date.now() + Math.random(),
-        duration: Math.max(5, (10 + Math.random() * 10) * durationReduction),
+        duration: Math.max(15, baseDuration * durationReduction),
         progress: 0,
-        reward:   rare ? 500 : 150,
+        reward:   rare ? 800 : 200,
         rare
     };
 }
@@ -53,7 +55,7 @@ const GARAGE_UPGRADES_DEF = [
         icon:  "🏗",
         desc:  "+1 auto simultáneo",
         max:   3,
-        cost:  lvl => [2000, 5000, 12000][lvl] || 0
+        cost:  lvl => [8000, 22000, 55000][lvl] || 0
     },
     {
         key:   "speedBoost",
@@ -61,15 +63,15 @@ const GARAGE_UPGRADES_DEF = [
         icon:  "⚡",
         desc:  "+0.5 velocidad de reparación",
         max:   4,
-        cost:  lvl => [1500, 3500, 7000, 15000][lvl] || 0
+        cost:  lvl => [5000, 14000, 32000, 75000][lvl] || 0
     },
     {
         key:   "partsStock",
         label: "Stock de repuestos",
         icon:  "📦",
-        desc:  "-10% duración de reparación",
+        desc:  "-8% duración de reparación",
         max:   3,
-        cost:  lvl => [1200, 3000, 8000][lvl] || 0
+        cost:  lvl => [4000, 12000, 30000][lvl] || 0
     }
 ];
 

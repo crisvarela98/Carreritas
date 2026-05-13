@@ -235,16 +235,37 @@ const MiniGame = {
             : `<img src="assets/car_red.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(255,60,60,0.7))">`;  
         const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
 
+        const canDouble = AdsManager && AdsManager.canOffer && AdsManager.canOffer("double_race_reward");
+        const adBtnHtml = canDouble
+            ? `<button class="rbtn ad-btn" onclick="MiniGame._doubleReward()">📺 Ver video — Duplicar ganancia ($${(this.score * 2).toLocaleString()})</button>`
+            : "";
+
         area.innerHTML = `
         <div class="mg-start-screen">
             <div class="mg-big-icon">${resultIcon}</div>
             <div class="mg-start-title">${resultMsg}</div>
             <div class="mg-start-desc" style="color:var(--coin);font-size:22px">+$${this.score.toLocaleString()}</div>
+            ${adBtnHtml}
             <button class="rbtn accent-btn mg-start-btn" onclick="MiniGame.start()">▶ JUGAR DE NUEVO</button>
             <button class="rbtn" onclick="MiniGame.close()">← Salir</button>
         </div>`;
 
         save_user_progress();
+    },
+
+    _doubleReward() {
+        // Rewarded ad hook — grant extra earnings equal to original score
+        if (window.AdsManager) {
+            AdsManager._showAdPlaceholder("double_minigame", () => {
+                earn_coins(this.score);
+                addXP(Math.floor(this.score / 30));
+                notifySuccess(`📺 ¡Ganancia duplicada! +$${this.score.toLocaleString()}`);
+                save_user_progress();
+                // Remove ad button after use
+                const adBtn = document.querySelector('.mg-start-screen .ad-btn');
+                if (adBtn) adBtn.remove();
+            });
+        }
     },
 
     close() {

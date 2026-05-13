@@ -9,7 +9,7 @@ const VEHICLE_CATALOG = {
         unlockLevel:  1,
         leagueId:     "car",
         basePace:     92,
-        baseStats:    { hp: 350, torque: 476, cv: 355 },
+        baseStats:    { hp: 250, torque: 340, cv: 253 },
         lapLabel:     "Vuelta",
         totalLaps:    20,
         desc:         "El punto de partida. Versátil y fácil de mejorar."
@@ -116,8 +116,10 @@ function getVehicleStats(vehicleId) {
     const tiresLvl      = up.tires      || 0;
     const suspensionLvl = up.suspension || 0;
 
-    const hpMult  = 1 + (motorLvl - 1) * 0.15 + turboLvl * 0.12;
-    const tqMult  = 1 + (motorLvl - 1) * 0.12 + turboLvl * 0.08 + suspensionLvl * 0.03;
+    // car: base 250hp → max 400hp (full upgrades motor5+turbo5)
+    // formula: 1 + 4*0.10 + 5*0.04 = 1.60 → 250*1.60 = 400 ✓
+    const hpMult  = 1 + (motorLvl - 1) * 0.10 + turboLvl * 0.04;
+    const tqMult  = 1 + (motorLvl - 1) * 0.08 + turboLvl * 0.03 + suspensionLvl * 0.02;
     const cvMult  = hpMult;
 
     return {

@@ -1,5 +1,5 @@
 const CAR_MAX_LEVEL = 5;
-const CAR_MAX_DIAMOND_COST = 30; // diamonds required for the final (level 5) upgrade
+const CAR_MAX_DIAMOND_COST = 15; // diamonds required for the final (level 5) upgrade
 
 const CAR_PARTS = [
     { key: "engine",       label: "Motor",        icon: "⚙️",  hpPerLevel: 50, baseCost: 3000 },

@@ -190,7 +190,7 @@ function showVersionInfo() {
     <div class="ad-modal" style="max-width:320px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">🏎</div>
         <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px">Motorsport Garage Tycoon</div>
-        <div style="font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:700">Versión 1.0</div>
+        <div style="font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:700">Versión 1.1</div>
         <div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:16px">
             Un juego de gestión de garage de carreras.<br>
             Repará autos, corré en ligas, contratá mecánicos<br>
@@ -250,7 +250,7 @@ function renderProfile() {
     <button class="rbtn" onclick="showScreen('leaderboard')">🌍 Ranking Global</button>
     <button class="rbtn ad-btn" onclick="AdsManager.offerRewardedAdToGetDiamonds()">📺 Ver anuncio — +2 💎</button>
     <div class="profile-info-btn-wrap">
-        <button class="rbtn profile-info-btn" onclick="showVersionInfo()">ℹ️ Información · v1.0</button>
+        <button class="rbtn profile-info-btn" onclick="showVersionInfo()">ℹ️ Información · v1.1</button>
     </div>
     `;
 }
