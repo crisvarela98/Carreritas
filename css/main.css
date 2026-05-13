@@ -717,20 +717,19 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── App shell ───────────────────────────────────────────────── */
+/* ── App shell — always fills the full phone screen ─────────── */
 #app {
     display: flex;
     flex-direction: column;
     height: 100dvh;
-    width: calc(100dvh * 853 / 1844);
+    width: 100%;
     max-width: 100vw;
     margin: 0 auto;
     position: relative;
-    background: var(--bg);
+    background: transparent;   /* body garage-bg shows through on dashboard */
 }
-@media (min-width: 464px) {
-    #app { box-shadow: 0 0 0 1px var(--border), 0 0 80px rgba(0,0,0,0.8); }
-}
+/* overlay-screen keeps its own solid bg so garage doesn't bleed through */
+.overlay-screen { background: var(--bg) !important; }
 
 /* ── Header ──────────────────────────────────────────────────── */
 #appHeader {
