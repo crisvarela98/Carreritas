@@ -1,0 +1,73 @@
+Estoy desarrollando un juego web llamado "Carreritas". Actualmente el proyecto funciona como frontend estático (HTML, CSS, JS) y está publicado en Render.
+
+El problema es que el frontend intenta usar MongoDB directamente desde el navegador, lo cual es incorrecto. Necesito transformar el proyecto en una aplicación fullstack real agregando un backend en Node.js + Express que se conecte a MongoDB Atlas correctamente y sirva el frontend.
+
+IMPORTANTE: No quiero cambiar la lógica del juego ni el frontend, solo agregar la arquitectura correcta para que la base de datos funcione.
+
+Estructura actual del proyecto:
+
+/
+├── index.html
+├── css/
+├── js/
+├── assets/
+└── otros archivos del juego
+
+Necesito que generes una nueva estructura profesional así:
+
+/
+├── server.js
+├── package.json
+├── /public
+│     ├── index.html
+│     ├── css/
+│     ├── js/
+│     ├── assets/
+
+Tareas que debe cumplir el backend:
+
+1) Usar Express.
+2) Conectarse a MongoDB Atlas usando mongoose.
+3) Leer la URI desde process.env.MONGO_URI.
+4) Leer el puerto desde process.env.PORT.
+5) Habilitar CORS.
+6) Servir los archivos estáticos desde /public.
+7) Tener middleware express.json().
+8) Crear al menos estas rutas de ejemplo:
+
+   GET /api/test
+   → devuelve { status: "ok" }
+
+   GET /api/scores
+   → devuelve una lista simulada de puntajes desde MongoDB
+
+   POST /api/scores
+   → guarda un nuevo puntaje en MongoDB
+
+9) Crear un modelo mongoose llamado Score con:
+   - player (string)
+   - points (number)
+   - date (date)
+
+10) Mostrar ejemplo de cómo el frontend debería hacer fetch a /api/scores.
+
+11) Crear un package.json correcto con:
+   - express
+   - mongoose
+   - cors
+   - nodemon (dev)
+   - scripts: start y dev
+
+12) Agregar instrucciones al final:
+   - Cómo correr localmente
+   - Cómo configurar variables de entorno
+   - Cómo desplegar en Render o Railway
+
+13) Usar buenas prácticas y código limpio.
+
+El resultado esperado es que, al subir este proyecto a Render/Railway y configurar MONGO_URI, el juego funcione y la base de datos responda correctamente.
+
+Genera todos los archivos completos.
+
+
+Ya hay un intento fallido de conectarse a mongodb corregilo 

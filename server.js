@@ -1,7 +1,6 @@
-const express    = require('express');
-const { MongoClient } = require('mongodb');
-const cors       = require('cors');
-const path       = require('path');
+const express = require('express');
+const cors    = require('cors');
+const path    = require('path');
 
 const app = express();
 
@@ -9,27 +8,33 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname)));
 
+// ── Optional MongoDB ──────────────────────────────────────────────
+let db = null;
+
 const MONGO_URI = process.env.MONGODB_URI;
-if (!MONGO_URI) {
-    console.error('❌ MONGODB_URI environment variable is not set');
-    process.exit(1);
+if (MONGO_URI) {
+    const { MongoClient } = require('mongodb');
+    const client = new MongoClient(MONGO_URI);
+    client.connect()
+        .then(() => {
+            db = client.db('garage_motorsports');
+            return Promise.all([
+                db.collection('saves').createIndex({ device_id: 1 }, { unique: true }),
+                db.collection('leaderboard').createIndex({ device_id: 1 }, { unique: true })
+            ]);
+        })
+        .then(() => console.log('✅ MongoDB connected — garage_motorsports'))
+        .catch(err => {
+            console.warn('⚠️  MongoDB connection failed, using in-memory storage:', err.message);
+            db = null;
+        });
+} else {
+    console.log('ℹ️  MONGODB_URI not set — using in-memory storage (data resets on restart)');
 }
 
-let db;
-const client = new MongoClient(MONGO_URI);
-
-async function initDb() {
-    try {
-        await client.connect();
-        db = client.db('garage_motorsports');
-        await db.collection('saves').createIndex({ device_id: 1 }, { unique: true });
-        await db.collection('leaderboard').createIndex({ device_id: 1 }, { unique: true });
-        console.log('✅ MongoDB connected — garage_motorsports');
-    } catch (err) {
-        console.error('[initDb]', err.message);
-        process.exit(1);
-    }
-}
+// ── In-memory fallback storage ────────────────────────────────────
+const memSaves       = new Map();
+const memLeaderboard = new Map();
 
 // ── POST /api/save ────────────────────────────────────────────────
 app.post('/api/save', async (req, res) => {
@@ -53,34 +58,43 @@ app.post('/api/save', async (req, res) => {
     const winsRallyVal   = Math.max(0, parseInt(stats.wins_rally)   || 0);
     const winsFormulaVal = Math.max(0, parseInt(stats.wins_formula) || 0);
     const sessionTime    = Math.max(0, parseInt(saveData.totalPlayTime) || 0);
+    const now            = new Date();
 
     try {
-        const now = new Date();
-        await db.collection('saves').updateOne(
-            { device_id: deviceId },
-            { $set: { device_id: deviceId, player_name: playerName, garage_name: garageName,
-                      save_data: saveData, updated_at: now } },
-            { upsert: true }
-        );
-
-        if (playerName) {
-            await db.collection('leaderboard').updateOne(
+        if (db) {
+            await db.collection('saves').updateOne(
                 { device_id: deviceId },
                 { $set: { device_id: deviceId, player_name: playerName, garage_name: garageName,
-                          level, xp, total_wins: totalWins, total_repairs: totalRepairs,
-                          total_coins: totalCoins, total_poles: totalPoles,
-                          wins_car: winsCarVal, wins_moto: winsMotoVal,
-                          wins_rally: winsRallyVal, wins_formula: winsFormulaVal,
-                          session_time: sessionTime,
-                          updated_at: now } },
+                          save_data: saveData, updated_at: now } },
                 { upsert: true }
             );
+            if (playerName) {
+                await db.collection('leaderboard').updateOne(
+                    { device_id: deviceId },
+                    { $set: { device_id: deviceId, player_name: playerName, garage_name: garageName,
+                              level, xp, total_wins: totalWins, total_repairs: totalRepairs,
+                              total_coins: totalCoins, total_poles: totalPoles,
+                              wins_car: winsCarVal, wins_moto: winsMotoVal,
+                              wins_rally: winsRallyVal, wins_formula: winsFormulaVal,
+                              session_time: sessionTime, updated_at: now } },
+                    { upsert: true }
+                );
+            }
+        } else {
+            memSaves.set(deviceId, { device_id: deviceId, player_name: playerName,
+                                     garage_name: garageName, save_data: saveData, updated_at: now });
+            if (playerName) {
+                memLeaderboard.set(deviceId, { device_id: deviceId, player_name: playerName,
+                    garage_name: garageName, level, xp, total_wins: totalWins,
+                    total_repairs: totalRepairs, total_coins: totalCoins, total_poles: totalPoles,
+                    wins_car: winsCarVal, wins_moto: winsMotoVal, wins_rally: winsRallyVal,
+                    wins_formula: winsFormulaVal, session_time: sessionTime, updated_at: now });
+            }
         }
-
         res.json({ ok: true });
     } catch (err) {
         console.error('[save]', err.message);
-        res.status(500).json({ ok: false, error: 'DB error' });
+        res.status(500).json({ ok: false, error: 'Storage error' });
     }
 });
 
@@ -90,23 +104,36 @@ app.get('/api/load/:deviceId', async (req, res) => {
     if (!deviceId || deviceId.length > 64)
         return res.status(400).json({ ok: false, error: 'Invalid deviceId' });
     try {
-        const doc = await db.collection('saves').findOne({ device_id: deviceId });
-        if (!doc) return res.json({ ok: true, found: false });
-        res.json({ ok: true, found: true, saveData: doc.save_data, updatedAt: doc.updated_at });
+        if (db) {
+            const doc = await db.collection('saves').findOne({ device_id: deviceId });
+            if (!doc) return res.json({ ok: true, found: false });
+            return res.json({ ok: true, found: true, saveData: doc.save_data, updatedAt: doc.updated_at });
+        } else {
+            const doc = memSaves.get(deviceId);
+            if (!doc) return res.json({ ok: true, found: false });
+            return res.json({ ok: true, found: true, saveData: doc.save_data, updatedAt: doc.updated_at });
+        }
     } catch (err) {
         console.error('[load]', err.message);
-        res.status(500).json({ ok: false, error: 'DB error' });
+        res.status(500).json({ ok: false, error: 'Storage error' });
     }
 });
 
 // ── GET /api/leaderboard ──────────────────────────────────────────
 app.get('/api/leaderboard', async (req, res) => {
     try {
-        const rows = await db.collection('leaderboard')
-            .find({})
-            .sort({ level: -1, total_wins: -1, total_repairs: -1 })
-            .limit(100)
-            .toArray();
+        let rows;
+        if (db) {
+            rows = await db.collection('leaderboard')
+                .find({})
+                .sort({ level: -1, total_wins: -1, total_repairs: -1 })
+                .limit(100)
+                .toArray();
+        } else {
+            rows = Array.from(memLeaderboard.values())
+                .sort((a, b) => b.level - a.level || b.total_wins - a.total_wins || b.total_repairs - a.total_repairs)
+                .slice(0, 100);
+        }
 
         const ranked = rows.map((r, i) => ({
             device_id:     r.device_id,
@@ -134,14 +161,17 @@ app.get('/api/leaderboard', async (req, res) => {
     }
 });
 
+// ── Health check ──────────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+    res.json({ ok: true, storage: db ? 'mongodb' : 'memory' });
+});
+
 // ── Fallback → index.html ─────────────────────────────────────────
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
-initDb().then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🏎  Motorsport Garage Tycoon running on :${PORT}`);
-    });
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🏎  Motorsport Garage Tycoon running on :${PORT}`);
 });
