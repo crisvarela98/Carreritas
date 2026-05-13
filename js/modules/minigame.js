@@ -37,7 +37,7 @@ const MiniGame = {
         if (!area) return;
         area.innerHTML = `
         <div class="mg-start-screen">
-            <div class="mg-big-icon"><img src="/assets/truck.png" style="width:72px;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))"></div>
+            <div class="mg-big-icon"><img src="assets/truck.png" style="width:72px;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))"></div>
             <div class="mg-start-title">CAMIÓN CIUDAD</div>
             <div class="mg-start-desc">Esquivá el tráfico · Ganás <span style="color:var(--green)">$150</span> por segundo</div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">60 segundos de supervivencia = $9,000</div>
@@ -58,7 +58,7 @@ const MiniGame = {
 
         area.innerHTML = `
         <div id="mgRoad" class="mg-road mg-fp">
-            <img id="mgPlayer" class="mg-player-sprite" src="/assets/truck.png">
+            <img id="mgPlayer" class="mg-player-sprite" src="assets/truck.png">
 
             <!-- Lane indicator -->
             <div class="mg-lane-ind">
@@ -166,7 +166,7 @@ const MiniGame = {
         const sprite = MG_CAR_SPRITES[Math.floor(Math.random() * MG_CAR_SPRITES.length)];
 
         const el = document.createElement('img');
-        el.src             = `/assets/${sprite}.png`;
+        el.src             = `assets/${sprite}.png`;
         el.className       = 'mg-car';
         el.dataset.lane    = lane;
         el.style.position  = 'absolute';
@@ -231,8 +231,8 @@ const MiniGame = {
         const area      = document.getElementById('mgGameArea');
         if (!area) return;
         const resultIcon = survived
-            ? `<img src="/assets/truck.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(0,200,100,0.6))">`
-            : `<img src="/assets/car_red.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(255,60,60,0.7)) hue-rotate(0deg)">`;
+            ? `<img src="assets/truck.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(0,200,100,0.6))">`
+            : `<img src="assets/car_red.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(255,60,60,0.7))">`;  
         const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
 
         area.innerHTML = `

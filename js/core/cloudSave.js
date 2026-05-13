@@ -10,8 +10,8 @@ const CloudSave = (() => {
     let _lastSyncedAt = 0;
     let _offlineSilenced = false;
 
-    // Replit server public URL — used when the game runs outside of Replit
-    // (e.g. GitHub Pages). Update this if the Repl URL ever changes.
+    // Replit server URL — used when the game runs outside of Replit (e.g. GitHub Pages).
+    // Works while this Repl is running. For 24/7 access, deploy the app and update this URL.
     const REPLIT_SERVER = 'https://dd7f52b6-ea99-43b2-8887-9c037baba08d-00-2qx1ff8q2g7g2.picard.replit.dev';
 
     // Returns the API base URL.
