@@ -1,21 +1,29 @@
 // ── Mini-game: Camión Ciudad — Top-Down View ──────────────────────
-// Lane x positions (top-down: left, center, right)
-const MG_LANE_PCTS = ['16%', '50%', '83%'];
+// Lane x positions — calibrated to the road.png asphalt lanes
+// Road spans ~22%–78% of image width; 3 lanes at 1/6, 3/6, 5/6 of that range
+const MG_LANE_PCTS  = ['32%', '50%', '68%'];
 const MG_LANE_LABELS = ['IZQ', 'CEN', 'DER'];
 
 // Obstacle car sprites
 const MG_CAR_SPRITES = ['car_green', 'car_yellow', 'car_red'];
 
+// Fixed car speed (px per tick at 30ms) — uniform so cars never bunch up
+const MG_CAR_SPEED = 5;
+
+// Minimum vertical gap (px) required before another car can spawn in the same lane
+const MG_LANE_GAP = 180;
+
 const MiniGame = {
-    lane:       1,
-    score:      0,
-    running:    false,
-    _scoreInt:  null,
-    _spawnTO:   null,
-    _collInt:   null,
-    _obstacles: [],
-    _startTs:   0,
-    _keyHandler:null,
+    lane:          1,
+    score:         0,
+    running:       false,
+    _scoreInt:     null,
+    _spawnTO:      null,
+    _collInt:      null,
+    _obstacles:    [],
+    _startTs:      0,
+    _keyHandler:   null,
+    _laneLastY:    [null, null, null], // tracks the last car's Y per lane
 
     open() {
         const ov = document.getElementById('minigameOverlay');
@@ -41,11 +49,12 @@ const MiniGame = {
     start() {
         const area = document.getElementById('mgGameArea');
         if (!area) return;
-        this.lane       = 1;
-        this.score      = 0;
-        this.running    = true;
-        this._obstacles = [];
-        this._startTs   = Date.now();
+        this.lane          = 1;
+        this.score         = 0;
+        this.running       = true;
+        this._obstacles    = [];
+        this._startTs      = Date.now();
+        this._laneLastY    = [null, null, null];
 
         area.innerHTML = `
         <div id="mgRoad" class="mg-road mg-fp">
@@ -132,45 +141,63 @@ const MiniGame = {
         setTimeout(() => el.classList.remove('flash'), 220);
     },
 
-    // ── Obstacle spawn — top-down, straight vertical movement ────────
+    // ── Obstacle spawn — top-down, uniform speed, lane-gap enforced ──
     _spawnObstacle() {
         if (!this.running) return;
         const road = document.getElementById('mgRoad');
         if (!road) return;
 
-        const lane   = Math.floor(Math.random() * 3);
+        // Pick a lane that has enough gap from the last spawned car
+        const shuffled = [0, 1, 2].sort(() => Math.random() - 0.5);
+        let lane = -1;
+        for (const candidate of shuffled) {
+            const lastY = this._laneLastY[candidate];
+            if (lastY === null || lastY > MG_LANE_GAP) {
+                lane = candidate;
+                break;
+            }
+        }
+        // If all lanes are blocked, wait and retry
+        if (lane === -1) {
+            this._spawnTO = setTimeout(() => this._spawnObstacle(), 300);
+            return;
+        }
+
         const sprite = MG_CAR_SPRITES[Math.floor(Math.random() * MG_CAR_SPRITES.length)];
 
         const el = document.createElement('img');
-        el.src        = `/assets/${sprite}.png`;
-        el.className  = 'mg-car';
-        el.dataset.lane = lane;
-        el.style.position = 'absolute';
-        el.style.left     = MG_LANE_PCTS[lane];
+        el.src             = `/assets/${sprite}.png`;
+        el.className       = 'mg-car';
+        el.dataset.lane    = lane;
+        el.style.position  = 'absolute';
+        el.style.left      = MG_LANE_PCTS[lane];
         el.style.transform = 'translateX(-50%)';
         road.appendChild(el);
         this._obstacles.push(el);
 
-        const roadH = road.offsetHeight || 500;
-        let y       = -100;
-        const speed = 4 + Math.random() * 3;
+        const roadH = road.offsetHeight || 600;
+        let y = -110;
+        this._laneLastY[lane] = 0; // just spawned — gap is 0
 
         el.style.top = y + 'px';
 
         const anim = setInterval(() => {
             if (!this.running) { clearInterval(anim); el.remove(); return; }
-            y += speed;
+            y += MG_CAR_SPEED;
+            // Track position in lane so next car knows the gap
+            this._laneLastY[lane] = Math.max(0, y + 110);
             el.style.top = y + 'px';
 
-            if (y > roadH) {
+            if (y > roadH + 20) {
                 clearInterval(anim);
                 el.remove();
                 this._obstacles = this._obstacles.filter(o => o !== el);
+                this._laneLastY[lane] = null; // lane is clear again
             }
         }, 30);
 
-        const delay = Math.max(600, 1400 - Math.min(800, (Date.now() - this._startTs) / 60));
-        this._spawnTO = setTimeout(() => this._spawnObstacle(), delay);
+        // Fixed spawn interval — keep it comfortable (easy game)
+        this._spawnTO = setTimeout(() => this._spawnObstacle(), 1200);
     },
 
     // ── Collision detection — unchanged ─────────────────────────────
