@@ -1,16 +1,10 @@
-// ── Mini-game: Camión Ciudad — First Person View ──────────────────
-// Lane x% at the BOTTOM of the visible road (where player is)
-// Shifted right because the A-pillar sits on the left side of the windshield
-const MG_LANE_BOT = [38, 55, 72];
-// Lane x% at the HORIZON (all lanes converge near windshield center ~58%)
-const MG_LANE_HOR = [55, 58, 63];
-// Lane positions for hitbox (matches bottom spread)
-const MG_LANE_PCTS = ['38%', '55%', '72%'];
-// Lane labels
+// ── Mini-game: Camión Ciudad — Top-Down View ──────────────────────
+// Lane x positions (top-down: left, center, right)
+const MG_LANE_PCTS = ['16%', '50%', '83%'];
 const MG_LANE_LABELS = ['IZQ', 'CEN', 'DER'];
 
-// Obstacle colors — swap for PNG: el.innerHTML = '<img src="cars/auto1.png">';
-const MG_CAR_COLORS = ['car-red', 'car-yellow', 'car-blue', 'car-green'];
+// Obstacle car sprites
+const MG_CAR_SPRITES = ['car_green', 'car_yellow', 'car_red'];
 
 const MiniGame = {
     lane:       1,
@@ -35,7 +29,7 @@ const MiniGame = {
         if (!area) return;
         area.innerHTML = `
         <div class="mg-start-screen">
-            <div class="mg-big-icon">🚛</div>
+            <div class="mg-big-icon"><img src="/assets/truck.png" style="width:72px;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))"></div>
             <div class="mg-start-title">CAMIÓN CIUDAD</div>
             <div class="mg-start-desc">Esquivá el tráfico · Ganás <span style="color:var(--green)">$150</span> por segundo</div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">60 segundos de supervivencia = $9,000</div>
@@ -55,12 +49,9 @@ const MiniGame = {
 
         area.innerHTML = `
         <div id="mgRoad" class="mg-road mg-fp">
-            <div class="mg-lane l1"></div>
-            <div class="mg-lane l2"></div>
-            <div class="mg-fp-cabin"></div>
-            <div id="mgPlayer" class="mg-player-hitbox"></div>
+            <img id="mgPlayer" class="mg-player-sprite" src="/assets/truck.png">
 
-            <!-- Lane indicator: shows IZQ / CEN / DER -->
+            <!-- Lane indicator -->
             <div class="mg-lane-ind">
                 <div id="mgLaneL" class="mg-li">IZQ</div>
                 <div id="mgLaneC" class="mg-li active">CEN</div>
@@ -113,14 +104,13 @@ const MiniGame = {
         document.addEventListener('keydown', this._keyHandler);
     },
 
-    // ── Invisible hitbox + lane indicator update ────────────────────
+    // ── Player positioning ───────────────────────────────────────────
     _positionPlayer() {
         const p = document.getElementById('mgPlayer');
         if (p) {
             p.style.left      = MG_LANE_PCTS[this.lane];
             p.style.transform = 'translateX(-50%)';
         }
-        // Update lane indicator highlight
         ['mgLaneL', 'mgLaneC', 'mgLaneR'].forEach((id, i) => {
             const el = document.getElementById(id);
             if (el) el.classList.toggle('active', i === this.lane);
@@ -134,7 +124,6 @@ const MiniGame = {
         if (this.lane < 2) { this.lane++; this._positionPlayer(); this._flashLane(); }
     },
 
-    // Brief flash to confirm lane change
     _flashLane() {
         const ids = ['mgLaneL', 'mgLaneC', 'mgLaneR'];
         const el  = document.getElementById(ids[this.lane]);
@@ -143,58 +132,37 @@ const MiniGame = {
         setTimeout(() => el.classList.remove('flash'), 220);
     },
 
-    // ── Obstacle spawn — perspective-correct x position ─────────────
-    // Cars start at the horizon (all lanes near 50%) and drift to
-    // their real lane position as they approach the player.
+    // ── Obstacle spawn — top-down, straight vertical movement ────────
     _spawnObstacle() {
         if (!this.running) return;
         const road = document.getElementById('mgRoad');
         if (!road) return;
 
-        const lane       = Math.floor(Math.random() * 3);
-        const colorClass = MG_CAR_COLORS[Math.floor(Math.random() * MG_CAR_COLORS.length)];
+        const lane   = Math.floor(Math.random() * 3);
+        const sprite = MG_CAR_SPRITES[Math.floor(Math.random() * MG_CAR_SPRITES.length)];
 
-        // ── To swap to PNG later: ────────────────────────────────────
-        // el.className = 'mg-car';
-        // el.innerHTML = '<img src="cars/auto1.png">';
-        const el = document.createElement('div');
-        el.className    = `mg-car ${colorClass}`;
+        const el = document.createElement('img');
+        el.src        = `/assets/${sprite}.png`;
+        el.className  = 'mg-car';
         el.dataset.lane = lane;
         el.style.position = 'absolute';
+        el.style.left     = MG_LANE_PCTS[lane];
+        el.style.transform = 'translateX(-50%)';
         road.appendChild(el);
         this._obstacles.push(el);
 
-        const roadH   = road.offsetHeight || 500;
-        // Y where lanes visually converge (horizon line)
-        const horizonY = roadH * 0.28;
-        // Y at top of cabin (bottom of visible road)
-        const cabinY   = roadH * 0.55;
-
-        // Returns perspective-correct x% for a given y
-        const perspX = (y) => {
-            const p = Math.max(0, Math.min(1, (y - horizonY) / (cabinY - horizonY)));
-            return MG_LANE_HOR[lane] + (MG_LANE_BOT[lane] - MG_LANE_HOR[lane]) * p;
-        };
-
-        let y     = -80;
-        let scale = 0.2;
+        const roadH = road.offsetHeight || 500;
+        let y       = -100;
         const speed = 4 + Math.random() * 3;
 
-        el.style.top       = y + 'px';
-        el.style.left      = '50%';
-        el.style.transform = `translateX(-50%) scale(${scale})`;
+        el.style.top = y + 'px';
 
         const anim = setInterval(() => {
             if (!this.running) { clearInterval(anim); el.remove(); return; }
-            y     += speed;
-            scale += 0.013;
-            const x = perspX(y);
-            el.style.top       = y + 'px';
-            el.style.left      = x + '%';
-            el.style.transform = `translateX(-50%) scale(${Math.min(scale, 3)})`;
+            y += speed;
+            el.style.top = y + 'px';
 
-            // Remove when past bottom of visible road
-            if (y > roadH * 0.70) {
+            if (y > roadH) {
                 clearInterval(anim);
                 el.remove();
                 this._obstacles = this._obstacles.filter(o => o !== el);
@@ -235,7 +203,9 @@ const MiniGame = {
 
         const area      = document.getElementById('mgGameArea');
         if (!area) return;
-        const resultIcon = survived ? '🏆' : '💥';
+        const resultIcon = survived
+            ? `<img src="/assets/truck.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(0,200,100,0.6))">`
+            : `<img src="/assets/car_red.png" style="width:64px;height:auto;filter:drop-shadow(0 4px 16px rgba(255,60,60,0.7)) hue-rotate(0deg)">`;
         const resultMsg  = survived ? '¡Sobreviviste los 60 segundos!' : '¡Choque! Fin del juego';
 
         area.innerHTML = `

@@ -24,11 +24,13 @@ const CloudSave = (() => {
         return id;
     }
 
+    function _base() { return (window.MGT_SERVER_URL || ''); }
+
     async function save(gameState) {
         if (_syncing) return;
         _syncing = true;
         try {
-            const res = await fetch('/api/save', {
+            const res = await fetch(_base() + '/api/save', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ deviceId: _getDeviceId(), saveData: gameState }),
@@ -53,7 +55,7 @@ const CloudSave = (() => {
 
     async function load() {
         try {
-            const res  = await fetch(`/api/load/${_getDeviceId()}`,
+            const res  = await fetch(_base() + `/api/load/${_getDeviceId()}`,
                 { signal: AbortSignal.timeout(6000) });
             const json = await res.json();
             if (json.ok && json.found) return json.saveData;
@@ -63,7 +65,7 @@ const CloudSave = (() => {
 
     async function fetchLeaderboard() {
         try {
-            const res  = await fetch('/api/leaderboard',
+            const res  = await fetch(_base() + '/api/leaderboard',
                 { signal: AbortSignal.timeout(8000) });
             const json = await res.json();
             return json.ok ? json.rows : [];

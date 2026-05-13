@@ -313,7 +313,7 @@ async function renderLeaderboard() {
     let rows = [];
     let connected = false;
     try {
-        const res  = await fetch('/api/leaderboard', { signal: AbortSignal.timeout(8000) });
+        const res  = await fetch((window.MGT_SERVER_URL || '') + '/api/leaderboard', { signal: AbortSignal.timeout(8000) });
         const json = await res.json();
         if (json.ok) { rows = json.rows; connected = true; }
     } catch (err) {
