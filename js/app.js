@@ -361,6 +361,11 @@ async function renderLeaderboard() {
             r.wins_formula > 0 ? `🏎${r.wins_formula}`: '',
         ].filter(Boolean).join(' ') || '—';
 
+        const secs  = r.session_time || 0;
+        const hh    = Math.floor(secs / 3600);
+        const mm    = Math.floor((secs % 3600) / 60);
+        const timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+
         return `
         <div class="lb-row ${isMe ? 'lb-me' : ''}">
             <div class="lb-rank">${medal}</div>
@@ -371,9 +376,9 @@ async function renderLeaderboard() {
             </div>
             <div class="lb-stats">
                 <div class="lb-stat"><span class="lb-sv">Nv.${r.level}</span><small>nivel</small></div>
-                <div class="lb-stat"><span class="lb-sv" style="color:var(--text-muted)">${Number(r.xp||0).toLocaleString()}</span><small>XP</small></div>
                 <div class="lb-stat"><span class="lb-sv gold">🥇${r.total_wins}</span><small>wins</small></div>
                 <div class="lb-stat"><span class="lb-sv" style="color:#b57bee">🟣${r.total_poles||0}</span><small>poles</small></div>
+                <div class="lb-stat"><span class="lb-sv" style="color:var(--text-muted)">⏱${timeStr}</span><small>jugado</small></div>
             </div>
         </div>`;
     }).join('');

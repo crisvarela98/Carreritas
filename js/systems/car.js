@@ -1,4 +1,5 @@
 const CAR_MAX_LEVEL = 5;
+const CAR_MAX_DIAMOND_COST = 30; // diamonds required for the final (level 5) upgrade
 
 const CAR_PARTS = [
     { key: "engine",       label: "Motor",        icon: "⚙️",  hpPerLevel: 50, baseCost: 3000 },
@@ -24,15 +25,37 @@ function tune_car(key) {
     const part = CAR_PARTS.find(p => p.key === key);
     const lvl  = game.car[key];
     if (lvl >= CAR_MAX_LEVEL) { notify("Nivel máximo alcanzado"); return; }
-    const cost = part.baseCost * lvl;
-    if (game.money < cost) { notifyWarn("Dinero insuficiente"); return; }
-    game.money -= cost;
+
+    const isMaxUpgrade = (lvl === CAR_MAX_LEVEL - 1);
+
+    if (isMaxUpgrade) {
+        if ((game.diamonds || 0) < CAR_MAX_DIAMOND_COST) {
+            notifyWarn(`Necesitás 💎 ${CAR_MAX_DIAMOND_COST} diamantes para la mejora máxima`);
+            return;
+        }
+        game.diamonds -= CAR_MAX_DIAMOND_COST;
+    } else {
+        const cost = part.baseCost * lvl;
+        if (game.money < cost) { notifyWarn("Dinero insuficiente"); return; }
+        game.money -= cost;
+    }
+
     game.car[key]++;
-    notify(`${part.label} mejorado — Nivel ${game.car[key]}`, "success");
+    game.stats = game.stats || {};
+    game.stats.totalUpgCar = (game.stats.totalUpgCar || 0) + 1;
+
+    if (isMaxUpgrade) {
+        notify(`${part.icon} ${part.label} al NIVEL MÁXIMO — 💎 ${CAR_MAX_DIAMOND_COST} usados`, "success");
+    } else {
+        notify(`${part.label} mejorado — Nivel ${game.car[key]}`, "success");
+    }
     renderCarUpgrades();
+    updateGarageHud();
 
     // FTUE progress
     if (window.FTUEManager) FTUEManager.onCarUpgraded();
+    if (window.TaskManager) { TaskManager.trackDaily('upgrade'); TaskManager._updateBadge(); }
+    save_user_progress();
 }
 
 function upgradePart(key) { tune_car(key); }
@@ -84,11 +107,33 @@ function renderCarUpgrades() {
     const hpPct  = Math.round(((hp - 350) / (maxHP - 350)) * 100);
 
     const partsHtml = CAR_PARTS.map(part => {
-        const lvl  = game.car[part.key];
-        const cost = lvl < CAR_MAX_LEVEL ? part.baseCost * lvl : null;
+        const lvl          = game.car[part.key];
+        const isMaxUpgrade = lvl === CAR_MAX_LEVEL - 1;
+        const cost         = lvl < CAR_MAX_LEVEL ? (isMaxUpgrade ? null : part.baseCost * lvl) : null;
         const segs = Array.from({ length: CAR_MAX_LEVEL }, (_, i) =>
             `<div class="part-seg ${i < lvl ? "seg-on" : ""}"></div>`
         ).join("");
+
+        let btnHtml;
+        if (lvl >= CAR_MAX_LEVEL) {
+            btnHtml = `<div class="part-maxed">✅ NIVEL MÁXIMO</div>`;
+        } else if (isMaxUpgrade) {
+            const canAfford = (game.diamonds || 0) >= CAR_MAX_DIAMOND_COST;
+            btnHtml = `
+                <button class="rbtn ${canAfford ? "diamond-btn" : ""}"
+                        onclick="tune_car('${part.key}')"
+                        ${!canAfford ? "disabled" : ""}>
+                    💎 ${CAR_MAX_DIAMOND_COST} — Nivel MAX
+                </button>`;
+        } else {
+            const canAfford = game.money >= cost;
+            btnHtml = `
+                <button class="rbtn ${canAfford ? "accent-btn" : ""}"
+                        onclick="tune_car('${part.key}')"
+                        ${!canAfford ? "disabled" : ""}>
+                    Mejorar — $${cost.toLocaleString()}
+                </button>`;
+        }
 
         return `
             <div class="part-card">
@@ -98,13 +143,7 @@ function renderCarUpgrades() {
                     <span class="part-lv">Nv.${lvl}</span>
                 </div>
                 <div class="part-segs">${segs}</div>
-                ${lvl < CAR_MAX_LEVEL
-                    ? `<button class="rbtn ${game.money >= cost ? "accent-btn" : ""}"
-                               onclick="tune_car('${part.key}')"
-                               ${game.money < cost ? "disabled" : ""}>
-                           Mejorar — $${cost.toLocaleString()}
-                       </button>`
-                    : `<div class="part-maxed">✅ NIVEL MÁXIMO</div>`}
+                ${btnHtml}
             </div>
         `;
     }).join("");

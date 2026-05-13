@@ -13,6 +13,9 @@ const game = {
     level:      1,
     lastTime:   Date.now(),
 
+    // ── SESSION & PLAYTIME ────────────────────────────────────────
+    totalPlayTime: 0,    // total seconds played (accumulated across all sessions)
+
     // ── VEHICLES ─────────────────────────────────────────────────
     // Tracks ownership and per-vehicle upgrade levels
     vehicles: {

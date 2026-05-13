@@ -899,6 +899,13 @@ html, body {
 }
 .accent-btn:hover:not(:disabled) { background: var(--accent-glow); border-color: var(--accent-glow); }
 
+.diamond-btn {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border-color: #7c3aed;
+    color: #fff;
+}
+.diamond-btn:hover:not(:disabled) { background: linear-gradient(135deg, #6d28d9, #9333ea); border-color: #6d28d9; }
+
 .gold-btn {
     background: linear-gradient(135deg, var(--gold), #d97706);
     border-color: var(--gold);

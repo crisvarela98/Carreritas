@@ -1,4 +1,5 @@
 const SAVE_KEY = "mgt_save_v4";
+let _sessionTickStart = Date.now(); // tracks elapsed time since last save tick
 
 function deepMerge(target, source) {
     for (const key of Object.keys(source)) {
@@ -19,10 +20,18 @@ function deepMerge(target, source) {
 
 // ── Save ──────────────────────────────────────────────────────────
 function save_user_progress() {
+    // Accumulate elapsed seconds since last save tick
+    const now = Date.now();
+    const elapsedSec = Math.floor((now - _sessionTickStart) / 1000);
+    if (elapsedSec > 0) {
+        game.totalPlayTime = (game.totalPlayTime || 0) + elapsedSec;
+    }
+    _sessionTickStart = now;
+
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify({
             version: 4,
-            timestamp: Date.now(),
+            timestamp: now,
             game
         }));
     } catch (e) {
@@ -101,6 +110,7 @@ function load_user_progress() {
         if (!game.ftue) game.ftue = { completed: false, step: 0 };
         if (!game.iap)  game.iap  = {};
         if (!game.activeVehicle) game.activeVehicle = "car";
+        if (typeof game.totalPlayTime !== 'number') game.totalPlayTime = 0;
 
     } catch (e) {
         console.error("Load error:", e);
@@ -119,5 +129,5 @@ function startAutoSave() {
     setInterval(() => {
         game.lastTime = Date.now();
         save_user_progress();
-    }, 5000);
+    }, 10000);
 }

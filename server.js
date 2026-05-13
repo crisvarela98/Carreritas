@@ -52,6 +52,7 @@ app.post('/api/save', async (req, res) => {
     const winsMotoVal    = Math.max(0, parseInt(stats.wins_moto)    || 0);
     const winsRallyVal   = Math.max(0, parseInt(stats.wins_rally)   || 0);
     const winsFormulaVal = Math.max(0, parseInt(stats.wins_formula) || 0);
+    const sessionTime    = Math.max(0, parseInt(saveData.totalPlayTime) || 0);
 
     try {
         const now = new Date();
@@ -70,6 +71,7 @@ app.post('/api/save', async (req, res) => {
                           total_coins: totalCoins, total_poles: totalPoles,
                           wins_car: winsCarVal, wins_moto: winsMotoVal,
                           wins_rally: winsRallyVal, wins_formula: winsFormulaVal,
+                          session_time: sessionTime,
                           updated_at: now } },
                 { upsert: true }
             );
@@ -120,6 +122,7 @@ app.get('/api/leaderboard', async (req, res) => {
             wins_moto:     r.wins_moto,
             wins_rally:    r.wins_rally,
             wins_formula:  r.wins_formula,
+            session_time:  r.session_time || 0,
             updated_at:    r.updated_at,
             rank:          i + 1
         }));
