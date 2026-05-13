@@ -81,7 +81,10 @@ const game = {
         totalWins:       0,
         totalPoles:      0,
         totalMinigames:  0,
-        totalRaceCoins:  0
+        totalRaceCoins:  0,
+        totalUpgCar:     0,
+        totalUpgGar:     0,
+        totalStaff:      0
     },
 
     // ── TASKS ─────────────────────────────────────────────────────

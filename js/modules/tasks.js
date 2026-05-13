@@ -72,7 +72,10 @@ const TaskManager = {
 
     init() {
         if (!game.tasks) game.tasks = { dailyReset: 0, dailyIds: [], dailyProgress: {}, dailyClaimed: {}, superClaimed: {} };
-        if (!game.stats)  game.stats = { totalRepairs: 0, totalRacesRun: 0, totalWins: 0, totalPoles: 0, totalMinigames: 0, totalRaceCoins: 0, totalUpgCar: 0, totalUpgGar: 0, totalStaff: 0 };
+        // Ensure all stat keys exist even on saves created before they were added
+        if (!game.stats) game.stats = {};
+        const statDefaults = { totalRepairs: 0, totalRacesRun: 0, totalWins: 0, totalPoles: 0, totalMinigames: 0, totalRaceCoins: 0, totalUpgCar: 0, totalUpgGar: 0, totalStaff: 0 };
+        Object.keys(statDefaults).forEach(k => { if (game.stats[k] === undefined) game.stats[k] = statDefaults[k]; });
         this.checkDailyReset();
         this._updateBadge();
     },

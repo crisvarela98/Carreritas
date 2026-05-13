@@ -68,6 +68,8 @@ function buyGarageUpgrade(key) {
     if (key === "speedBoost") game.workshop.speed = 1 + game.garageUpgrades.speedBoost * 0.5;
 
     notifySuccess(`${def.label} mejorado — Nv.${game.garageUpgrades[key]}`);
+    if (!game.stats) game.stats = {};
+    game.stats.totalUpgGar = (game.stats.totalUpgGar || 0) + 1;
     renderWorkshop();
     if (window.TaskManager) { TaskManager.trackDaily('upgradegarage'); TaskManager._updateBadge(); }
     if (window.FTUEManager) FTUEManager.onGarageUpgradePurchased();

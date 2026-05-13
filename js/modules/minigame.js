@@ -176,6 +176,7 @@ const MiniGame = {
         addXP(Math.floor(this.score / 30));
         if (!game.stats) game.stats = {};
         game.stats.totalMinigames = (game.stats.totalMinigames || 0) + 1;
+        if (window.TaskManager) { TaskManager.trackDaily('minigame'); TaskManager._updateBadge(); }
 
         const area = document.getElementById('mgGameArea');
         if (!area) return;
