@@ -5,7 +5,7 @@ A browser-based idle/tycoon game where players manage a racing garage — repair
 ## Run & Operate
 
 - **Dev server:** `node server.js` (port 5000)
-- **Requires:** `DATABASE_URL` environment variable (Replit PostgreSQL, provisioned automatically)
+- **Requires:** `MONGODB_URI` environment variable (MongoDB Atlas — cluster `1rabase.llxhss4.mongodb.net`, DB `garage_motorsports`)
 - **Start:** `npm start`
 
 ## Stack
