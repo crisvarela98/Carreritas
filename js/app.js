@@ -351,42 +351,65 @@ async function renderLeaderboard() {
         return;
     }
 
-    const rowsHtml = rows.map((r, i) => {
-        const medal  = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${r.rank}`;
-        const isMe   = r.device_id === myDeviceId;
-        const winsByVehicle = [
-            r.wins_car     > 0 ? `🚗${r.wins_car}`   : '',
-            r.wins_moto    > 0 ? `🏍${r.wins_moto}`  : '',
-            r.wins_rally   > 0 ? `🚙${r.wins_rally}` : '',
-            r.wins_formula > 0 ? `🏎${r.wins_formula}`: '',
-        ].filter(Boolean).join(' ') || '—';
+    const myRow = rows.find(r => r.device_id === myDeviceId);
 
-        const secs  = r.session_time || 0;
-        const hh    = Math.floor(secs / 3600);
-        const mm    = Math.floor((secs % 3600) / 60);
-        const timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+    const rowsHtml = rows.map((r, i) => {
+        const medal  = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="lb-rank-num">#${r.rank}</span>`;
+        const isMe   = r.device_id === myDeviceId;
+
+        const vehicleWins = [
+            { icon: '🚗', v: r.wins_car },
+            { icon: '🏍', v: r.wins_moto },
+            { icon: '🚙', v: r.wins_rally },
+            { icon: '🏎', v: r.wins_formula },
+        ].filter(x => x.v > 0);
+        const winsHtml = vehicleWins.length
+            ? vehicleWins.map(x => `<span class="lb-vwin">${x.icon}<strong>${x.v}</strong></span>`).join('')
+            : '<span class="lb-vwin-none">Sin victorias aún</span>';
+
+        const secs    = r.session_time || 0;
+        const hh      = Math.floor(secs / 3600);
+        const mm      = Math.floor((secs % 3600) / 60);
+        const timeStr = hh > 0 ? `${hh}h ${mm}m` : mm > 0 ? `${mm}m` : '< 1m';
+
+        const xpMax = r.level * 1000;
+        const xpPct = Math.min(100, Math.round(((r.xp || 0) / xpMax) * 100));
 
         return `
         <div class="lb-row ${isMe ? 'lb-me' : ''}">
-            <div class="lb-rank">${medal}</div>
-            <div class="lb-info">
-                <div class="lb-name">${escHtml(r.player_name || 'Anónimo')}${isMe ? ' <span class="lb-you-tag">Tú</span>' : ''}</div>
-                <div class="lb-garage">${escHtml(r.garage_name || '')}</div>
-                <div class="lb-wins-row">${winsByVehicle}</div>
-            </div>
-            <div class="lb-stats">
-                <div class="lb-stat"><span class="lb-sv">Nv.${r.level}</span><small>nivel</small></div>
-                <div class="lb-stat"><span class="lb-sv gold">🥇${r.total_wins}</span><small>wins</small></div>
-                <div class="lb-stat"><span class="lb-sv" style="color:#b57bee">🟣${r.total_poles||0}</span><small>poles</small></div>
-                <div class="lb-stat"><span class="lb-sv" style="color:var(--text-muted)">⏱${timeStr}</span><small>jugado</small></div>
+            <div class="lb-rank-col">${medal}</div>
+            <div class="lb-body">
+                <div class="lb-top-row">
+                    <div class="lb-name-block">
+                        <span class="lb-name">${escHtml(r.player_name || 'Anónimo')}</span>
+                        ${isMe ? '<span class="lb-you-tag">TÚ</span>' : ''}
+                    </div>
+                    <div class="lb-level-pill">Nv.${r.level}</div>
+                </div>
+                <div class="lb-garage-name">${escHtml(r.garage_name || '—')}</div>
+                <div class="lb-xp-bar-wrap"><div class="lb-xp-bar" style="width:${xpPct}%"></div></div>
+                <div class="lb-chips-row">
+                    <span class="lb-chip lb-chip-gold">🥇 ${r.total_wins} victorias</span>
+                    <span class="lb-chip lb-chip-purple">🟣 ${r.total_poles || 0} poles</span>
+                    <span class="lb-chip lb-chip-gray">🔧 ${r.total_repairs || 0} reparaciones</span>
+                    <span class="lb-chip lb-chip-gray">⏱ ${timeStr}</span>
+                </div>
+                <div class="lb-vehicle-wins">${winsHtml}</div>
             </div>
         </div>`;
     }).join('');
+
+    const myCardHtml = myRow ? `
+    <div class="lb-mycard">
+        <div class="lb-mycard-label">Tu posición</div>
+        <div class="lb-mycard-rank">#${myRow.rank} — Nv.${myRow.level} · 🥇 ${myRow.total_wins} victorias · 🟣 ${myRow.total_poles || 0} poles</div>
+    </div>` : '';
 
     el.innerHTML = `
     <div class="race-card">
         <div class="race-hero-title">🌍 RANKING GLOBAL</div>
         <div class="lb-subtitle">Top ${rows.length} jugadores · en tiempo real ☁️</div>
+        ${myCardHtml}
         <div class="lb-list">${rowsHtml}</div>
     </div>`;
 }
@@ -410,7 +433,9 @@ async function init() {
 
     if (window.FTUEManager) FTUEManager.init();
     if (window.TaskManager) TaskManager.init();
-    if (!game.playerName) showProfileModal();
+    // Profile modal is now shown at the END of the FTUE, not at the start.
+    // Only show it if FTUE was already completed and player somehow has no name.
+    if (!game.playerName && game.ftue && game.ftue.completed) showProfileModal();
 
     setInterval(() => {
         updateGarageHud();

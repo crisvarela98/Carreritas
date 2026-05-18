@@ -1,0 +1,137 @@
+1- adapta la imagen unicamente para ser ejecutado en celulares con la pantalla de de forma vertical
+2- la altura y ancho, tiene que ser la misma o definida mejor dicho por el background
+3- se supone que esto tenia que tener una introduccion FTUE , 
+4- mejora el ranking global que informacion me estas mostrando 
+
+OBJETIVO DEL CAMBIO
+
+Implementar un FTUE (First Time User Experience) dirigido por pasos que:
+
+1. NO pida nombre al inicio
+
+
+2. Haga que el jugador juegue inmediatamente
+
+
+3. Lo guíe visualmente por:
+
+Reparar un auto
+
+Correr una carrera
+
+Contratar un mecánico
+
+Jugar el mini-juego del camión
+
+
+
+4. Recién después de eso, pedir nombre del jugador y del garage
+
+
+
+NO quiero rehacer pantallas.
+NO quiero cambiar mecánicas.
+Solo quiero cambiar el orden en que el jugador descubre el juego usando una capa overlay.
+
+
+---
+
+IMPLEMENTACIÓN DESEADA
+
+Crear un sistema FTUE basado en una variable global de estado:
+
+let ftueStep = 0;
+
+Agregar una capa HTML overlay que:
+
+Oscurezca el fondo
+
+Muestre mensajes cortos
+
+Muestre una flecha animada señalando botones/elementos existentes
+
+Obligue al jugador a hacer las acciones en orden
+
+
+
+---
+
+PASOS DEL FTUE
+
+Paso 1
+
+Mensaje: “🚗 Tocá el auto para repararlo”
+Flecha apuntando al auto del garage.
+Cuando el auto se repara → avanzar al paso 2.
+
+Paso 2
+
+Mensaje: “🏁 Corré tu primera carrera”
+Flecha al botón de carreras.
+Cuando termina la carrera → paso 3.
+
+Paso 3
+
+Mensaje: “👨‍🔧 Contratá un mecánico”
+Flecha al botón de mecánico.
+Cuando lo contrata → paso 4.
+
+Paso 4
+
+Mensaje: “🚚 Probá el camión ciudad para ganar dinero rápido”
+Flecha al botón del mini-juego.
+Después de 20–30s de juego → paso 5.
+
+Paso 5
+
+Ocultar FTUE y recién ahí mostrar el formulario de:
+
+Nombre del jugador
+
+Nombre del garage
+
+
+
+---
+
+REQUISITOS TÉCNICOS
+
+Crear el overlay HTML
+
+Crear el CSS necesario
+
+Crear funciones JS:
+
+startFTUE()
+
+showStep()
+
+nextStep()
+
+positionArrowOver(selector)
+
+
+Detectar eventos ya existentes del juego (reparación, carrera, mecánico, camión) para avanzar pasos
+
+NO romper la lógica actual
+
+Integrarlo con la estructura actual del proyecto
+
+
+
+---
+
+RESULTADO ESPERADO
+
+Cuando alguien entra al juego por primera vez:
+
+En menos de 5 segundos ya está jugando.
+En menos de 2 minutos ya vio TODO el potencial del juego.
+Recién después se le pide su nombre.
+
+Esto debe mejorar radicalmente la retención de los primeros 3 minutos.
+
+
+---
+
+Analizá el repositorio y generá los archivos y modificaciones necesarias para implementar este sistema FTUE de forma limpia y reutilizable.
