@@ -2,6 +2,17 @@
 
 let workshopTab = "garage";
 
+function ensureWorkshopState() {
+    if (!game.workshop || typeof game.workshop !== 'object') {
+        game.workshop = { level: 1, speed: 1, capacity: 2, queue: [], active: [] };
+    }
+    if (!Array.isArray(game.workshop.queue)) game.workshop.queue = [];
+    if (!Array.isArray(game.workshop.active)) game.workshop.active = [];
+    if (!game.garageUpgrades || typeof game.garageUpgrades !== 'object') {
+        game.garageUpgrades = { extraBay: 0, speedBoost: 0, partsStock: 0 };
+    }
+}
+
 function showWorkshopTab(tab) {
     workshopTab = tab;
     renderWorkshop();
@@ -26,6 +37,7 @@ function generateCustomerCar() {
 
 // ── repair_car() — accept customer car ────────────────────────────
 function repair_car() {
+    ensureWorkshopState();
     if (game.workshop.queue.length >= 5) {
         notifyWarn("¡Plaza llena! (5 en espera) — espera que se libere un lugar.");
         return;
@@ -41,7 +53,7 @@ function getTotalMechanicSpeed() {
 }
 
 function assignCars() {
-    if (!game.workshop || !Array.isArray(game.workshop.active)) return;
+    ensureWorkshopState();
     while (
         game.workshop.active.length < game.workshop.capacity &&
         game.workshop.queue.length > 0
@@ -77,13 +89,16 @@ function buyGarageUpgrade(key) {
 
 // ── Dashboard car visual layer ────────────────────────────────────
 function renderDashboardCars() {
+    ensureWorkshopState();
     const layer = document.getElementById('garageCarLayer');
     if (!layer) return;
 
     const capacity = game.workshop.capacity || 2;
+    const active = game.workshop.active;
+    const queue = game.workshop.queue;
 
     const elevHtml = Array.from({ length: capacity }, (_, i) => {
-        const car = game.workshop.active[i];
+        const car = active[i];
         if (!car) {
             return `<div class="garage-elevator-slot garage-slot-empty">
                 <div class="gslot-label">BAHÍA ${i + 1}</div>
@@ -104,7 +119,7 @@ function renderDashboardCars() {
     }).join('');
 
     const parkHtml = Array.from({ length: 5 }, (_, i) => {
-        const car = game.workshop.queue[i];
+        const car = queue[i];
         if (!car) return `<div class="garage-parking-slot gpark-empty"></div>`;
         return `<div class="garage-parking-slot">
             <div class="gpark-car">${car.rare ? '⭐' : '🚗'}</div>
@@ -224,6 +239,7 @@ function _makeTabBar() {
 }
 
 function _renderGarageTab(el) {
+    ensureWorkshopState();
     const totalSpeed = Math.min(18, (game.workshop.speed || 1) + getTotalMechanicSpeed());
 
     const upgradesHtml = GARAGE_UPGRADES_DEF.map(def => {

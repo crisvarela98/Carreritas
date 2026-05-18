@@ -47,70 +47,16 @@ function fireMechanic(uid) {
     game.mechanics = game.mechanics.filter(m => m.uid !== uid);
     notify("Mecánico despedido");
     renderEmployees();
+
+    if (typeof tryAdvanceFtue === "function") {
+        tryAdvanceFtue(3);
+    }
 }
 
-function renderEmployees() {
-    const el = document.getElementById("employeesContent");
-    if (!el) return;
-
-    const totalSpeed = getTotalMechanicSpeed();
-
-    const hiredHtml = game.mechanics.length === 0
-        ? `<div class="empty-row">Sin mecánicos contratados</div>`
-        : game.mechanics.map(m => `
-            <div class="mech-card">
-                <div class="mech-card-left">
-                    <span class="mech-icon">${m.icon}</span>
-                    <div>
-                        <div class="mech-name">${m.name}</div>
-                        <div class="mech-stats">+${m.speed} vel · $${m.salaryPerMin}/min</div>
-                    </div>
-                </div>
-                <button class="mech-fire-btn" onclick="fireMechanic(${m.uid})">✕</button>
-            </div>
-        `).join("");
-
-    const catalogHtml = MECHANIC_CATALOG.map(def => {
-        const alreadyHired = game.mechanics.filter(m => m.catalogId === def.id).length;
-        const canAfford    = game.money >= def.hireCost;
-
-        return `
-            <div class="mech-catalog-card ${def.premium ? "mech-premium" : ""}">
-                <div class="mcc-left">
-                    <span class="mech-icon">${def.icon}</span>
-                    <div>
-                        <div class="mech-name">${def.name} ${def.premium ? '<span class="badge-premium">PRO</span>' : ""}</div>
-                        <div class="mech-stats">${def.desc}</div>
-                        <div class="mech-speed-tag">+${def.speed} vel/seg · $${def.salaryPerMin}/min</div>
-                    </div>
-                </div>
-                <button class="rbtn ${canAfford ? "accent-btn" : ""} mcc-hire-btn"
-                        onclick="hire_mechanic('${def.id}')"
-                        ${!canAfford && !def.premium ? "disabled" : ""}>
-                    ${def.premium ? "💎 IAP" : `$${def.hireCost.toLocaleString()}`}
-                </button>
-            </div>
-        `;
-    }).join("");
-
-    el.innerHTML = `
-        <div class="race-card">
-            <div class="race-hero-title">👷 MECÁNICOS</div>
-            <div class="staff-summary">
-                <div class="ss-box"><div class="ss-label">Contratados</div><div class="ss-val">${game.mechanics.length}</div></div>
-                <div class="ss-box"><div class="ss-label">Velocidad total</div><div class="ss-val">+${totalSpeed.toFixed(1)}</div></div>
-                <div class="ss-box"><div class="ss-label">Salario/min</div><div class="ss-val">$${game.mechanics.reduce((s, m) => s + m.salaryPerMin, 0)}</div></div>
-            </div>
-        </div>
-
-        <div class="race-card">
-            <div class="race-divider">TU EQUIPO</div>
-            ${hiredHtml}
-        </div>
-
-        <div class="race-card">
-            <div class="race-divider">CONTRATAR MECÁNICO</div>
-            ${catalogHtml}
-        </div>
-    `;
-}
+function renderEmployees(){
+    employeesContent.innerHTML=`
+    <div class="panel">
+        Empleados: ${game.employees.length}
+        <button onclick="hireEmployee()">Contratar</button>
+    </div>`;
+}"

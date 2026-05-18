@@ -343,103 +343,14 @@ function run_race(pos, cash, xp, leaguePts) {
     else if (pos === 2) game.medals.silver++;
     else if (pos === 3) game.medals.bronze++;
 
-    // ── League points ─────────────────────────────────────────────
-    awardLeaguePoints("Jugador", pos);
-    game.league.currentRace++;
-
-    // ── Rival league points ───────────────────────────────────────
-    const sPts = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-    raceState.standings.forEach((r, i) => {
-        if (r.name !== "Tú") {
-            awardLeaguePoints(r.name, i + 1);
-        }
-        raceState.seriesPoints[r.name] = (raceState.seriesPoints[r.name] || 0) + (sPts[i] || 0);
+    // puntos liga
+    results.forEach((r,i)=>{
+        awardLeaguePoints(r.name, i+1);
     });
 
-    // ── Persist race result ───────────────────────────────────────
-    game.raceResults.push({
-        position:    pos,
-        moneyEarned: cash,
-        xpEarned:    xp,
-        leaguePoints: leaguePts,
-        timestamp:   Date.now()
-    });
+    notify("Terminaste " + pos + "° | $" + reward);
 
-    // Keep history to last 50 races
-    if (game.raceResults.length > 50) game.raceResults.shift();
+    league.currentRace++;
 
-    raceState.seriesRace++;
-    raceState.phase = "result";
-
-    // FTUE progress
-    if (window.FTUEManager) FTUEManager.onRaceCompleted();
-
-    showRaceResult(pos, cash, xp);
-}
-
-// ── Result screen ─────────────────────────────────────────────────
-function showRaceResult(pos, cash, xp) {
-    const el = getRaceEl();
-    if (!el) return;
-
-    const medal    = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "🏁";
-    const posLabel = pos === 1 ? "1er lugar" : pos === 2 ? "2do lugar" : pos === 3 ? "3er lugar" : `${pos}° lugar`;
-    const sPts     = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-
-    const rows = raceState.standings.map((r, i) => `
-        <div class="result-row ${r.name === "Tú" ? "player-row" : ""}">
-            <span class="res-medal">${i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
-            <span class="res-name">${r.name}</span>
-            <span class="res-pts">${sPts[i] || 0}pts</span>
-        </div>
-    `).join("");
-
-    const hasMore = raceState.seriesRace < raceState.seriesMode;
-
-    // Rewarded ad hook
-    const adBtn = AdsManager.canOffer("double_race_reward")
-        ? `<button class="rbtn ad-btn" onclick="AdsManager.offer_ad_double_race_reward()">📺 Ver anuncio — Doblar recompensa</button>`
-        : "";
-
-    el.innerHTML = `
-        <div class="race-card">
-            <div class="race-hero-title">${medal} ${posLabel}</div>
-            ${cash > 0 ? `<div class="result-reward-badge">+$${cash.toLocaleString()} &nbsp;·&nbsp; +${xp} XP</div>` : ""}
-            <div class="result-standings">${rows}</div>
-            ${adBtn}
-            ${hasMore
-                ? `<button class="rbtn accent-btn" onclick="startNextRace()">Siguiente carrera (${raceState.seriesRace + 1}/${raceState.seriesMode}) →</button>`
-                : `<button class="rbtn accent-btn" onclick="showSeriesResult()">🏆 Resultado final</button>`}
-            <button class="rbtn" onclick="showRaceMenu()">← Menú</button>
-        </div>
-    `;
-}
-
-function startNextRace() { beginRace(); }
-
-// ── Series result ─────────────────────────────────────────────────
-function showSeriesResult() {
-    const sorted    = Object.entries(raceState.seriesPoints).sort((a, b) => b[1] - a[1]);
-    const playerPos = sorted.findIndex(([n]) => n === "Tú") + 1;
-    const trophy    = playerPos === 1 ? "🥇" : playerPos === 2 ? "🥈" : playerPos === 3 ? "🥉" : "🏁";
-
-    const rows = sorted.map(([name, pts], i) => `
-        <div class="result-row ${name === "Tú" ? "player-row" : ""}">
-            <span class="res-medal">${i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
-            <span class="res-name">${name}</span>
-            <span class="res-pts">${pts}pts</span>
-        </div>
-    `).join("");
-
-    const backLabel = raceState.leagueMode ? "← Volver a Liga" : "← Menú";
-    const el = getRaceEl();
-    if (!el) return;
-
-    el.innerHTML = `
-        <div class="race-card">
-            <div class="race-hero-title">${trophy} CAMPEONATO FINAL</div>
-            <div class="result-standings">${rows}</div>
-            <button class="rbtn" onclick="showRaceMenu()">${backLabel}</button>
-        </div>
-    `;
+    renderLeague();
 }

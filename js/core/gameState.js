@@ -1,101 +1,27 @@
 // ── Global game state — single source of truth ───────────────────
 const game = {
+    money: 1000,
+    reputation: 1,
 
-    // ── USER PROFILE ──────────────────────────────────────────────
-    playerName: "",
-    garageName: "",
-
-    // ── ECONOMY ───────────────────────────────────────────────────
-    money:      15000,   // regular coins
-    diamonds:   15,      // premium currency
-    reputation: 0,
-    xp:         0,
-    level:      1,
-    lastTime:   Date.now(),
-
-    // ── SESSION & PLAYTIME ────────────────────────────────────────
-    totalPlayTime: 0,    // total seconds played (accumulated across all sessions)
-
-    // ── VEHICLES ─────────────────────────────────────────────────
-    // Tracks ownership and per-vehicle upgrade levels
-    vehicles: {
-        car:     { owned: true,  upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
-        moto:    { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
-        rally:   { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } },
-        formula: { owned: false, upgrades: { motor: 1, turbo: 0, brakes: 1, tires: 1, suspension: 1 } }
+    car: {
+        engine: 1,
+        aero: 1,
+        durability: 1
     },
 
-    activeVehicle: "car",   // currently selected vehicle for racing
-
-    // ── WORKSHOP ─────────────────────────────────────────────────
-    workshop: {
-        level:    1,
-        speed:    1,
-        capacity: 2,
-        queue:    [],
-        active:   []
+    driver: {
+        name: "Jugador",
+        skill: 1,
+        salary: 100
     },
 
-    garageUpgrades: {
-        extraBay:   0,  // +1 capacity, max 3
-        speedBoost: 0,  // +0.5 speed, max 4
-        partsStock: 0   // -10% repair time, max 3
+    sponsor: null,
+
+    championship: {
+        round: 1,
+        totalRounds: 10,
+        points: 0
     },
 
-    // ── STAFF ────────────────────────────────────────────────────
-    mechanics:  [],
-    employees:  [],  // legacy compat
-
-    // ── SPONSORS ─────────────────────────────────────────────────
-    sponsor:          null,
-    sponsorsUnlocked: [],
-
-    // ── RACE STATS ───────────────────────────────────────────────
-    medals:       { gold: 0, silver: 0, bronze: 0 },
-    bestLapTimes: {},   // keyed by vehicleId
-    poleCount:    0,
-
-    // ── PER-VEHICLE LEAGUES ───────────────────────────────────────
-    // THE OLD BUG: league was outside game object → never saved.
-    // Now all leagues live here.
-    leagues: {
-        car:     { standings: [], currentRace: 1 },
-        moto:    { standings: [], currentRace: 1 },
-        rally:   { standings: [], currentRace: 1 },
-        formula: { standings: [], currentRace: 1 }
-    },
-
-    // ── RACE HISTORY ─────────────────────────────────────────────
-    raceResults: [],    // last 50 races
-
-    // ── FTUE ─────────────────────────────────────────────────────
-    ftue: {
-        completed: false,
-        step: 0     // 0=profile, 1=repair, 2=race, 3=upgrade, 4=done
-    },
-
-    // ── IAP OWNERSHIP ────────────────────────────────────────────
-    iap: {},
-
-    // ── LIFETIME STATS (for tasks & achievements) ─────────────────
-    stats: {
-        totalRepairs:    0,
-        totalRacesRun:   0,
-        totalWins:       0,
-        totalPoles:      0,
-        totalMinigames:  0,
-        totalRaceCoins:  0,
-        totalUpgCar:     0,
-        totalUpgGar:     0,
-        totalStaff:      0
-    },
-
-    // ── TASKS ─────────────────────────────────────────────────────
-    tasks: {
-        dailyReset:    0,   // midnight timestamp of last reset
-        dailyIds:      [],  // 3 active daily task IDs
-        dailyProgress: {},  // taskId → number
-        dailyClaimed:  {},  // taskId → bool
-        superClaimed:  {}   // supertaskId → bool
-    }
+    rivals: []
 };
