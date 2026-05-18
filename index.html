@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Motorsport Garage Tycoon</title>
+    <link rel="icon" type="image/jpeg" href="assets/logojuego.jpg">
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+
+<!-- ══ SPLASH SCREEN ══ -->
+<div id="splashScreen">
+    <div id="splashLogo1" class="splash-logo">
+        <img src="assets/milogo.jpg" alt="Studio Logo">
+    </div>
+    <div id="splashLogo2" class="splash-logo">
+        <img src="assets/logojuego.jpg" alt="Game Logo">
+    </div>
+</div>
 
 <div id="rotate-warning">
     <div class="rw-icon">📱</div>
@@ -265,6 +276,34 @@
 
 <!-- App -->
 <script src="js/app.js"></script>
+
+<!-- Splash screen sequencer — runs before app init -->
+<script>
+(function() {
+    var el1 = document.getElementById('splashLogo1');
+    var el2 = document.getElementById('splashLogo2');
+    var screen = document.getElementById('splashScreen');
+
+    function removeSplash() {
+        screen.classList.add('splash-out');
+        setTimeout(function() { screen.style.display = 'none'; }, 420);
+    }
+
+    el1.classList.add('splash-show');
+    setTimeout(function() {
+        el1.classList.remove('splash-show');
+        el1.classList.add('splash-hide');
+        setTimeout(function() {
+            el2.classList.add('splash-show');
+            setTimeout(function() {
+                el2.classList.remove('splash-show');
+                el2.classList.add('splash-hide');
+                setTimeout(removeSplash, 370);
+            }, 1500);
+        }, 370);
+    }, 1500);
+})();
+</script>
 
 </body>
 </html>

@@ -2,6 +2,65 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ══════════════════════════════════════════════════════════════════
+   SPLASH SCREEN
+   ══════════════════════════════════════════════════════════════════ */
+#splashScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#splashScreen.splash-out {
+    animation: splash-fade-out 0.4s ease forwards;
+}
+@keyframes splash-fade-out {
+    to { opacity: 0; pointer-events: none; }
+}
+
+.splash-logo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    padding: 40px;
+}
+.splash-logo img {
+    max-width: 72%;
+    max-height: 60%;
+    object-fit: contain;
+    border-radius: 18px;
+}
+
+/* Logo 1 — my logo (circular avatar) */
+#splashLogo1 img {
+    max-width: 220px;
+    max-height: 220px;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(212,175,55,0.45);
+}
+
+/* Fade-in / fade-out animations */
+.splash-show {
+    animation: splash-fade-in 0.35s ease forwards;
+}
+.splash-hide {
+    animation: splash-fade-out-logo 0.35s ease forwards;
+}
+@keyframes splash-fade-in {
+    from { opacity: 0; transform: scale(0.93); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@keyframes splash-fade-out-logo {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.04); }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    GARAGE SCENE — DASHBOARD
    ══════════════════════════════════════════════════════════════════ */
 

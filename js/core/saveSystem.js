@@ -1,4 +1,4 @@
-const SAVE_KEY = "mgt_save_v4";
+const SAVE_KEY = "mgt_save_v5";
 let _sessionTickStart = Date.now(); // tracks elapsed time since last save tick
 
 function deepMerge(target, source) {
