@@ -59,4 +59,4 @@ function renderEmployees(){
         Empleados: ${game.employees.length}
         <button onclick="hireEmployee()">Contratar</button>
     </div>`;
-}"
+}
